@@ -1,5 +1,7 @@
 const requiredValidation = (item) => {
-  if (!item) return '入力してください';
+  if (!item) {
+    return '入力してください';
+  }
 
   // const regex = /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
   // if (!regex.test(email)) return '正しい形式でメールアドレスを入力してください';

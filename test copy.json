@@ -1,0 +1,421 @@
+{
+  "_reactInternalFiber": {
+    "_debugHookTypes": null,
+    "_debugID": 1062,
+    "_debugIsCurrentlyTiming": false,
+    "_debugNeedsRemount": false,
+    "_debugOwner": {
+      "_debugHookTypes": null,
+      "_debugID": 23,
+      "_debugIsCurrentlyTiming": false,
+      "_debugNeedsRemount": false,
+      "_debugOwner": null,
+      "_debugSource": [Object
+      ],
+      "actualDuration": 0,
+      "actualStartTime": 1954,
+      "alternate": [FiberNode
+      ],
+      "child": [FiberNode
+      ],
+      "childExpirationTime": 1073741823,
+      "dependencies": null,
+      "effectTag": 0,
+      "elementType": [Function Vocabulary
+      ],
+      "expirationTime": 0,
+      "firstEffect": null,
+      "index": 0,
+      "key": null,
+      "lastEffect": null,
+      "memoizedProps": [Object
+      ],
+      "memoizedState": [Object
+      ],
+      "mode": 8,
+      "nextEffect": null,
+      "pendingProps": [Object
+      ],
+      "ref": null,
+      "return": [FiberNode
+      ],
+      "selfBaseDuration": 3,
+      "sibling": null,
+      "stateNode": [Vocabulary
+      ],
+      "tag": 1,
+      "treeBaseDuration": 32,
+      "type": [Function Vocabulary
+      ],
+      "updateQueue": [Object
+      ]
+    },
+    "_debugSource": {
+      "columnNumber": 11,
+      "fileName": "/Users/hiroyuki/Desktop/app0124/Vocabulary.js",
+      "lineNumber": 268
+    },
+    "actualDuration": 5,
+    "actualStartTime": 341,
+    "alternate": {
+      "_debugHookTypes": null,
+      "_debugID": 1062,
+      "_debugIsCurrentlyTiming": false,
+      "_debugNeedsRemount": false,
+      "_debugOwner": [FiberNode
+      ],
+      "_debugSource": [Object
+      ],
+      "actualDuration": 1,
+      "actualStartTime": 365,
+      "alternate": [Circular
+      ],
+      "child": [FiberNode
+      ],
+      "childExpirationTime": 0,
+      "dependencies": null,
+      "effectTag": 1,
+      "elementType": [Function CardFlip
+      ],
+      "expirationTime": 1073741823,
+      "firstEffect": [FiberNode
+      ],
+      "index": 0,
+      "key": null,
+      "lastEffect": [FiberNode
+      ],
+      "memoizedProps": [Object
+      ],
+      "memoizedState": [Object
+      ],
+      "mode": 8,
+      "nextEffect": null,
+      "pendingProps": [Object
+      ],
+      "ref": [Function ref
+      ],
+      "return": [FiberNode
+      ],
+      "selfBaseDuration": 1,
+      "sibling": null,
+      "stateNode": [Circular
+      ],
+      "tag": 1,
+      "treeBaseDuration": 3,
+      "type": [Function CardFlip
+      ],
+      "updateQueue": [Object
+      ]
+    },
+    "child": {
+      "_debugHookTypes": null,
+      "_debugID": 1064,
+      "_debugIsCurrentlyTiming": false,
+      "_debugNeedsRemount": false,
+      "_debugOwner": [Circular
+      ],
+      "_debugSource": [Object
+      ],
+      "actualDuration": 5,
+      "actualStartTime": 341,
+      "alternate": [FiberNode
+      ],
+      "child": [FiberNode
+      ],
+      "childExpirationTime": 0,
+      "dependencies": null,
+      "effectTag": 1,
+      "elementType": [Object
+      ],
+      "expirationTime": 0,
+      "firstEffect": [FiberNode
+      ],
+      "index": 0,
+      "key": null,
+      "lastEffect": [FiberNode
+      ],
+      "memoizedProps": [Object
+      ],
+      "memoizedState": null,
+      "mode": 8,
+      "nextEffect": null,
+      "pendingProps": [Object
+      ],
+      "ref": null,
+      "return": [Circular
+      ],
+      "selfBaseDuration": 0,
+      "sibling": null,
+      "stateNode": null,
+      "tag": 11,
+      "treeBaseDuration": 2,
+      "type": [Object
+      ],
+      "updateQueue": null
+    },
+    "childExpirationTime": 0,
+    "dependencies": null,
+    "effectTag": 133,
+    "elementType": [Function CardFlip
+    ],
+    "expirationTime": 1073741823,
+    "firstEffect": {
+      "_debugHookTypes": null,
+      "_debugID": 1112,
+      "_debugIsCurrentlyTiming": false,
+      "_debugNeedsRemount": false,
+      "_debugOwner": [FiberNode
+      ],
+      "_debugSource": [Object
+      ],
+      "actualDuration": 2,
+      "actualStartTime": 342,
+      "alternate": null,
+      "child": [FiberNode
+      ],
+      "childExpirationTime": 0,
+      "dependencies": null,
+      "effectTag": 128,
+      "elementType": "RCTText",
+      "expirationTime": 0,
+      "firstEffect": null,
+      "index": 0,
+      "key": null,
+      "lastEffect": null,
+      "memoizedProps": [Object
+      ],
+      "memoizedState": null,
+      "mode": 8,
+      "nextEffect": null,
+      "pendingProps": [Object
+      ],
+      "ref": [Function setRoot
+      ],
+      "return": [FiberNode
+      ],
+      "selfBaseDuration": 0,
+      "sibling": null,
+      "stateNode": [ReactNativeFiberHostComponent
+      ],
+      "tag": 5,
+      "treeBaseDuration": 0,
+      "type": "RCTText",
+      "updateQueue": null
+    },
+    "index": 0,
+    "key": null,
+    "lastEffect": {
+      "_debugHookTypes": null,
+      "_debugID": 1066,
+      "_debugIsCurrentlyTiming": false,
+      "_debugNeedsRemount": false,
+      "_debugOwner": [FiberNode
+      ],
+      "_debugSource": [Object
+      ],
+      "actualDuration": 5,
+      "actualStartTime": 341,
+      "alternate": [FiberNode
+      ],
+      "child": [FiberNode
+      ],
+      "childExpirationTime": 0,
+      "dependencies": null,
+      "effectTag": 5,
+      "elementType": [Function AnimatedComponent
+      ],
+      "expirationTime": 0,
+      "firstEffect": [FiberNode
+      ],
+      "index": 0,
+      "key": null,
+      "lastEffect": [FiberNode
+      ],
+      "memoizedProps": [Object
+      ],
+      "memoizedState": null,
+      "mode": 8,
+      "nextEffect": null,
+      "pendingProps": [Object
+      ],
+      "ref": null,
+      "return": [FiberNode
+      ],
+      "selfBaseDuration": 0,
+      "sibling": null,
+      "stateNode": [AnimatedComponent
+      ],
+      "tag": 1,
+      "treeBaseDuration": 2,
+      "type": [Function AnimatedComponent
+      ],
+      "updateQueue": [Object
+      ]
+    },
+    "memoizedProps": {
+      "children": [Array
+      ],
+      "duration": 500,
+      "flipDirection": "y",
+      "flipZoom": 0.09,
+      "id": 25,
+      "onFlip": [Function onFlip
+      ],
+      "onFlipEnd": [Function onFlipEnd
+      ],
+      "onFlipStart": [Function onFlipStart
+      ],
+      "perspective": 800,
+      "style": [Object
+      ]
+    },
+    "memoizedState": {
+      "duration": 500,
+      "flipDirection": "y",
+      "flipZoom": 0.09,
+      "progress": [AnimatedValue
+      ],
+      "rotateOrientation": "",
+      "rotation": [AnimatedValueXY
+      ],
+      "side": 0,
+      "sides": [Array
+      ],
+      "zoom": [AnimatedValue
+      ]
+    },
+    "mode": 8,
+    "nextEffect": null,
+    "pendingProps": {
+      "children": [Array
+      ],
+      "duration": 500,
+      "flipDirection": "y",
+      "flipZoom": 0.09,
+      "id": 25,
+      "onFlip": [Function onFlip
+      ],
+      "onFlipEnd": [Function onFlipEnd
+      ],
+      "onFlipStart": [Function onFlipStart
+      ],
+      "perspective": 800,
+      "style": [Object
+      ]
+    },
+    "ref": [Function ref
+    ],
+    "return": {
+      "_debugHookTypes": null,
+      "_debugID": 1060,
+      "_debugIsCurrentlyTiming": false,
+      "_debugNeedsRemount": false,
+      "_debugOwner": [FiberNode
+      ],
+      "_debugSource": [Object
+      ],
+      "actualDuration": 5,
+      "actualStartTime": 341,
+      "alternate": [FiberNode
+      ],
+      "child": [Circular
+      ],
+      "childExpirationTime": 1073741823,
+      "dependencies": null,
+      "effectTag": 0,
+      "elementType": "RCTView",
+      "expirationTime": 0,
+      "firstEffect": [FiberNode
+      ],
+      "index": 0,
+      "key": null,
+      "lastEffect": [Circular
+      ],
+      "memoizedProps": [Object
+      ],
+      "memoizedState": null,
+      "mode": 8,
+      "nextEffect": null,
+      "pendingProps": [Object
+      ],
+      "ref": null,
+      "return": [FiberNode
+      ],
+      "selfBaseDuration": 0,
+      "sibling": null,
+      "stateNode": [ReactNativeFiberHostComponent
+      ],
+      "tag": 5,
+      "treeBaseDuration": 2,
+      "type": "RCTView",
+      "updateQueue": null
+    },
+    "selfBaseDuration": 0,
+    "sibling": null,
+    "stateNode": [Circular
+    ],
+    "tag": 1,
+    "treeBaseDuration": 2,
+    "type": [Function CardFlip
+    ],
+    "updateQueue": {
+      "baseQueue": [Object
+      ],
+      "baseState": [Object
+      ],
+      "effects": null,
+      "shared": [Object
+      ]
+    }
+  },
+  "_reactInternalInstance": {},
+  "context": {},
+  "props": {
+    "children": [<ForwardRef … />, <ForwardRef … />
+    ],
+    "duration": 500,
+    "flipDirection": "y",
+    "flipZoom": 0.09,
+    "id": 25,
+    "onFlip": [Function onFlip
+    ],
+    "onFlipEnd": [Function onFlipEnd
+    ],
+    "onFlipStart": [Function onFlipStart
+    ],
+    "perspective": 800,
+    "style": {
+      "bottom": 0,
+      "flex": 1,
+      "height": 470,
+      "left": 0,
+      "right": 0,
+      "top": 0,
+      "width": 320
+    }
+  },
+  "refs": {},
+  "state": {
+    "duration": 500,
+    "flipDirection": "y",
+    "flipZoom": 0.09,
+    "progress": 0,
+    "rotateOrientation": "",
+    "rotation": [Object
+    ],
+    "side": 0,
+    "sides": [<ForwardRef … />, <ForwardRef … />
+    ],
+    "zoom": 0
+  },
+  "updater": {
+    "enqueueForceUpdate": [Function enqueueForceUpdate
+    ],
+    "enqueueReplaceState": [Function enqueueReplaceState
+    ],
+    "enqueueSetState": [Function enqueueSetState
+    ],
+    "isMounted": [Function isMounted
+    ]
+  }
+}

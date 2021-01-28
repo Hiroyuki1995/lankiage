@@ -1,0 +1,12 @@
+{
+  "type": "service_account",
+  "project_id": "translate-api-295008",
+  "private_key_id": "e48942ab872cd7422c94e117eaecd032d3938ebc",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvAIBADANBgkqhkiG9w0BAQEFAASCBKYwggSiAgEAAoIBAQCszOMvJ99ir8e3\nvKfZsvyR/OtdgHeOIrtx9hotGV/TNmunaBP3ufFlRNF6GGr9QJZIvngGAejnw+Fr\noJ79+Xz2iWRBQl5ar3jdpeRBhsdrhJkJA6NMwApHPsM1SeDu1/0M504dVCFJHF8+\niu81ph6C3T6hBIiyHCweIBa8Opy/gIurp5qdvhgq0PstjLsnilwC1/+wlW+YYHk6\nDv7kTQgdWdelGVJhqxsdRnqusU1LvSdbtGoUQ7y1up21Ci1WLTFe1gPpLYKNrjE0\nxz/nS/kUG0N2bGapUstb8DwL/VgJ4YDqC4gYeZvQ8cat6dleS7NES1kwUTjSy6/T\nHT6y0mdNAgMBAAECggEAKSn1xLn+4Qd20DJE2ftlZ3GUsAV2dYmYlaFGww+UYEBK\njOqiNxU4iCNIs4k1k3bbViDpfqTd0rg67uSoe1//gMth8pnY2EmMxWBLa8CrqNVB\nj4AqWpI04Jv27K7Ywoz5XyWK2jm8ZCo6FjAKpAEaq5oA3WKzHZrQd6y1PcnIpWWY\nzwzkT+jCOhWPcr4R2HYmZUpiBI21Lc9CcHffVu/sAD/Zg436ZRFCqjF8JdUo2WOL\nsgSPm9aClFuuYDoco/emtrrWGWBuk57O2ryM65UPqhxlQC5WL3OWC51jMQtiEMY5\nRIPyMnekPg1JOQi00+tzlS5svBbMLCZJTVkY6axwEQKBgQDvukLYjVFaJTfYrkUm\n0kRbSFGIMbZxBdRAuhwL7tlcUWVlFYEQogIqcjwaRbqt0f8QcrDHWces8YrOcU2L\ncFiphqIhmnhEHC7aEkvPMEqZORSA1AP0J4w7xVvK7geU+pQ9o+bs/6NYzFjT6NlJ\nuGNcPTEz1Mk+tspPbcjydpPruwKBgQC4h6I6FO7WxLuLb+gR5cUBQzQH4LyYt9yQ\nqHIyqrDRo8ATytTUnyH1h+GsDBDQsTnGiT9tdl3qdsC4TzUK38qEVEZNJqf+0dPH\ny0GpHt5Lu5uHuYCtT/adPoBCcTfCuq9rG6+dBnEC17VcZe0+LKBDmkEkEfI6u75i\ngC6cmptUlwKBgD7wEdi00WTvXIggyLr2fUfR5sXw90sZEq6jrfVcEejw3cP6L1Zk\nklj+gNUM9YPpHCP/WHYeFhRLnfuxN4CiUETBuhNEcMrA83QBVbHhpdQwbjecciVJ\ntMGEgSL39zmfyAee3mPegc4waCnKejGmnT98OUy4UtWKO/c6hYVSqGc9AoGAdh6k\nUqeZpzKxlnUgyWwaKk+5W52ZO+zdrF+XEiW/H8LBLio1CJGArGm5pGbo0J3RjOvI\nBSqyvWYcwR46puZP/Vrw0WwAN5ZbCVZrhnVy+Gl0CnJNEyPPiiI6+cz9U5IqvdYw\nGMTJzHcF6cp5DcaFJCD2t78hHkWVffntXGN/MKsCgYBpFfKz7klwPDa1pYNVzIM2\nbh0E32uM31lRmclyLvZL6KCw/3Z1q+7XKh9PhawkTiGuGb3Whq8+a29Vx+V4oujj\nbB/WAy9prSzmDFvBzoFc/IXhcnV/SnTWiL4UjLndPnfIN+xs1VB027dAMgkvoqQX\ncRgfWyO6dCiBQPtCjhMu6A==\n-----END PRIVATE KEY-----\n",
+  "client_email": "hiroyuki-iwata@translate-api-295008.iam.gserviceaccount.com",
+  "client_id": "117638283645997322502",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/hiroyuki-iwata%40translate-api-295008.iam.gserviceaccount.com"
+}
