@@ -1,4 +1,5 @@
 import React, {Component} from 'react';
+import {StyleSheet} from 'react-native';
 import {
   Container,
   Content,
@@ -38,7 +39,7 @@ class Screen extends Component {
   render() {
     return (
       <Container>
-        <Content>{this.renderSelectedTab()}</Content>
+        <Content style={styles.content}>{this.renderSelectedTab()}</Content>
 
         <Footer>
           <FooterTab>
@@ -77,3 +78,9 @@ class Screen extends Component {
 }
 
 export default Screen;
+
+const styles = StyleSheet.create({
+  content: {
+    backgroundColor: '#f5f5ff',
+  },
+});

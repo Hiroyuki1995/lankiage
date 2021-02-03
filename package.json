@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@google-cloud/storage": "^5.7.2",
+    "@google-cloud/translate": "^6.1.0",
     "@react-native-community/picker": "^1.8.1",
     "@react-native-picker/picker": "^1.9.10",
     "googleapis": "^67.0.0",
@@ -21,10 +22,17 @@
     "react-native": "0.63.4",
     "react-native-card-flip": "^1.0.7",
     "react-native-debugger": "^1.1.0",
+    "react-native-elements": "^3.1.0",
+    "react-native-get-random-values": "^1.5.1",
     "react-native-picker-select": "^8.0.4",
     "react-native-speech": "^0.1.2",
+    "react-native-svg": "^12.1.0",
     "react-native-tts": "^3.2.0",
-    "react-scroll": "^1.8.1"
+    "react-native-vector-icons": "^8.0.0",
+    "react-scroll": "^1.8.1",
+    "realm": "^10.1.4",
+    "translate-google-api": "^1.0.4",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@babel/core": "^7.12.10",

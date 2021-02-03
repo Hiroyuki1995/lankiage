@@ -1,0 +1,17 @@
+[
+  {
+    "id": 1,
+    "language": "日本語",
+    "code": "ja-JP"
+  },
+  {
+    "id": 2,
+    "language": "English",
+    "code": "en-US"
+  },
+  {
+    "id": 3,
+    "language": "中文",
+    "code": "zh-CN"
+  }
+]
