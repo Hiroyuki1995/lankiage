@@ -1,7 +1,7 @@
 import React, {Component} from 'react';
 import {Text, StyleSheet, Dimensions} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
-import Ionicons from 'react-native-vector-icons/Ionicons';
+// import Ionicons from 'react-native-vector-icons/Ionicons';
 const {width, height} = Dimensions.get('window');
 import 'react-native-get-random-values';
 
@@ -24,13 +24,25 @@ class LanguageSelect extends Component {
         style={pickerSelectStyles}
         placeholder={{label: 'Select a Language', value: ''}}
         Icon={() => (
-          <Ionicons
-            name="chevron-down"
-            size={25}
-            color="gray"
-            style={styles.pickerIcon}
-          />
+          <Text
+            style={{
+              position: 'absolute',
+              right: 95,
+              top: 10,
+              fontSize: 18,
+              color: '#789'
+            }}>
+            ▼
+          </Text>
         )}
+        // Icon={() => (
+        //   <Ionicons
+        //     name="chevron-down"
+        //     size={25}
+        //     color="gray"
+        //     style={styles.pickerIcon}
+        //   />
+        // )}
         value={value}
       />
     );

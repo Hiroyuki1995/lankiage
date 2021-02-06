@@ -8,11 +8,10 @@ target 'app0124' do
 
   use_react_native!(:path => config["reactNativePath"])
 
+
+
+
   pod 'TextToSpeech', :path => '../node_modules/react-native-tts'
-
-  pod 'RealmJS', :path => '../node_modules/realm'
-
-  pod 'RNSVG', :path => '../node_modules/react-native-svg'
 
   target 'app0124Tests' do
     inherit! :complete

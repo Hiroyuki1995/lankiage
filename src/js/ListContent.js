@@ -48,6 +48,7 @@ class ListContent extends Component {
     this.handleLangChange = this.handleLangChange.bind(this);
     this.move = this.move.bind(this);
     this.editWord = this.editWord.bind(this);
+    this.playback = this.playback.bind(this);
   }
 
   componentDidMount() {
@@ -177,6 +178,10 @@ class ListContent extends Component {
     console.log('単語を編集します');
   }
 
+  playback() {
+    console.log('単語を自動で再生します');
+  }
+
   render() {
     let wordCards;
     if (!this.state.realm) {
@@ -272,7 +277,17 @@ class ListContent extends Component {
           {wordCards}
         </ScrollView>
         <View style={styles.settingArea}>
-          <View style={styles.settingCard} />
+          <View style={styles.settingCard}>
+            <TouchableOpacity
+              onPress={() => this.playback()}
+              style={styles.playbackOpacity}>
+              <Image
+                style={styles.playbackButton}
+                source={require('../png/playback.png')}
+                resizeMode="contain"
+              />
+            </TouchableOpacity>
+          </View>
         </View>
       </View>
     );
@@ -413,6 +428,15 @@ const styles = StyleSheet.create({
     width: width * 0.9,
     height: height * 0.2,
     borderRadius: 10,
+  },
+  playbackButton: {
+    width: 30,
+    height: 30,
+  },
+  playbackOpacity: {
+    position: 'absolute',
+    left: width * 0.05,
+    top: height * 0.005,
   },
 });
 

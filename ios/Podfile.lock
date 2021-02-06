@@ -301,10 +301,14 @@ PODS:
     - React-Core (= 0.63.4)
     - React-cxxreact (= 0.63.4)
     - React-jsi (= 0.63.4)
-  - RealmJS (10.1.4):
+  - RealmJS (10.2.0):
     - GCDWebServer
     - React
   - RNCPicker (1.8.1):
+    - React-Core
+  - RNSVG (12.1.0):
+    - React
+  - RNVectorIcons (8.0.0):
     - React-Core
   - TextToSpeech (2.0.0):
     - React
@@ -362,6 +366,8 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - RealmJS (from `../node_modules/realm`)
   - "RNCPicker (from `../node_modules/@react-native-community/picker`)"
+  - RNSVG (from `../node_modules/react-native-svg`)
+  - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - TextToSpeech (from `../node_modules/react-native-tts`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -438,6 +444,10 @@ EXTERNAL SOURCES:
     :path: "../node_modules/realm"
   RNCPicker:
     :path: "../node_modules/@react-native-community/picker"
+  RNSVG:
+    :path: "../node_modules/react-native-svg"
+  RNVectorIcons:
+    :path: "../node_modules/react-native-vector-icons"
   TextToSpeech:
     :path: "../node_modules/react-native-tts"
   Yoga:
@@ -482,12 +492,14 @@ SPEC CHECKSUMS:
   React-RCTText: 5c51df3f08cb9dedc6e790161195d12bac06101c
   React-RCTVibration: ae4f914cfe8de7d4de95ae1ea6cc8f6315d73d9d
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
-  RealmJS: 0b841607e0327c1bb58b97dd21eee16658a07d65
+  RealmJS: 5195064e9aeccf94ae3756bd9d0f2301b9074b07
   RNCPicker: 914b557e20b3b8317b084aca9ff4b4edb95f61e4
+  RNSVG: ce9d996113475209013317e48b05c21ee988d42e
+  RNVectorIcons: f67a1abce2ec73e62fe4606e8110e95a832bc859
   TextToSpeech: 4e2fc50c7495416c6da5a1662ad3f750c58d3c85
   Yoga: 4bd86afe9883422a7c4028c00e34790f560923d6
   YogaKit: f782866e155069a2cca2517aafea43200b01fd5a
 
-PODFILE CHECKSUM: 3b0db5dedb973730d0ecd2672098ce9a106758a8
+PODFILE CHECKSUM: cea6612802fcf83430a9f5957c66e97f1dd0cfcc
 
 COCOAPODS: 1.10.0
