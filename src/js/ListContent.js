@@ -18,6 +18,7 @@ import {v4 as uuidv4} from 'uuid';
 const {width, height} = Dimensions.get('window');
 const Realm = require('realm');
 import {WordSchema} from './Schema.js';
+let pageNumber = 1;
 
 class ListContent extends Component {
   constructor(props) {
@@ -41,7 +42,10 @@ class ListContent extends Component {
       loading: false,
       realm: null,
       currentCardId: '',
+      horizontalScroll: 0,
+      // pageNumber: 0,
     };
+    this.ScrollView = React.createRef();
     this.handleClick = this.handleClick.bind(this);
     this.clickCard = this.clickCard.bind(this);
     // this.handleWordChange = this.handleWordChange.bind(this);
@@ -76,6 +80,12 @@ class ListContent extends Component {
       // });
       this.setState({realm});
     });
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot) {
+    pageNumber = Math.floor(prevState.horizontalScroll / width) + 1;
+    console.log(`prevState.horizontalScroll ${prevState.horizontalScroll}`);
+    console.log(`pageNumber in update ${pageNumber}`);
   }
 
   componentWillUnmount() {
@@ -180,9 +190,22 @@ class ListContent extends Component {
 
   playback() {
     console.log('単語を自動で再生します');
+    this.autoScroll();
+    this.autoScroll();
+  }
+
+  autoScroll() {
+    // X use for horizontal
+    // let horizontalScroll = this.state.horizontalScroll;
+    this.ScrollView.scrollTo({
+      x: this.state.horizontalScroll + width,
+      animated: true,
+    });
   }
 
   render() {
+    console.log(`horizontalScroll ${JSON.stringify(this.state)}`);
+    console.log(`pageNumber in render: ${pageNumber}`);
     let wordCards;
     if (!this.state.realm) {
       wordCards = <Text style={styles.message}>Loading...</Text>;
@@ -273,7 +296,34 @@ class ListContent extends Component {
           className="words-area"
           showsHorizontalScrollIndicator={false}
           pagingEnabled
-          style={styles.cardsArea}>
+          style={styles.cardsArea}
+          ref={(ref) => (this.ScrollView = ref)}
+          onScroll={
+            (event) =>
+              this.setState({
+                horizontalScroll:
+                  // this.state.horizontalScroll +
+                  event.nativeEvent.contentOffset.x,
+              })
+            // this.setState({
+            //   horizontalScroll: event.nativeEvent.contentOffset.x,
+            // })
+            // this.setState((prevState) => {
+            // console.log(event.nativeEvent.contentOffset.x);
+            // const currentPageNumber = prevState.pageNumber;
+            // let pageAdd = 1;
+            // if (event.nativeEvent.contentOffset.x < 0) {
+            //   pageAdd = -1;
+            // } else {
+            //   pageAdd = 1;
+            // }
+            // return {
+            //   // ...prevState,
+            //   pageNumber: currentPageNumber + pageAdd,
+            //   // horizontalScroll: event.nativeEvent.contentOffset.x,
+            // };
+            // })
+          }>
           {wordCards}
         </ScrollView>
         <View style={styles.settingArea}>
