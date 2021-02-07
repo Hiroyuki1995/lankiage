@@ -12,13 +12,11 @@ import {Text} from 'native-base';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import CardFlip from 'react-native-card-flip';
 import Tts from 'react-native-tts';
-// import Validation from './Validation';
+import Slider from '@react-native-community/slider';
 import 'react-native-get-random-values';
-import {v4 as uuidv4} from 'uuid';
 const {width, height} = Dimensions.get('window');
 const Realm = require('realm');
 import {WordSchema} from './Schema.js';
-let pageNumber = 1;
 
 class ListContent extends Component {
   constructor(props) {
@@ -27,12 +25,6 @@ class ListContent extends Component {
     this.state = {
       words: [],
       isFront: true,
-      // info: {
-      //   frontWord: '',
-      //   backWord: '',
-      //   frontLang: '',
-      //   backLang: '',
-      // },
       message: {
         frontWord: '',
         backWord: '',
@@ -43,49 +35,63 @@ class ListContent extends Component {
       realm: null,
       currentCardId: '',
       horizontalScroll: 0,
-      // pageNumber: 0,
+      currentPage: 1,
+      isSliding: false,
     };
     this.ScrollView = React.createRef();
-    this.handleClick = this.handleClick.bind(this);
     this.clickCard = this.clickCard.bind(this);
-    // this.handleWordChange = this.handleWordChange.bind(this);
-    this.handleLangChange = this.handleLangChange.bind(this);
-    this.move = this.move.bind(this);
     this.editWord = this.editWord.bind(this);
     this.playback = this.playback.bind(this);
+    this.onPageChange = this.onPageChange.bind(this);
+    this.scrollCardView = this.scrollCardView.bind(this);
   }
 
   componentDidMount() {
-    // const response = await fetch('http://localhost:8080/api/words');
-    // const json = await response.json();
-    // // console.log(`json:${JSON.stringify(json)}`);
-    // this.setState({
-    //   words: json,
-    // });
     console.log(Realm.defaultPath);
     console.log(this.state.realm);
     Realm.open({
       schema: [WordSchema],
       deleteRealmIfMigrationNeeded: true,
     }).then((realm) => {
-      // console.log(this.state.realm.objects('Word'));
-      // realm.write(() => {
-      //   realm.create('Word', {
-      //     id: uuidv4(),
-      //     frontWord: '下雨',
-      //     frontLang: 'zh-CN',
-      //     backWord: '雨が降る',
-      //     backLang: 'ja-JP',
-      //   });
-      // });
       this.setState({realm});
     });
   }
 
+  scrollCardView(event) {
+    console.log(event.nativeEvent.contentOffset.x);
+    if (!this.state.isSliding) {
+      let newPageNum = parseInt(
+        // event.nativeEvent.contentOffset.x / width + 1,
+        event.nativeEvent.contentOffset.x / width,
+        10,
+      );
+      console.log(`newPageNum in scrollCardView: ${newPageNum}`);
+      this.setState({
+        currentPage: newPageNum,
+      });
+    }
+    // newPageNum !== this.state.currentPage &&
+    //   this.setState({
+    //     currentPage: newPageNum,
+    //   });
+    // this.setState({
+    //   horizontalScroll:
+    //     // this.state.horizontalScroll +
+    //     event.nativeEvent.contentOffset.x,
+    // });
+  }
+
   componentDidUpdate(prevProps, prevState, snapshot) {
-    pageNumber = Math.floor(prevState.horizontalScroll / width) + 1;
-    console.log(`prevState.horizontalScroll ${prevState.horizontalScroll}`);
-    console.log(`pageNumber in update ${pageNumber}`);
+    // console.log(`prevState.horizontalScroll ${prevState.horizontalScroll}`);
+    // console.log(`currentPage in update ${prevState.currentPage}`);
+    // this.autoScroll(prevState.currentPage);
+  }
+
+  onPageChange(pageNumber) {
+    console.log(`pageNumber ${pageNumber}`);
+    this.setState({currentPage: pageNumber, isSliding: false});
+    // this.setState({isSliding: false});
+    this.autoScroll(pageNumber);
   }
 
   componentWillUnmount() {
@@ -94,31 +100,6 @@ class ListContent extends Component {
     if (realm !== null && !realm.isClosed) {
       realm.close();
     }
-  }
-
-  move(isForward = true) {
-    const movingDistance = 240;
-    // if (isForward) {
-    //   Scroll.scroller.scrollTo('words-area', {
-    //     duration: 1500,
-    //     delay: 100,
-    //     smooth: true,
-    //     // containerId: 'ContainerElementID',
-    //     offset: 50,
-    //   });
-    //   // document.getElementById("words-area").scrollBy(movingDistance,0);
-    // } else {
-    //   document.getElementById("words-area").scrollBy(-movingDistance,0);
-    // }
-  }
-
-  handleClick(id) {
-    this.setState((prevState) => {
-      console.log(`id:${id}`);
-      return {
-        isFront: !prevState.isFront,
-      };
-    });
   }
 
   speakWord(word, speakFrontWord) {
@@ -134,56 +115,11 @@ class ListContent extends Component {
     Tts.speak(uttr.text);
   }
 
-  handleLangChange = (event) => {
-    console.log('clicked');
-    const key = event.target.name;
-    const value = event.target.value;
-    const {info} = this.state;
-    this.setState({
-      info: {...info, [key]: value},
-    });
-    console.log(`this.state.info:${this.state.info}`);
-  };
-
   clickCard(word, ref, speakFrontWord) {
     ref.flip();
     this.speakWord(word, speakFrontWord);
   }
 
-  handleChange(id) {
-    this.setState((prevState) => {
-      const updatedTodos = prevState.todos.map((todo) => {
-        if (todo.id === id) {
-          todo.done = !todo.done;
-        }
-        return todo;
-      });
-      return {
-        todos: updatedTodos,
-      };
-    });
-  }
-
-  onChange = (event) => {
-    this.setState({
-      [event.target.name]: event.target.value,
-    });
-  };
-
-  // handleWordChange = (event) => {
-  //   const key = event.target.name;
-  //   const value = event.target.value;
-  //   const {info, message} = this.state;
-  //   this.setState({
-  //     info: {...info, [key]: value},
-  //   });
-  //   this.setState({
-  //     message: {
-  //       ...message,
-  //       [key]: Validation.formValidate(key, value),
-  //     },
-  //   });
-  // };
   editWord(word) {
     console.log('単語を編集します');
   }
@@ -191,21 +127,22 @@ class ListContent extends Component {
   playback() {
     console.log('単語を自動で再生します');
     this.autoScroll();
-    this.autoScroll();
+    // this.autoScroll();
   }
 
-  autoScroll() {
+  autoScroll(pageNumber = this.state.currentPage + 1) {
     // X use for horizontal
     // let horizontalScroll = this.state.horizontalScroll;
     this.ScrollView.scrollTo({
-      x: this.state.horizontalScroll + width,
+      x: pageNumber * width,
       animated: true,
     });
   }
 
   render() {
-    console.log(`horizontalScroll ${JSON.stringify(this.state)}`);
-    console.log(`pageNumber in render: ${pageNumber}`);
+    // console.log(`horizontalScroll ${JSON.stringify(this.state)}`);
+    console.log(`currentPage in render: ${this.state.currentPage}`);
+    console.log(`this.state.isSliding ${this.state.isSliding}`);
     let wordCards;
     if (!this.state.realm) {
       wordCards = <Text style={styles.message}>Loading...</Text>;
@@ -296,36 +233,29 @@ class ListContent extends Component {
           className="words-area"
           showsHorizontalScrollIndicator={false}
           pagingEnabled
+          scrollEnabled={!this.state.isSliding}
           style={styles.cardsArea}
           ref={(ref) => (this.ScrollView = ref)}
-          onScroll={
-            (event) =>
-              this.setState({
-                horizontalScroll:
-                  // this.state.horizontalScroll +
-                  event.nativeEvent.contentOffset.x,
-              })
-            // this.setState({
-            //   horizontalScroll: event.nativeEvent.contentOffset.x,
-            // })
-            // this.setState((prevState) => {
-            // console.log(event.nativeEvent.contentOffset.x);
-            // const currentPageNumber = prevState.pageNumber;
-            // let pageAdd = 1;
-            // if (event.nativeEvent.contentOffset.x < 0) {
-            //   pageAdd = -1;
-            // } else {
-            //   pageAdd = 1;
-            // }
-            // return {
-            //   // ...prevState,
-            //   pageNumber: currentPageNumber + pageAdd,
-            //   // horizontalScroll: event.nativeEvent.contentOffset.x,
-            // };
-            // })
-          }>
+          // scrollEventThrottle={100}
+          onScroll={(event) => this.scrollCardView(event)}>
           {wordCards}
         </ScrollView>
+        <View>
+          <Slider
+            onSlidingStart={() => this.setState({isSliding: true})}
+            // onSlidingComplete={() => this.setState({isSliding: false})}
+            onSlidingComplete={(pageNumber) => this.onPageChange(pageNumber)}
+            style={styles.sliderView}
+            maximumValue={
+              this.state.realm ? this.state.realm.objects('Word').length : 1
+            }
+            minimumValue={1}
+            value={this.state.currentPage}
+            disableInitialCallback={true}
+            step={1}
+            // onValueChange={(pageNumber) => this.onPageChange(pageNumber)}
+          />
+        </View>
         <View style={styles.settingArea}>
           <View style={styles.settingCard}>
             <TouchableOpacity
@@ -487,6 +417,11 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: width * 0.05,
     top: height * 0.005,
+  },
+  sliderView: {
+    // width: '100%',
+    marginHorizontal: width * 0.1,
+    marginTop: 20,
   },
 });
 

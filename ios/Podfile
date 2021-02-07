@@ -13,6 +13,8 @@ target 'app0124' do
 
   pod 'TextToSpeech', :path => '../node_modules/react-native-tts'
 
+  pod 'react-native-slider', :path => '../node_modules/@react-native-community/slider'
+
   target 'app0124Tests' do
     inherit! :complete
     # Pods for testing
