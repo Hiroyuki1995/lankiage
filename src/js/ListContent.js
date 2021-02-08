@@ -22,9 +22,9 @@ class ListContent extends Component {
   constructor(props) {
     super(props);
     this.card = [];
+    this.isFront = true;
     this.state = {
       words: [],
-      isFront: true,
       message: {
         frontWord: '',
         backWord: '',
@@ -35,20 +35,22 @@ class ListContent extends Component {
       realm: null,
       currentCardId: '',
       horizontalScroll: 0,
-      currentPage: 1,
+      currentPage: 0,
       isSliding: false,
+      sortCondition: '1',
+      isAutoPlaying: false,
     };
     this.ScrollView = React.createRef();
     this.clickCard = this.clickCard.bind(this);
     this.editWord = this.editWord.bind(this);
     this.playback = this.playback.bind(this);
+    this.stopPlaying = this.stopPlaying.bind(this);
     this.onPageChange = this.onPageChange.bind(this);
     this.scrollCardView = this.scrollCardView.bind(this);
   }
 
   componentDidMount() {
     console.log(Realm.defaultPath);
-    console.log(this.state.realm);
     Realm.open({
       schema: [WordSchema],
       deleteRealmIfMigrationNeeded: true,
@@ -70,21 +72,18 @@ class ListContent extends Component {
         currentPage: newPageNum,
       });
     }
-    // newPageNum !== this.state.currentPage &&
-    //   this.setState({
-    //     currentPage: newPageNum,
-    //   });
-    // this.setState({
-    //   horizontalScroll:
-    //     // this.state.horizontalScroll +
-    //     event.nativeEvent.contentOffset.x,
-    // });
   }
 
   componentDidUpdate(prevProps, prevState, snapshot) {
     // console.log(`prevState.horizontalScroll ${prevState.horizontalScroll}`);
     // console.log(`currentPage in update ${prevState.currentPage}`);
     // this.autoScroll(prevState.currentPage);
+  }
+
+  sortWords(data) {
+    if (this.state.sortCondition === '1') {
+      return data.sorted('createdAt', true);
+    }
   }
 
   onPageChange(pageNumber) {
@@ -102,7 +101,8 @@ class ListContent extends Component {
     }
   }
 
-  speakWord(word, speakFrontWord) {
+  speakWord(word, speakFrontWord = this.isFront) {
+    console.log(`isFront ${this.isFront}`);
     let uttr = {};
     if (speakFrontWord) {
       uttr.text = word.frontWord;
@@ -116,7 +116,9 @@ class ListContent extends Component {
   }
 
   clickCard(word, ref, speakFrontWord) {
+    console.log('clickCard');
     ref.flip();
+    this.isFront = !this.isFront;
     this.speakWord(word, speakFrontWord);
   }
 
@@ -125,9 +127,49 @@ class ListContent extends Component {
   }
 
   playback() {
-    console.log('単語を自動で再生します');
-    this.autoScroll();
-    // this.autoScroll();
+    this.setState({isAutoPlaying: true});
+    Tts.removeAllListeners('tts-finish');
+    Tts.addEventListener('tts-finish', () => {
+      let nextWordPage;
+      console.log('tts-finish');
+      // 自動再生中でない場合、または最後のカードの表の場合、自動再生を止める。
+      if (
+        !this.state.isAutoPlaying ||
+        (this.state.currentPage === this.state.realm.objects('Word').length &&
+          !this.isFront)
+      ) {
+        this.setState({isAutoPlaying: false});
+        return;
+      } else if (this.isFront) {
+        // カードが表の場合は、カードをめくる
+        nextWordPage = this.state.currentPage;
+        this.card[this.state.currentPage].flip();
+      } else {
+        // 上記以外の場合、スクロールする
+        nextWordPage = this.state.currentPage + 1;
+        this.autoScroll();
+      }
+      this.isFront = !this.isFront;
+      const nextWord = this.sortWords(this.state.realm.objects('Word'))[
+        nextWordPage
+      ];
+      this.speakWord(nextWord);
+    });
+    // console.log(`単語を自動で再生します ${this.state.currentPage}`);
+    // console.log(`
+    // 現在の単語:${JSON.stringify(
+    //   this.sortWords(this.state.realm.objects('Word'))[this.state.currentPage],
+    // )}`);
+    const currentWord = this.sortWords(this.state.realm.objects('Word'))[
+      this.state.currentPage
+    ];
+    this.speakWord(currentWord);
+  }
+
+  stopPlaying() {
+    Tts.stop();
+    Tts.removeAllListeners('tts-finish');
+    this.setState({isAutoPlaying: false});
   }
 
   autoScroll(pageNumber = this.state.currentPage + 1) {
@@ -151,11 +193,9 @@ class ListContent extends Component {
         <Text style={styles.message}>No words have been registered yet</Text>
       );
     } else {
-      wordCards = this.state.realm
-        .objects('Word')
-        .sorted('createdAt', true) // true->DESC
-        .map((word, key) => {
-          // console.log('id:' + word.id);
+      wordCards = this.sortWords(this.state.realm.objects('Word')).map(
+        (word, key) => {
+          // console.log('word.id', word.id, 'key', key);
           return (
             <View key={word.id} className="oneCard">
               <CardFlip
@@ -168,6 +208,7 @@ class ListContent extends Component {
                   className="card"
                   style={styles.card}
                   onPress={() => {
+                    console.log(key);
                     this.clickCard(word, this.card[key], false);
                   }}>
                   <Text style={styles.cardWord}>{word.frontWord}</Text>
@@ -220,9 +261,9 @@ class ListContent extends Component {
                 </TouchableOpacity>
               </CardFlip>
             </View>
-            // <WordCard key={word.id} word={word} handleClick={this.handleClick} isFront={this.state.isFront}/>
           );
-        });
+        },
+      );
     }
     return (
       <View>
@@ -247,9 +288,9 @@ class ListContent extends Component {
             onSlidingComplete={(pageNumber) => this.onPageChange(pageNumber)}
             style={styles.sliderView}
             maximumValue={
-              this.state.realm ? this.state.realm.objects('Word').length : 1
+              this.state.realm ? this.state.realm.objects('Word').length - 1 : 0
             }
-            minimumValue={1}
+            minimumValue={0}
             value={this.state.currentPage}
             disableInitialCallback={true}
             step={1}
@@ -258,15 +299,33 @@ class ListContent extends Component {
         </View>
         <View style={styles.settingArea}>
           <View style={styles.settingCard}>
-            <TouchableOpacity
-              onPress={() => this.playback()}
-              style={styles.playbackOpacity}>
-              <Image
-                style={styles.playbackButton}
-                source={require('../png/playback.png')}
-                resizeMode="contain"
-              />
-            </TouchableOpacity>
+            {(() => {
+              if (!this.state.isAutoPlaying) {
+                return (
+                  <TouchableOpacity
+                    onPress={() => this.playback()}
+                    style={styles.playbackOpacity}>
+                    <Image
+                      style={styles.playbackButton}
+                      source={require('../png/playback.png')}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                );
+              } else {
+                return (
+                  <TouchableOpacity
+                    onPress={() => this.stopPlaying()}
+                    style={styles.stopOpacity}>
+                    <Image
+                      style={styles.stopPlayingButton}
+                      source={require('../png/stop.png')}
+                      resizeMode="contain"
+                    />
+                  </TouchableOpacity>
+                );
+              }
+            })()}
           </View>
         </View>
       </View>
@@ -413,9 +472,18 @@ const styles = StyleSheet.create({
     width: 30,
     height: 30,
   },
+  stopPlayingButton: {
+    width: 30,
+    height: 30,
+  },
   playbackOpacity: {
     position: 'absolute',
     left: width * 0.05,
+    top: height * 0.005,
+  },
+  stopOpacity: {
+    position: 'absolute',
+    left: width * 0.15,
     top: height * 0.005,
   },
   sliderView: {
