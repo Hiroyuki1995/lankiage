@@ -18,8 +18,6 @@ const Realm = require('realm');
 import {WordSchema} from './Schema.js';
 const defalutFrontLang = 'zh-cn';
 const defalutBackLang = 'ja';
-// const defalutFrontLang = '';
-// const defalutBackLang = '';
 const wordSchema = {
   frontWord: '',
   backWord: '',
@@ -34,7 +32,6 @@ class AddContent extends Component {
     this.card = [];
     this.state = {
       words: [],
-      // words: [wordSchema],
       loading: false,
       frontLang: defalutFrontLang,
       backLang: defalutBackLang,
@@ -46,49 +43,11 @@ class AddContent extends Component {
       this.state.words.push(wordSchema);
     }
     this.registerWords = this.registerWords.bind(this);
-    // this.handleWordChange = this.handleWordChange.bind(this);
-    this.canSubmit = this.canSubmit.bind(this);
-    this.handleLangChange = this.handleLangChange.bind(this);
     this.resetWords = this.resetWords.bind(this);
     this.translate = this.translate.bind(this);
-    // this.canTranslate = this.canTranslate.bind(this);
     this.changeContent = this.changeContent.bind(this);
     this.changeLanguage = this.changeLanguage.bind(this);
   }
-
-  // async componentDidMount() {
-  //
-  // }
-
-  // サブミットできるときtrueを返す
-  canSubmit = () => {
-    // const {info, message, loading} = this.state;
-
-    // const validInfo =
-    //   Object.values(info).filter((value) => {
-    //     return value === '';
-    //   }).length === 0;
-    // const validMessage =
-    //   Object.values(message).filter((value) => {
-    //     return value !== '';
-    //   }).length === 0;
-    // return validInfo && validMessage && !loading;
-    return true;
-  };
-
-  // 翻訳できるときtrueを返す
-  // canTranslate = () => {
-  //   const target = ['frontWord', 'frontLang', 'backLang'];
-  //   const {info} = this.state;
-
-  //   for (let i = 0; i < target.length; i++) {
-  //     if (info[target[i]] === '') {
-  //       return false;
-  //     }
-  //     console.log('can translate');
-  //     return true;
-  //   }
-  // };
 
   async translate(isForword = true) {
     const {words, frontLang, backLang} = this.state;
@@ -133,18 +92,6 @@ class AddContent extends Component {
         this.setState({words: updatedWords});
       }
     }
-
-    // const query = isForword
-    //   ? `beforeWord=${frontWord}&beforeLang=${frontLang}&afterLang=${backLang}`
-    //   : `beforeWord=${backWord}&beforeLang=${backLang}&afterLang=${frontLang}`;
-    // const answer = isForword ? 'backWord' : 'frontWord';
-    // const response = await fetch(
-    //   `http://localhost:8080/api/translate?${query}`,
-    // );
-    // const json = await response.json();
-    // this.setState({
-    //   info: {...info, [answer]: json.text},
-    // });
   }
 
   changeContent(v, i, label) {
@@ -230,15 +177,6 @@ class AddContent extends Component {
     }
   }
 
-  handleLangChange = (event) => {
-    const key = event.target.name;
-    const value = event.target.value;
-    const {info} = this.state;
-    this.setState({
-      info: {...info, [key]: value},
-    });
-  };
-
   handleChange(id) {
     this.setState((prevState) => {
       const updatedTodos = prevState.todos.map((todo) => {
@@ -252,28 +190,6 @@ class AddContent extends Component {
       };
     });
   }
-
-  onChange = (event) => {
-    this.setState({
-      [event.target.name]: event.target.value,
-    });
-  };
-
-  // handleWordChange = (text) => {
-  //   this.setState({ inputValue });
-  //   // const key = event.target.name;
-  //   // const value = event.target.value;
-  //   // const {info, message} = this.state;
-  //   // this.setState({
-  //   //   info: {...info, [key]: value},
-  //   // });
-  //   // this.setState({
-  //   //   message: {
-  //   //     ...message,
-  //   //     [key]: Validation.formValidate(key, value),
-  //   //   },
-  //   // });
-  // };
 
   render() {
     const {words, numberOfWords, message, frontLang, backLang} = this.state;
@@ -374,7 +290,6 @@ class AddContent extends Component {
               block
               variant="contained"
               style={[styles.button, styles.submitButton]}
-              disabled={!this.canSubmit()}
               onPress={this.registerWords}>
               <Text h3 style={styles.submitButtonText}>
                 Save
@@ -384,7 +299,6 @@ class AddContent extends Component {
               block
               variant="contained"
               style={[styles.button, styles.resetButton]}
-              disabled={!this.canSubmit()}
               onPress={this.resetWords}>
               <Text h3 style={styles.resetButtonText}>
                 Reset

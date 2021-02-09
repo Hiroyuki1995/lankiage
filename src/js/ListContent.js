@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Dimensions,
   Item,
+  Modal,
 } from 'react-native';
 import {Text} from 'native-base';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
@@ -39,6 +40,7 @@ class ListContent extends Component {
       isSliding: false,
       sortCondition: '1',
       isAutoPlaying: false,
+      editModalIsVisible: false,
     };
     this.ScrollView = React.createRef();
     this.clickCard = this.clickCard.bind(this);
@@ -60,25 +62,16 @@ class ListContent extends Component {
   }
 
   scrollCardView(event) {
-    console.log(event.nativeEvent.contentOffset.x);
     if (!this.state.isSliding) {
-      let newPageNum = parseInt(
-        // event.nativeEvent.contentOffset.x / width + 1,
-        event.nativeEvent.contentOffset.x / width,
-        10,
-      );
-      console.log(`newPageNum in scrollCardView: ${newPageNum}`);
+      let newPageNum = parseInt(event.nativeEvent.contentOffset.x / width, 10);
       this.setState({
         currentPage: newPageNum,
       });
     }
   }
 
-  componentDidUpdate(prevProps, prevState, snapshot) {
-    // console.log(`prevState.horizontalScroll ${prevState.horizontalScroll}`);
-    // console.log(`currentPage in update ${prevState.currentPage}`);
-    // this.autoScroll(prevState.currentPage);
-  }
+  // componentDidUpdate(prevProps, prevState, snapshot) {
+  // }
 
   sortWords(data) {
     if (this.state.sortCondition === '1') {
@@ -87,9 +80,7 @@ class ListContent extends Component {
   }
 
   onPageChange(pageNumber) {
-    console.log(`pageNumber ${pageNumber}`);
     this.setState({currentPage: pageNumber, isSliding: false});
-    // this.setState({isSliding: false});
     this.autoScroll(pageNumber);
   }
 
@@ -101,8 +92,11 @@ class ListContent extends Component {
     }
   }
 
-  speakWord(word, speakFrontWord = this.isFront) {
-    console.log(`isFront ${this.isFront}`);
+  speakWord(
+    pageNumber = this.state.currentPage,
+    speakFrontWord = this.isFront,
+  ) {
+    const word = this.sortWords(this.state.realm.objects('Word'))[pageNumber];
     let uttr = {};
     if (speakFrontWord) {
       uttr.text = word.frontWord;
@@ -115,15 +109,15 @@ class ListContent extends Component {
     Tts.speak(uttr.text);
   }
 
-  clickCard(word, ref, speakFrontWord) {
-    console.log('clickCard');
+  clickCard(pageNumber, ref, speakFrontWord) {
     ref.flip();
     this.isFront = !this.isFront;
-    this.speakWord(word, speakFrontWord);
+    this.speakWord(pageNumber, speakFrontWord);
   }
 
   editWord(word) {
     console.log('単語を編集します');
+    this.setState({editModalIsVisible: true});
   }
 
   playback() {
@@ -132,10 +126,11 @@ class ListContent extends Component {
     Tts.addEventListener('tts-finish', () => {
       let nextWordPage;
       console.log('tts-finish');
-      // 自動再生中でない場合、または最後のカードの表の場合、自動再生を止める。
+      // 自動再生中でない場合、または最後のカードの裏の場合、自動再生を止める。
       if (
         !this.state.isAutoPlaying ||
-        (this.state.currentPage === this.state.realm.objects('Word').length &&
+        (this.state.currentPage ===
+          this.state.realm.objects('Word').length - 1 &&
           !this.isFront)
       ) {
         this.setState({isAutoPlaying: false});
@@ -150,20 +145,9 @@ class ListContent extends Component {
         this.autoScroll();
       }
       this.isFront = !this.isFront;
-      const nextWord = this.sortWords(this.state.realm.objects('Word'))[
-        nextWordPage
-      ];
-      this.speakWord(nextWord);
+      this.speakWord(nextWordPage);
     });
-    // console.log(`単語を自動で再生します ${this.state.currentPage}`);
-    // console.log(`
-    // 現在の単語:${JSON.stringify(
-    //   this.sortWords(this.state.realm.objects('Word'))[this.state.currentPage],
-    // )}`);
-    const currentWord = this.sortWords(this.state.realm.objects('Word'))[
-      this.state.currentPage
-    ];
-    this.speakWord(currentWord);
+    this.speakWord();
   }
 
   stopPlaying() {
@@ -182,9 +166,6 @@ class ListContent extends Component {
   }
 
   render() {
-    // console.log(`horizontalScroll ${JSON.stringify(this.state)}`);
-    console.log(`currentPage in render: ${this.state.currentPage}`);
-    console.log(`this.state.isSliding ${this.state.isSliding}`);
     let wordCards;
     if (!this.state.realm) {
       wordCards = <Text style={styles.message}>Loading...</Text>;
@@ -195,7 +176,6 @@ class ListContent extends Component {
     } else {
       wordCards = this.sortWords(this.state.realm.objects('Word')).map(
         (word, key) => {
-          // console.log('word.id', word.id, 'key', key);
           return (
             <View key={word.id} className="oneCard">
               <CardFlip
@@ -208,12 +188,11 @@ class ListContent extends Component {
                   className="card"
                   style={styles.card}
                   onPress={() => {
-                    console.log(key);
-                    this.clickCard(word, this.card[key], false);
+                    this.clickCard(key, this.card[key], false);
                   }}>
                   <Text style={styles.cardWord}>{word.frontWord}</Text>
                   <TouchableOpacity
-                    onPress={() => this.speakWord(word, true)}
+                    onPress={() => this.speakWord(key, true)}
                     style={styles.soundOpacity}>
                     <Image
                       style={styles.soundImage}
@@ -236,12 +215,12 @@ class ListContent extends Component {
                   className="card"
                   key={word.id}
                   onPress={() => {
-                    this.clickCard(word, this.card[key], true);
+                    this.clickCard(key, this.card[key], true);
                   }}
                   style={[styles.card, styles.backCard]}>
                   <Text style={styles.cardWord}>{word.backWord}</Text>
                   <TouchableOpacity
-                    onPress={() => this.speakWord(word, false)}
+                    onPress={() => this.speakWord(key, false)}
                     style={styles.soundOpacity}>
                     <Image
                       style={styles.soundImage}
@@ -295,39 +274,71 @@ class ListContent extends Component {
             disableInitialCallback={true}
             step={1}
             // onValueChange={(pageNumber) => this.onPageChange(pageNumber)}
-          />
+          >
+            <Text style={styles.pageText}>
+              {this.state.currentPage + 1}/
+              {this.state.realm ? this.state.realm.objects('Word').length : 1}
+            </Text>
+          </Slider>
         </View>
         <View style={styles.settingArea}>
           <View style={styles.settingCard}>
             {(() => {
               if (!this.state.isAutoPlaying) {
                 return (
-                  <TouchableOpacity
-                    onPress={() => this.playback()}
-                    style={styles.playbackOpacity}>
-                    <Image
-                      style={styles.playbackButton}
-                      source={require('../png/playback.png')}
-                      resizeMode="contain"
-                    />
-                  </TouchableOpacity>
+                  <View>
+                    <TouchableOpacity
+                      onPress={() => this.playback()}
+                      style={styles.playStopOpacity}>
+                      <Image
+                        style={styles.playStopButton}
+                        source={require('../png/playback.png')}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.playStopText}>Play</Text>
+                  </View>
                 );
               } else {
                 return (
-                  <TouchableOpacity
-                    onPress={() => this.stopPlaying()}
-                    style={styles.stopOpacity}>
-                    <Image
-                      style={styles.stopPlayingButton}
-                      source={require('../png/stop.png')}
-                      resizeMode="contain"
-                    />
-                  </TouchableOpacity>
+                  <View>
+                    <TouchableOpacity
+                      onPress={() => this.stopPlaying()}
+                      style={styles.playStopOpacity}>
+                      <Image
+                        style={styles.playStopButton}
+                        source={require('../png/stop.png')}
+                        resizeMode="contain"
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.playStopText}>Stop</Text>
+                  </View>
                 );
               }
             })()}
           </View>
         </View>
+        <Modal
+          style={styles.modalView}
+          visible={this.state.editModalIsVisible}
+          animationType={'slide' || 'fade'}>
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              backgroundColor: '#E5ECEE'
+            }}>
+            <Text>This is a Modal.</Text>
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => {
+                this.setState({editModalIsVisible: false});
+              }}>
+              <Text>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -468,28 +479,38 @@ const styles = StyleSheet.create({
     height: height * 0.2,
     borderRadius: 10,
   },
-  playbackButton: {
-    width: 30,
-    height: 30,
+  playStopButton: {
+    width: 50,
+    height: 50,
   },
-  stopPlayingButton: {
-    width: 30,
-    height: 30,
-  },
-  playbackOpacity: {
+  playStopOpacity: {
     position: 'absolute',
     left: width * 0.05,
-    top: height * 0.005,
-  },
-  stopOpacity: {
-    position: 'absolute',
-    left: width * 0.15,
     top: height * 0.005,
   },
   sliderView: {
     // width: '100%',
     marginHorizontal: width * 0.1,
     marginTop: 20,
+  },
+  playStopText: {
+    position: 'absolute',
+    left: width * 0.07,
+    top: height * 0.07,
+  },
+  pageText: {
+    textAlign: 'right',
+    marginTop: 20,
+  },
+  closeButton: {
+    // width: 20,
+    // height: 20,
+  },
+  modalView: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#F5FCFF',
   },
 });
 
