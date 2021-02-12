@@ -16,6 +16,7 @@ import translate from 'translate-google-api';
 import {v4 as uuidv4} from 'uuid';
 const Realm = require('realm');
 import {WordSchema} from './Schema.js';
+import EditOneCard from './EditOneCard';
 const defalutFrontLang = 'zh-cn';
 const defalutBackLang = 'ja';
 const wordSchema = {
@@ -29,15 +30,14 @@ var leftArrowButton = require('../png/left_arrow.png');
 class AddContent extends Component {
   constructor(props) {
     super(props);
-    this.card = [];
     this.state = {
       words: [],
       loading: false,
       frontLang: defalutFrontLang,
       backLang: defalutBackLang,
-      numberOfWords: 10,
+      numberOfWords: 5,
       message: '',
-      realm: null,
+      // realm: null,
     };
     for (let i = 0; i < this.state.numberOfWords; i++) {
       this.state.words.push(wordSchema);
@@ -49,14 +49,13 @@ class AddContent extends Component {
     this.changeLanguage = this.changeLanguage.bind(this);
   }
 
-  async translate(isForword = true) {
+  translate(isForword = true) {
+    this.setState({message: ''});
     const {words, frontLang, backLang} = this.state;
     const fromLang = isForword ? frontLang : backLang;
     const toLang = !isForword ? frontLang : backLang;
-    console.log('translate function started');
-    console.log(this.state);
     if (!fromLang || !toLang) {
-      console.log('言語を設定してください');
+      this.setState({message: 'Please set the languages'});
     } else {
       const translationTargets = [];
       const keys = [];
@@ -64,50 +63,52 @@ class AddContent extends Component {
       for (const word of words) {
         const targetWord = isForword ? word.frontWord : word.backWord;
         if (targetWord !== '') {
-          console.log(`${targetWord}を翻訳します`);
           translationTargets.push(targetWord);
           keys.push(key);
         }
         key++;
       }
-      console.log(translationTargets, keys);
       if (translationTargets.length > 0) {
-        const result = await translate(translationTargets, {
+        translate(translationTargets, {
           from: fromLang,
           tld: 'com',
           to: toLang,
-        });
-        console.log(result, keys);
-        const resultWordLabel = isForword ? 'backWord' : 'frontWord';
-        const updatedWords = words.map((word, index) => {
-          if (keys.includes(index)) {
-            return {
-              ...word,
-              [resultWordLabel]: result[index],
-            };
-          } else {
-            return {word};
-          }
-        });
-        this.setState({words: updatedWords});
+        })
+          .then((result) => {
+            const resultWordLabel = isForword ? 'backWord' : 'frontWord';
+            const updatedWords = words.map((word, index) => {
+              if (keys.includes(index)) {
+                return {
+                  ...word,
+                  [resultWordLabel]: result[index],
+                };
+              } else {
+                return {word};
+              }
+            });
+            this.setState({words: updatedWords});
+          })
+          .catch((error) => {
+            this.setState({message: error.message});
+          });
       }
     }
   }
 
-  changeContent(v, i, label) {
+  changeContent = (name, value, i) => {
     this.setState((prevState) => {
       const updatedWords = prevState.words.map((word, index) => {
         if (index === i) {
           return {
             ...word,
-            [label]: v,
+            [name]: value,
           };
         }
         return word;
       });
       return {words: updatedWords};
     });
-  }
+  };
 
   changeLanguage(v, label) {
     this.setState((prevState) => {
@@ -115,7 +116,8 @@ class AddContent extends Component {
     });
   }
 
-  async registerWords() {
+  registerWords() {
+    this.setState({message: ''});
     const {words, frontLang, backLang} = this.state;
     const updatedWords = [];
     let numberOfRegisterd = 0;
@@ -136,7 +138,7 @@ class AddContent extends Component {
               createdAt: new Date(),
             });
           });
-          this.setState({realm});
+          // this.setState({realm});
         });
         updatedWords.push({
           ...word,
@@ -147,19 +149,18 @@ class AddContent extends Component {
         updatedWords.push({...word});
       }
     }
-    console.log(`updatedWords ${JSON.stringify(updatedWords)}`);
     this.setState(() => {
       let message;
       if (numberOfRegisterd === 0) {
-        message = '登録できる単語はありません';
+        message = 'There are no words that can be registed';
       } else {
-        message = `${numberOfRegisterd}件の単語を登録しました`;
+        message = `Registerd ${numberOfRegisterd} words`;
       }
       return {words: updatedWords, message: message};
     });
   }
 
-  async resetWords() {
+  resetWords() {
     this.setState(() => {
       const words = [];
       for (let i = 0; i < this.state.numberOfWords; i++) {
@@ -171,38 +172,34 @@ class AddContent extends Component {
 
   componentWillUnmount() {
     // Close the realm if there is one open.
-    const {realm} = this.state;
-    if (realm !== null && !realm.isClosed) {
-      realm.close();
-    }
-  }
-
-  handleChange(id) {
-    this.setState((prevState) => {
-      const updatedTodos = prevState.todos.map((todo) => {
-        if (todo.id === id) {
-          todo.done = !todo.done;
-        }
-        return todo;
-      });
-      return {
-        todos: updatedTodos,
-      };
-    });
+    // const {realm} = this.state;
+    // if (realm !== null && !realm.isClosed) {
+    //   realm.close();
+    // }
   }
 
   render() {
     const {words, numberOfWords, message, frontLang, backLang} = this.state;
-    console.log(JSON.stringify(this.state));
     return (
       <View className="input-area" style={styles.inputArea}>
+        {(() => {
+          if (message) {
+            return (
+              <View style={styles.messageView}>
+                <Text style={styles.messageText}>{message}</Text>
+              </View>
+            );
+          }
+        })()}
         <View style={styles.languageSelectArea}>
-          <LanguageSelect
-            label="frontLang"
-            style={styles.languageSelect}
-            value={frontLang}
-            onValueChange={(v) => this.changeLanguage(v, 'frontLang')}
-          />
+          <View style={styles.oneLanguageSelectArea}>
+            <LanguageSelect
+              label="frontLang"
+              style={styles.languageSelect}
+              value={frontLang}
+              onValueChange={(v) => this.changeLanguage(v, 'frontLang')}
+            />
+          </View>
           <View style={styles.buttonArea}>
             <TouchableOpacity onPress={() => this.translate(true)}>
               <Image
@@ -217,12 +214,14 @@ class AddContent extends Component {
               />
             </TouchableOpacity>
           </View>
-          <LanguageSelect
-            label="backLang"
-            style={styles.languageSelect}
-            value={backLang}
-            onValueChange={(v) => this.changeLanguage(v, 'backLang')}
-          />
+          <View style={styles.oneLanguageSelectArea}>
+            <LanguageSelect
+              label="backLang"
+              style={styles.languageSelect}
+              value={backLang}
+              onValueChange={(v) => this.changeLanguage(v, 'backLang')}
+            />
+          </View>
         </View>
         {(() => {
           const items = [];
@@ -234,55 +233,16 @@ class AddContent extends Component {
               formStyle = styles.inputForm;
             }
             items.push(
-              <View
+              // <View>
+              <EditOneCard
+                id={i}
                 key={i}
-                className="input-area"
-                style={styles.oneCardInputArea}>
-                <View
-                  className="front-input-area"
-                  style={styles.oneSideInputArea}>
-                  <View className="form-area">
-                    <TextInput
-                      multiline={true}
-                      numberOfLines={10}
-                      // maxLength={1000}
-                      label="frontWord"
-                      value={words[i].frontWord}
-                      style={formStyle}
-                      placeholder="front word"
-                      onChangeText={(v) =>
-                        this.changeContent(v, i, 'frontWord')
-                      }
-                    />
-                  </View>
-                </View>
-                <View
-                  className="back-input-area"
-                  style={styles.oneSideInputArea}>
-                  <View className="form-area">
-                    <TextInput
-                      label="backWord"
-                      multiline={true}
-                      value={words[i].backWord}
-                      style={formStyle}
-                      placeholder="back word"
-                      onChangeText={(v) => this.changeContent(v, i, 'backWord')}
-                    />
-                  </View>
-                </View>
-              </View>,
+                word={words[i]}
+                onChange={this.changeContent}
+              />,
             );
           }
           return <View>{items}</View>;
-        })()}
-        {(() => {
-          if (message) {
-            return (
-              <View style={styles.messageView}>
-                <Text style={styles.messageText}>{message}</Text>
-              </View>
-            );
-          }
         })()}
         <View style={{flex: 1}}>
           <View style={styles.submitButtonView}>
@@ -353,9 +313,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#87cefa',
   },
   languageSelect: {
-    flex: 1,
-    alignItems: 'flex-end',
-    width: '40%',
+    // flex: 1,
+    // alignItems: 'flex-end',
   },
   button: {
     padding: 10,
@@ -405,10 +364,20 @@ const styles = StyleSheet.create({
   },
   buttonArea: {
     flexDirection: 'column',
+    width: '20%',
+    // flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   languageSelectArea: {
     flexDirection: 'row',
-    flex: 1,
+    // flex: 1,
+    // alignItems: 'center',
+    // justifyContent: 'center',
+  },
+  oneLanguageSelectArea: {
+    width: '40%',
+    // flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },

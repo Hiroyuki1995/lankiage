@@ -22,13 +22,13 @@ class LanguageSelect extends Component {
           {label: 'English', value: 'en'},
         ]}
         style={pickerSelectStyles}
-        placeholder={{label: 'Select a Language', value: ''}}
+        placeholder={{label: 'Select...', value: ''}}
         Icon={() => (
           <Text
             style={{
               position: 'absolute',
-              right: 95,
-              top: 10,
+              right: 10,
+              top: 5,
               fontSize: 18,
               color: '#789'
             }}>
@@ -57,16 +57,16 @@ LanguageSelect.defaultProps = {
 
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
-    // borderWidth: 1,
-    // borderColor: '#ccc',
-    // borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 4,
     // marginLeft: 20,
     // marginRight: 20,
     marginBottom: 10,
     padding: 5,
     paddingRight: 20,
     fontSize: 18,
-    width: '100%',
+    // width: '100%',
     // paddingVertical: 12,
     // paddingHorizontal: 10,
     // borderWidth: 1,
@@ -76,14 +76,14 @@ const pickerSelectStyles = StyleSheet.create({
     // paddingRight: 30, // to ensure the text is never behind the icon
     // width: 200,
     // marginLeft: 30,
-    alignItems: 'flex-end',
+    // alignItems: 'flex-end',
   },
   pickerText: {
-    position: 'absolute',
-    right: 95,
-    fontSize: 18,
-    color: '#789',
-    alignItems: 'flex-end',
+    // position: 'absolute',
+    // right: 95,
+    // fontSize: 18,
+    // color: '#789',
+    // alignItems: 'flex-end',
   },
 });
 

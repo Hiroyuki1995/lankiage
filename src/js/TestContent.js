@@ -1,21 +1,41 @@
-import React, {Component} from 'react';
-import {View} from 'react-native';
-import {Text} from 'native-base';
+import React from 'react';
+import {View, Button, Text} from 'react-native';
+import {FormPart} from './FormPart';
 
-class TestContent extends Component {
+export default class TestContent extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      title: '',
+      description: '',
+    };
+    // this.onChange = this.onChange.bind(this);
   }
 
-  async componentDidMount() {}
+  onChange = (name) => (value) => {
+    console.log(`name ${name} value ${value}`);
+    this.setState({
+      [name]: value,
+    });
+  };
 
   render() {
+    let onSave = () => {
+      console.log(this.state.title, this.state.description);
+    };
+
     return (
       <View>
-        <Text>TEST</Text>
+        <FormPart
+          title={this.state.title}
+          description={this.state.description}
+          name="testContentName"
+          onChange={this.onChange}
+        />
+        <Button title="send" type="button" onClick={onSave}>
+          <Text>Save</Text>
+        </Button>
       </View>
     );
   }
 }
-
-export default TestContent;

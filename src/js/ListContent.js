@@ -18,6 +18,7 @@ import 'react-native-get-random-values';
 const {width, height} = Dimensions.get('window');
 const Realm = require('realm');
 import {WordSchema} from './Schema.js';
+import AddContent from './AddContent.js';
 
 class ListContent extends Component {
   constructor(props) {
@@ -112,7 +113,7 @@ class ListContent extends Component {
   clickCard(pageNumber, ref, speakFrontWord) {
     ref.flip();
     this.isFront = !this.isFront;
-    this.speakWord(pageNumber, speakFrontWord);
+    // this.speakWord(pageNumber, speakFrontWord);
   }
 
   editWord(word) {
@@ -323,15 +324,17 @@ class ListContent extends Component {
           visible={this.state.editModalIsVisible}
           animationType={'slide' || 'fade'}>
           <View
-            style={{
-              flex: 1,
-              justifyContent: 'center',
-              alignItems: 'center',
-              backgroundColor: '#E5ECEE'
-            }}>
+          // style={{
+          // flex: 1,
+          // justifyContent: 'center',
+          // alignItems: 'center',
+          // backgroundColor: '#E5ECEE'
+          // }}
+          >
+            <AddContent style={styles.addContentView} />
             <Text>This is a Modal.</Text>
             <TouchableOpacity
-              style={styles.closeButton}
+              // style={styles.closeButton}
               onPress={() => {
                 this.setState({editModalIsVisible: false});
               }}>
@@ -511,6 +514,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#F5FCFF',
+  },
+  addContentView: {
+    flex: 1,
+    height: '100%',
   },
 });
 
