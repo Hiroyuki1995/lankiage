@@ -19,6 +19,7 @@ const {width, height} = Dimensions.get('window');
 const Realm = require('realm');
 import {WordSchema} from './Schema.js';
 import AddContent from './AddContent.js';
+import { defaultPath } from 'realm';
 
 class ListContent extends Component {
   constructor(props) {
@@ -40,6 +41,7 @@ class ListContent extends Component {
       currentPage: 0,
       isSliding: false,
       sortCondition: '1',
+      defalutSortPattern: '1',
       isAutoPlaying: false,
       editModalIsVisible: false,
     };
@@ -50,16 +52,32 @@ class ListContent extends Component {
     this.stopPlaying = this.stopPlaying.bind(this);
     this.onPageChange = this.onPageChange.bind(this);
     this.scrollCardView = this.scrollCardView.bind(this);
+    this.shuffle = this.shuffle.bind(this);
   }
 
   componentDidMount() {
+    console.log('componentDidMount');
     console.log(Realm.defaultPath);
-    Realm.open({
-      schema: [WordSchema],
-      deleteRealmIfMigrationNeeded: true,
-    }).then((realm) => {
-      this.setState({realm});
-    });
+    try {
+      Realm.open({
+        schema: [WordSchema],
+        deleteRealmIfMigrationNeeded: true,
+      }).then((realm) => {
+        if (this.state.defalutSortPattern === '1') {
+          this.setState(() => {
+            const defalutWords = realm
+              .objects('Word')
+              .sorted('createdAt', true);
+            return {
+              realm,
+              words: defalutWords,
+            };
+          });
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
   }
 
   scrollCardView(event) {
@@ -71,13 +89,25 @@ class ListContent extends Component {
     }
   }
 
+  shuffle() {
+    if (this.state.words) {
+      let temp = this.state.words.slice();
+      for (var i = temp.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        [temp[i], temp[j]] = [temp[j], temp[i]];
+      }
+      this.setState({words: temp});
+    }
+  }
+
   // componentDidUpdate(prevProps, prevState, snapshot) {
   // }
 
   sortWords(data) {
-    if (this.state.sortCondition === '1') {
-      return data.sorted('createdAt', true);
-    }
+    // if (this.state.sortCondition === '1') {
+    //   return data.sorted('createdAt', true);
+    // }
+    return data;
   }
 
   onPageChange(pageNumber) {
@@ -86,6 +116,7 @@ class ListContent extends Component {
   }
 
   componentWillUnmount() {
+    console.log('componentWillUnmout is started');
     // Close the realm if there is one open.
     const {realm} = this.state;
     if (realm !== null && !realm.isClosed) {
@@ -97,7 +128,7 @@ class ListContent extends Component {
     pageNumber = this.state.currentPage,
     speakFrontWord = this.isFront,
   ) {
-    const word = this.sortWords(this.state.realm.objects('Word'))[pageNumber];
+    const word = this.state.words[pageNumber];
     let uttr = {};
     if (speakFrontWord) {
       uttr.text = word.frontWord;
@@ -130,8 +161,7 @@ class ListContent extends Component {
       // 自動再生中でない場合、または最後のカードの裏の場合、自動再生を止める。
       if (
         !this.state.isAutoPlaying ||
-        (this.state.currentPage ===
-          this.state.realm.objects('Word').length - 1 &&
+        (this.state.currentPage === this.state.words.length - 1 &&
           !this.isFront)
       ) {
         this.setState({isAutoPlaying: false});
@@ -168,82 +198,80 @@ class ListContent extends Component {
 
   render() {
     let wordCards;
-    if (!this.state.realm) {
+    if (!this.state.words) {
       wordCards = <Text style={styles.message}>Loading...</Text>;
-    } else if (this.state.realm.objects('Word').length === 0) {
+    } else if (this.state.words.length === 0) {
       wordCards = (
         <Text style={styles.message}>No words have been registered yet</Text>
       );
     } else {
-      wordCards = this.sortWords(this.state.realm.objects('Word')).map(
-        (word, key) => {
-          return (
-            <View key={word.id} className="oneCard">
-              <CardFlip
-                style={styles.cardContainer}
-                flipDirection="x"
+      wordCards = this.state.words.map((word, key) => {
+        return (
+          <View key={word.id} className="oneCard">
+            <CardFlip
+              style={styles.cardContainer}
+              flipDirection="x"
+              key={word.id}
+              ref={(card) => (this.card[key] = card)}>
+              <TouchableOpacity
                 key={word.id}
-                ref={(card) => (this.card[key] = card)}>
+                className="card"
+                style={styles.card}
+                onPress={() => {
+                  this.clickCard(key, this.card[key], false);
+                }}>
+                <Text style={styles.cardWord}>{word.frontWord}</Text>
                 <TouchableOpacity
-                  key={word.id}
-                  className="card"
-                  style={styles.card}
-                  onPress={() => {
-                    this.clickCard(key, this.card[key], false);
-                  }}>
-                  <Text style={styles.cardWord}>{word.frontWord}</Text>
-                  <TouchableOpacity
-                    onPress={() => this.speakWord(key, true)}
-                    style={styles.soundOpacity}>
-                    <Image
-                      style={styles.soundImage}
-                      resizeMode="contain"
-                      source={require('../png/sound.png')}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => this.editWord(word)}
-                    style={styles.penOpacity}>
-                    <Image
-                      style={styles.penImage}
-                      resizeMode="contain"
-                      source={require('../png/pen.png')}
-                    />
-                  </TouchableOpacity>
+                  onPress={() => this.speakWord(key, true)}
+                  style={styles.soundOpacity}>
+                  <Image
+                    style={styles.soundImage}
+                    resizeMode="contain"
+                    source={require('../png/sound.png')}
+                  />
                 </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => this.editWord(word)}
+                  style={styles.penOpacity}>
+                  <Image
+                    style={styles.penImage}
+                    resizeMode="contain"
+                    source={require('../png/pen.png')}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>
 
+              <TouchableOpacity
+                className="card"
+                key={word.id}
+                onPress={() => {
+                  this.clickCard(key, this.card[key], true);
+                }}
+                style={[styles.card, styles.backCard]}>
+                <Text style={styles.cardWord}>{word.backWord}</Text>
                 <TouchableOpacity
-                  className="card"
-                  key={word.id}
-                  onPress={() => {
-                    this.clickCard(key, this.card[key], true);
-                  }}
-                  style={[styles.card, styles.backCard]}>
-                  <Text style={styles.cardWord}>{word.backWord}</Text>
-                  <TouchableOpacity
-                    onPress={() => this.speakWord(key, false)}
-                    style={styles.soundOpacity}>
-                    <Image
-                      style={styles.soundImage}
-                      resizeMode="contain"
-                      source={require('../png/sound.png')}
-                    />
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => this.editWord(word)}
-                    style={styles.penOpacity}>
-                    <Image
-                      style={styles.penImage}
-                      resizeMode="contain"
-                      source={require('../png/pen.png')}
-                    />
-                  </TouchableOpacity>
+                  onPress={() => this.speakWord(key, false)}
+                  style={styles.soundOpacity}>
+                  <Image
+                    style={styles.soundImage}
+                    resizeMode="contain"
+                    source={require('../png/sound.png')}
+                  />
                 </TouchableOpacity>
-              </CardFlip>
-            </View>
-          );
-        },
-      );
+                <TouchableOpacity
+                  onPress={() => this.editWord(word)}
+                  style={styles.penOpacity}>
+                  <Image
+                    style={styles.penImage}
+                    resizeMode="contain"
+                    source={require('../png/pen.png')}
+                  />
+                </TouchableOpacity>
+              </TouchableOpacity>
+            </CardFlip>
+          </View>
+        );
+      });
     }
     return (
       <View>
@@ -267,9 +295,7 @@ class ListContent extends Component {
             // onSlidingComplete={() => this.setState({isSliding: false})}
             onSlidingComplete={(pageNumber) => this.onPageChange(pageNumber)}
             style={styles.sliderView}
-            maximumValue={
-              this.state.realm ? this.state.realm.objects('Word').length - 1 : 0
-            }
+            maximumValue={this.state.words ? this.state.words.length - 1 : 0}
             minimumValue={0}
             value={this.state.currentPage}
             disableInitialCallback={true}
@@ -278,7 +304,7 @@ class ListContent extends Component {
           >
             <Text style={styles.pageText}>
               {this.state.currentPage + 1}/
-              {this.state.realm ? this.state.realm.objects('Word').length : 1}
+              {this.state.words ? this.state.words.length : 0}
             </Text>
           </Slider>
         </View>
@@ -317,6 +343,18 @@ class ListContent extends Component {
                 );
               }
             })()}
+            <View>
+              <TouchableOpacity
+                onPress={() => this.shuffle()}
+                style={styles.shuffleOpacity}>
+                <Image
+                  style={styles.shuffleButton}
+                  source={require('../png/shuffle.png')}
+                  resizeMode="contain"
+                />
+              </TouchableOpacity>
+              <Text style={styles.shuffleText}>Shuffle</Text>
+            </View>
           </View>
         </View>
         <Modal
@@ -486,9 +524,18 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
   },
+  shuffleButton: {
+    width: 50,
+    height: 50,
+  },
   playStopOpacity: {
     position: 'absolute',
     left: width * 0.05,
+    top: height * 0.005,
+  },
+  shuffleOpacity: {
+    position: 'absolute',
+    left: width * 0.2,
     top: height * 0.005,
   },
   sliderView: {
@@ -499,6 +546,11 @@ const styles = StyleSheet.create({
   playStopText: {
     position: 'absolute',
     left: width * 0.07,
+    top: height * 0.07,
+  },
+  shuffleText: {
+    position: 'absolute',
+    left: width * 0.2,
     top: height * 0.07,
   },
   pageText: {

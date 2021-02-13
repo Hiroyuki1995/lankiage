@@ -6,6 +6,9 @@ import {
   Dimensions,
   TouchableOpacity,
   Image,
+  InputAccessoryView,
+  Button as NativeButton,
+  KeyboardAvoidingView,
 } from 'react-native';
 import {Button, Footer} from 'native-base';
 import {Text} from 'react-native-elements';
@@ -26,6 +29,7 @@ const wordSchema = {
 };
 var rightArrowButton = require('../png/right_arrow.png');
 var leftArrowButton = require('../png/left_arrow.png');
+const inputAccessoryViewID = 'uniqueID';
 
 class AddContent extends Component {
   constructor(props) {
@@ -239,31 +243,49 @@ class AddContent extends Component {
                 key={i}
                 word={words[i]}
                 onChange={this.changeContent}
+                inputAccessoryViewID={inputAccessoryViewID}
               />,
             );
           }
           return <View>{items}</View>;
         })()}
-        <View style={{flex: 1}}>
-          <View style={styles.submitButtonView}>
-            <Button
-              block
-              variant="contained"
-              style={[styles.button, styles.submitButton]}
-              onPress={this.registerWords}>
-              <Text h3 style={styles.submitButtonText}>
-                Save
-              </Text>
-            </Button>
-            <Button
-              block
-              variant="contained"
-              style={[styles.button, styles.resetButton]}
-              onPress={this.resetWords}>
-              <Text h3 style={styles.resetButtonText}>
-                Reset
-              </Text>
-            </Button>
+        <InputAccessoryView
+          nativeID={inputAccessoryViewID}
+          backgroundColor="#ffffff"
+          style={styles.inputAccessoryView}>
+          <Button
+            style={styles.keyboardButton}
+            onPress={() => console.log('button1 clicked')}>
+            <Text style={styles.keyboardButtonText}>SEND</Text>
+          </Button>
+          <Button
+            style={styles.keyboardButton}
+            onPress={() => console.log('button2 clicked')}>
+            <Text style={styles.keyboardButtonText}>RESET</Text>
+          </Button>
+        </InputAccessoryView>
+        <View>
+          <View style={{flex: 1}}>
+            <View style={styles.submitButtonView}>
+              <Button
+                block
+                variant="contained"
+                style={[styles.button, styles.submitButton]}
+                onPress={this.registerWords}>
+                <Text h3 style={styles.submitButtonText}>
+                  Save
+                </Text>
+              </Button>
+              <Button
+                block
+                variant="contained"
+                style={[styles.button, styles.resetButton]}
+                onPress={this.resetWords}>
+                <Text h3 style={styles.resetButtonText}>
+                  Reset
+                </Text>
+              </Button>
+            </View>
           </View>
         </View>
       </View>
@@ -380,6 +402,24 @@ const styles = StyleSheet.create({
     // flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  keyboardButton: {
+    width: '50%',
+    backgroundColor: '#ffffff',
+    color: '#ff6600',
+    textAlign: 'center',
+  },
+  inputAccessoryView: {
+    backgroundColor: '#ffffff',
+    flexDirection: 'row',
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  keyboardButtonText: {
+    flex: 1,
+    color: '#007aff',
+    textAlign: 'center',
   },
 });
 

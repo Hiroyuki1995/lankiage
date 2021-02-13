@@ -73,6 +73,7 @@ class EditOneCard extends Component {
               value={word.frontWord}
               style={formStyle}
               placeholder="front word"
+              inputAccessoryViewID={this.props.inputAccessoryViewID}
               onChangeText={(value) => {
                 this.props.onChange('frontWord', value, this.props.id);
               }}

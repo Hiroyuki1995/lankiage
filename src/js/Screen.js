@@ -14,6 +14,7 @@ import ListContent from './ListContent';
 import AddContent from './AddContent';
 import HomeContent from './HomeContent';
 import TestContent from './TestContent';
+import { Header } from 'react-native/Libraries/NewAppScreen';
 
 class Screen extends Component {
   constructor(props) {
