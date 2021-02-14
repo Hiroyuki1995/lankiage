@@ -8,9 +8,8 @@ import {
   Image,
   InputAccessoryView,
   Button as NativeButton,
-  KeyboardAvoidingView,
 } from 'react-native';
-import {Button, Footer} from 'native-base';
+import {Button} from 'native-base';
 import {Text} from 'react-native-elements';
 import LanguageSelect from './LanguageSelect';
 const {width, height} = Dimensions.get('window');
@@ -29,6 +28,8 @@ const wordSchema = {
 };
 var rightArrowButton = require('../png/right_arrow.png');
 var leftArrowButton = require('../png/left_arrow.png');
+var nextButton = require('../png/next.png');
+var backButton = require('../png/back.png');
 const inputAccessoryViewID = 'uniqueID';
 
 class AddContent extends Component {
@@ -42,6 +43,10 @@ class AddContent extends Component {
       numberOfWords: 5,
       message: '',
       // realm: null,
+      currentFocus: {
+        key: 0,
+        isFront: true,
+      },
     };
     for (let i = 0; i < this.state.numberOfWords; i++) {
       this.state.words.push(wordSchema);
@@ -51,6 +56,9 @@ class AddContent extends Component {
     this.translate = this.translate.bind(this);
     this.changeContent = this.changeContent.bind(this);
     this.changeLanguage = this.changeLanguage.bind(this);
+    this.focusNextWord = this.focusNextWord.bind(this);
+    this.focusBackWord = this.focusBackWord.bind(this);
+    this.formFocus = this.formFocus.bind(this);
   }
 
   translate(isForword = true) {
@@ -117,6 +125,56 @@ class AddContent extends Component {
   changeLanguage(v, label) {
     this.setState((prevState) => {
       return {[label]: v};
+    });
+  }
+
+  focusBackWord() {
+    this.setState((prevState) => {
+      const currentFocusKey = prevState.currentFocus.key;
+      if (
+        !(prevState.currentFocus.isFront && prevState.currentFocus.key === 0)
+      ) {
+        const nextFocusKey = prevState.currentFocus.isFront
+          ? currentFocusKey - 1
+          : currentFocusKey;
+        return {
+          currentFocus: {
+            key: nextFocusKey,
+            isFront: !prevState.currentFocus.isFront,
+          },
+        };
+      }
+    });
+  }
+
+  focusNextWord() {
+    this.setState((prevState) => {
+      const currentFocusKey = prevState.currentFocus.key;
+      if (
+        !(
+          !prevState.currentFocus.isFront &&
+          prevState.currentFocus.key === prevState.numberOfWords - 1
+        )
+      ) {
+        const nextFocusKey = prevState.currentFocus.isFront
+          ? currentFocusKey
+          : currentFocusKey + 1;
+        return {
+          currentFocus: {
+            key: nextFocusKey,
+            isFront: !prevState.currentFocus.isFront,
+          },
+        };
+      }
+    });
+  }
+
+  formFocus(key, isFront) {
+    this.setState({
+      currentFocus: {
+        key: key,
+        isFront: isFront,
+      },
     });
   }
 
@@ -242,7 +300,10 @@ class AddContent extends Component {
                 id={i}
                 key={i}
                 word={words[i]}
+                currentFocusKey={this.state.currentFocus.key}
+                currentFocusSide={this.state.currentFocus.isFront}
                 onChange={this.changeContent}
+                onFormFocus={this.formFocus}
                 inputAccessoryViewID={inputAccessoryViewID}
               />,
             );
@@ -252,17 +313,34 @@ class AddContent extends Component {
         <InputAccessoryView
           nativeID={inputAccessoryViewID}
           backgroundColor="#ffffff"
-          style={styles.inputAccessoryView}>
-          <Button
-            style={styles.keyboardButton}
-            onPress={() => console.log('button1 clicked')}>
-            <Text style={styles.keyboardButtonText}>SEND</Text>
-          </Button>
-          <Button
-            style={styles.keyboardButton}
-            onPress={() => console.log('button2 clicked')}>
-            <Text style={styles.keyboardButtonText}>RESET</Text>
-          </Button>
+          // style={styles.keyboradToolbar}
+        >
+          <View style={styles.keyboradToolbar}>
+            <View style={styles.directionButtons}>
+              <TouchableOpacity
+                style={false ? {display: 'none'} : {display: 'flex'}}
+                onPress={this.focusBackWord}>
+                <Image source={backButton} style={styles.directionButton} />
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={false ? {display: 'none'} : {display: 'flex'}}
+                onPress={this.focusNextWord}>
+                <Image source={nextButton} style={styles.directionButton} />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.actionButtons}>
+              <NativeButton
+                style={styles.keyboardButton}
+                onPress={this.registerWords}
+                title="Save"
+              />
+              <NativeButton
+                style={styles.keyboardButton}
+                onPress={this.resetWords}
+                title="Reset"
+              />
+            </View>
+          </View>
         </InputAccessoryView>
         <View>
           <View style={{flex: 1}}>
@@ -404,22 +482,48 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   keyboardButton: {
-    width: '50%',
-    backgroundColor: '#ffffff',
-    color: '#ff6600',
     textAlign: 'center',
+    // paddingHorizontal: 10,
   },
   inputAccessoryView: {
-    backgroundColor: '#ffffff',
-    flexDirection: 'row',
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+    // backgroundColor: '#ffffff',
+    // flexDirection: 'row',
+    // flex: 1,
+    // // alignItems: 'flex-end',
+    // justifyContent: 'center',
   },
   keyboardButtonText: {
     flex: 1,
     color: '#007aff',
     textAlign: 'center',
+  },
+  keyboradToolbar: {
+    flex: 1,
+    justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
+    // backgroundColor: '#F8F8F8',
+    // paddingHorizontal: 8,
+    height: 48,
+  },
+  directionButtons: {
+    // alignItems: 'flex-start',
+    flexDirection: 'row',
+    // justifyContent: 'flex-start',
+    position: 'absolute',
+    left: 10,
+  },
+  actionButtons: {
+    alignItems: 'flex-end',
+    flexDirection: 'row',
+    justifyContent: 'flex-end',
+    position: 'absolute',
+    right: 10,
+  },
+  directionButton: {
+    width: 18,
+    height: 18,
+    marginHorizontal: 10,
   },
 });
 

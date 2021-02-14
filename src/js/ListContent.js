@@ -96,7 +96,7 @@ class ListContent extends Component {
         var j = Math.floor(Math.random() * (i + 1));
         [temp[i], temp[j]] = [temp[j], temp[i]];
       }
-      this.setState({words: temp});
+      this.setState({words: temp, currentPage: 0});
     }
   }
 
@@ -152,31 +152,52 @@ class ListContent extends Component {
     this.setState({editModalIsVisible: true});
   }
 
+  // setIntervalを使う方法
+  sleep(waitSec, callbackFunc) {
+    // 経過時間（秒）
+    var spanedSec = 0;
+    // 1秒間隔で無名関数を実行
+    var id = setInterval(function () {
+      spanedSec++;
+      // 経過時間 >= 待機時間の場合、待機終了。
+      if (spanedSec >= waitSec) {
+        // タイマー停止
+        clearInterval(id);
+        // 完了時、コールバック関数を実行
+        if (callbackFunc) {
+          callbackFunc();
+        }
+      }
+    }, 100);
+  }
+
   playback() {
     this.setState({isAutoPlaying: true});
     Tts.removeAllListeners('tts-finish');
     Tts.addEventListener('tts-finish', () => {
-      let nextWordPage;
-      console.log('tts-finish');
-      // 自動再生中でない場合、または最後のカードの裏の場合、自動再生を止める。
-      if (
-        !this.state.isAutoPlaying ||
-        (this.state.currentPage === this.state.words.length - 1 &&
-          !this.isFront)
-      ) {
-        this.setState({isAutoPlaying: false});
-        return;
-      } else if (this.isFront) {
-        // カードが表の場合は、カードをめくる
-        nextWordPage = this.state.currentPage;
-        this.card[this.state.currentPage].flip();
-      } else {
-        // 上記以外の場合、スクロールする
-        nextWordPage = this.state.currentPage + 1;
-        this.autoScroll();
-      }
-      this.isFront = !this.isFront;
-      this.speakWord(nextWordPage);
+      this.sleep(4, () => {
+        let nextWordPage;
+        console.log('tts-finish');
+        // 自動再生中でない場合、または最後のカードの裏の場合、自動再生を止める。
+        if (
+          !this.state.isAutoPlaying ||
+          (this.state.currentPage === this.state.words.length - 1 &&
+            !this.isFront)
+        ) {
+          this.setState({isAutoPlaying: false});
+          return;
+        } else if (this.isFront) {
+          // カードが表の場合は、カードをめくる
+          nextWordPage = this.state.currentPage;
+          this.card[this.state.currentPage].flip();
+        } else {
+          // 上記以外の場合、スクロールする
+          nextWordPage = this.state.currentPage + 1;
+          this.autoScroll();
+        }
+        this.isFront = !this.isFront;
+        this.speakWord(nextWordPage);
+      });
     });
     this.speakWord();
   }
@@ -469,7 +490,7 @@ const styles = StyleSheet.create({
   cardsArea: {
     flexDirection: 'row',
     flex: 1,
-    marginTop: height * 0.2,
+    marginTop: height * 0.1,
   },
   pickerSelectStyles: {
     fontSize: 16,

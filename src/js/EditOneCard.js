@@ -14,8 +14,8 @@ class EditOneCard extends Component {
   constructor(props) {
     super(props);
     this.card = [];
+    this.ref = null;
     this.state = {
-      // word: this.props.word,
       words: [],
       loading: false,
       frontLang: defalutFrontLang,
@@ -24,33 +24,16 @@ class EditOneCard extends Component {
       message: '',
       realm: null,
     };
-    // console.log(this.state.word);
-    this.changeContent = this.changeContent.bind(this);
   }
 
-  changeContent(v, label) {
-    // this.setState((prevState) => {
-    //   return {
-    //     word: {
-    //       ...prevState.word,
-    //       [label]: v,
-    //     },
-    //   };
-    // });
-    // this.props.word[label] = v;
-    // console.log(this.props.word);
-    // this.setState((prevState) => {
-    //   const updatedWords = prevState.words.map((word, index) => {
-    //     if (index === i) {
-    //       return {
-    //         ...word,
-    //         [label]: v,
-    //       };
-    //     }
-    //     return word;
-    //   });
-    //   return {words: updatedWords};
-    // });
+  componentDidUpdate() {
+    if (this.props.currentFocusKey === this.props.id) {
+      if (this.props.currentFocusSide) {
+        this.front.focus();
+      } else {
+        this.back.focus();
+      }
+    }
   }
 
   render() {
@@ -70,12 +53,16 @@ class EditOneCard extends Component {
               numberOfLines={10}
               // maxLength={1000}
               name="frontWord"
+              ref={(input) => (this.front = input)}
               value={word.frontWord}
               style={formStyle}
               placeholder="front word"
               inputAccessoryViewID={this.props.inputAccessoryViewID}
               onChangeText={(value) => {
                 this.props.onChange('frontWord', value, this.props.id);
+              }}
+              onFocus={() => {
+                this.props.onFormFocus(this.props.id, true);
               }}
             />
           </View>
@@ -84,12 +71,17 @@ class EditOneCard extends Component {
           <View className="form-area">
             <TextInput
               name="backWord"
+              ref={(input) => (this.back = input)}
               multiline={true}
               value={word.backWord}
               style={formStyle}
               placeholder="back word"
+              inputAccessoryViewID={this.props.inputAccessoryViewID}
               onChangeText={(value) => {
                 this.props.onChange('backWord', value, this.props.id);
+              }}
+              onFocus={() => {
+                this.props.onFormFocus(this.props.id, false);
               }}
             />
           </View>
