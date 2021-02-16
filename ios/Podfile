@@ -1,7 +1,7 @@
 require_relative '../node_modules/react-native/scripts/react_native_pods'
 require_relative '../node_modules/@react-native-community/cli-platform-ios/native_modules'
 
-platform :ios, '10.0'
+platform :ios, '11.0'
 
 target 'app0124' do
   config = use_native_modules!
@@ -11,9 +11,7 @@ target 'app0124' do
 
 
 
-  pod 'TextToSpeech', :path => '../node_modules/react-native-tts'
 
-  pod 'react-native-slider', :path => '../node_modules/@react-native-community/slider'
 
   target 'app0124Tests' do
     inherit! :complete

@@ -1,18 +1,8 @@
 import React, {Component} from 'react';
-import {Text, View} from 'react-native';
+import {ScrollView, Text, View, Button} from 'react-native';
+import {Navigation} from 'react-native-navigation';
 const Realm = require('realm');
-const CarSchema = {
-  name: 'Car',
-  properties: {
-    make: 'string',
-    model: 'string',
-    miles: {type: 'int', default: 0},
-  },
-};
-const DogSchema = {
-  name: 'Dog',
-  properties: {name: 'string'},
-};
+import {WordSchema} from './Schema.js';
 
 class HomeContent extends Component {
   constructor(props) {
@@ -21,21 +11,21 @@ class HomeContent extends Component {
   }
 
   componentDidMount() {
-    console.log(Realm.defaultPath);
-    Realm.open({
-      schema: [CarSchema, DogSchema],
-    }).then((realm) => {
-      realm.write(() => {
-        // realm.deleteAll();
-        realm.create('Dog', {name: 'Rex'});
-        realm.create('Car', {
-          make: 'Honda',
-          model: 'Civic',
-          miles: 1000,
-        });
-      });
-      this.setState({realm});
-    });
+    // console.log(Realm.defaultPath);
+    // Realm.open({
+    //   schema: [WordSchema],
+    // }).then((realm) => {
+    //   realm.write(() => {
+    //     // realm.deleteAll();
+    //     realm.create('Dog', {name: 'Rex'});
+    //     realm.create('Car', {
+    //       make: 'Honda',
+    //       model: 'Civic',
+    //       miles: 1000,
+    //     });
+    //   });
+    //   this.setState({realm});
+    // });
   }
 
   componentWillUnmount() {
@@ -47,10 +37,6 @@ class HomeContent extends Component {
   }
 
   render() {
-    // const info = this.state.realm
-    //   ? JSON.stringify(this.state.realm.objects('Car')) +
-    //     JSON.stringify(this.state.realm.objects('Dog'))
-    //   : 'Loading...';
     let info;
     if (this.state.realm) {
       info = this.state.realm.objects('Car').map((car, key) => {
@@ -58,19 +44,28 @@ class HomeContent extends Component {
         return <Text key={key}>{carMake + '\n'}</Text>;
       });
     }
-    // console.log(this.state.realm.objects('Dog'));
-    // console.log(JSON.stringify(this.state.realm.objects('Dog')));
-    // this.state.realm.objects('Dog').map((dog) => {
-    //   console.log(JSON.stringify(dog.name));
-    // });
-    // const info = this.state.realm
-    //   ? 'Number of dogs in this Realm: ' +
-    //     this.state.realm.objects('Dog').length
-    //   : 'Loading...';
     return (
-      <View style={styles.container}>
+      <ScrollView style={styles.container}>
+        <Button
+        title='Push List Screen'
+        color='#710ce3'
+        onPress={() => {
+          console.log(this.props);
+          Navigation.push(this.props.componentId, {
+            component: {
+              name: 'List',
+              options: {
+                topBar: {
+                  title: {
+                    text: 'List'
+                  }
+                }
+              }
+            }
+          });
+        }} />
         <Text style={styles.welcome}>{info}</Text>
-      </View>
+      </ScrollView>
     );
   }
 }

@@ -5,7 +5,6 @@ import {
   Content,
   Footer,
   FooterTab,
-  // Icon,
   Header,
   Button,
   Text,
@@ -14,7 +13,7 @@ import {
   Body,
   Title,
 } from 'native-base';
-// import Icon from 'react-native-vector-icons/Ionicons';
+import Icon from 'react-native-vector-icons/Ionicons';
 import ListContent from './ListContent';
 import AddContent from './AddContent';
 import HomeContent from './HomeContent';
@@ -81,28 +80,28 @@ class Screen extends Component {
             <Button
               active={this.state.selectedTab === 'home'}
               onPress={() => this.setState({selectedTab: 'home'})}>
-              {/* <Icon name="ios-home" /> */}
+              <Icon name="ios-home" />
               <Text>Home</Text>
             </Button>
 
             <Button
               active={this.state.selectedTab === 'list'}
               onPress={() => this.setState({selectedTab: 'list'})}>
-              {/* <Icon name="list" /> */}
+              <Icon name="list" />
               <Text>List</Text>
             </Button>
 
             <Button
               active={this.state.selectedTab === 'test'}
               onPress={() => this.setState({selectedTab: 'test'})}>
-              {/* <Icon name="pencil" /> */}
+              <Icon name="pencil" />
               <Text>Test</Text>
             </Button>
 
             <Button
               active={this.state.selectedTab === 'add'}
               onPress={() => this.setState({selectedTab: 'add'})}>
-              {/* <Icon name="add" /> */}
+              <Icon name="add" />
               <Text>Add</Text>
             </Button>
           </FooterTab>

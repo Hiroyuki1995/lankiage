@@ -8,8 +8,13 @@ import {
   Dimensions,
   Item,
   Modal,
+  ImageBackground,
 } from 'react-native';
 import {Text} from 'native-base';
+import {Navigation} from 'react-native-navigation';
+import Icon from 'react-native-vector-icons/Ionicons';
+import FoundationIcon from 'react-native-vector-icons/Foundation';
+// import AntIcon from 'react-native-vector-icons/Foundation';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import CardFlip from 'react-native-card-flip';
 import Tts from 'react-native-tts';
@@ -53,6 +58,7 @@ class ListContent extends Component {
     this.onPageChange = this.onPageChange.bind(this);
     this.scrollCardView = this.scrollCardView.bind(this);
     this.shuffle = this.shuffle.bind(this);
+    this.openAddContent = this.openAddContent.bind(this);
   }
 
   componentDidMount() {
@@ -78,6 +84,22 @@ class ListContent extends Component {
     } catch (error) {
       console.log(error);
     }
+  }
+
+  openAddContent() {
+    console.log('aiueo');
+    Navigation.push(this.props.componentId, {
+      component: {
+        name: 'Add',
+        options: {
+          topBar: {
+            title: {
+              text: 'Add'
+            }
+          }
+        }
+      }
+    });
   }
 
   scrollCardView(event) {
@@ -120,6 +142,7 @@ class ListContent extends Component {
     // Close the realm if there is one open.
     const {realm} = this.state;
     if (realm !== null && !realm.isClosed) {
+      console.log('realm will be close');
       realm.close();
     }
   }
@@ -218,6 +241,7 @@ class ListContent extends Component {
   }
 
   render() {
+    console.log('render method is called');
     let wordCards;
     if (!this.state.words) {
       wordCards = <Text style={styles.message}>Loading...</Text>;
@@ -228,7 +252,7 @@ class ListContent extends Component {
     } else {
       wordCards = this.state.words.map((word, key) => {
         return (
-          <View key={word.id} className="oneCard">
+          <View key={word.id} className="oneCard" style={styles.wordCardView}>
             <CardFlip
               style={styles.cardContainer}
               flipDirection="x"
@@ -245,20 +269,12 @@ class ListContent extends Component {
                 <TouchableOpacity
                   onPress={() => this.speakWord(key, true)}
                   style={styles.soundOpacity}>
-                  <Image
-                    style={styles.soundImage}
-                    resizeMode="contain"
-                    source={require('../png/sound.png')}
-                  />
+                  <FoundationIcon name="sound" style={styles.soundImage} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => this.editWord(word)}
                   style={styles.penOpacity}>
-                  <Image
-                    style={styles.penImage}
-                    resizeMode="contain"
-                    source={require('../png/pen.png')}
-                  />
+                  <Icon name="pencil-sharp" style={styles.penIcon} />
                 </TouchableOpacity>
               </TouchableOpacity>
 
@@ -273,20 +289,17 @@ class ListContent extends Component {
                 <TouchableOpacity
                   onPress={() => this.speakWord(key, false)}
                   style={styles.soundOpacity}>
-                  <Image
-                    style={styles.soundImage}
-                    resizeMode="contain"
-                    source={require('../png/sound.png')}
-                  />
+                  <FoundationIcon name="sound" style={styles.soundImage} />
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => this.editWord(word)}
                   style={styles.penOpacity}>
-                  <Image
+                  <Icon name="pencil-sharp" style={styles.penIcon} />
+                  {/* <Image
                     style={styles.penImage}
                     resizeMode="contain"
                     source={require('../png/pen.png')}
-                  />
+                  /> */}
                 </TouchableOpacity>
               </TouchableOpacity>
             </CardFlip>
@@ -295,112 +308,116 @@ class ListContent extends Component {
       });
     }
     return (
-      <View>
-        <ScrollView
-          horizontal={true}
-          id="words-area"
-          name="words-area"
-          className="words-area"
-          showsHorizontalScrollIndicator={false}
-          pagingEnabled
-          scrollEnabled={!this.state.isSliding}
-          style={styles.cardsArea}
-          ref={(ref) => (this.ScrollView = ref)}
-          // scrollEventThrottle={100}
-          onScroll={(event) => this.scrollCardView(event)}>
-          {wordCards}
-        </ScrollView>
-        <View>
-          <Slider
-            onSlidingStart={() => this.setState({isSliding: true})}
-            // onSlidingComplete={() => this.setState({isSliding: false})}
-            onSlidingComplete={(pageNumber) => this.onPageChange(pageNumber)}
-            style={styles.sliderView}
-            maximumValue={this.state.words ? this.state.words.length - 1 : 0}
-            minimumValue={0}
-            value={this.state.currentPage}
-            disableInitialCallback={true}
-            step={1}
-            // onValueChange={(pageNumber) => this.onPageChange(pageNumber)}
-          >
-            <Text style={styles.pageText}>
-              {this.state.currentPage + 1}/
-              {this.state.words ? this.state.words.length : 0}
-            </Text>
-          </Slider>
-        </View>
-        <View style={styles.settingArea}>
-          <View style={styles.settingCard}>
-            {(() => {
-              if (!this.state.isAutoPlaying) {
-                return (
-                  <View>
+      <View style={styles.listContentView}>
+        <ImageBackground
+          style={styles.backgroundImage}
+          // resizeMode="contain"
+          source={require('../png/milky-way.jpg')}
+        >
+          <View style={styles.background}>
+            <ScrollView
+              horizontal={true}
+              id="words-area"
+              name="words-area"
+              className="words-area"
+              showsHorizontalScrollIndicator={false}
+              pagingEnabled
+              scrollEnabled={!this.state.isSliding}
+              style={styles.cardsArea}
+              ref={(ref) => (this.ScrollView = ref)}
+              onScroll={(event) => this.scrollCardView(event)}>
+              {wordCards}
+            </ScrollView>
+            <View>
+              <Slider
+                onSlidingStart={() => this.setState({isSliding: true})}
+                onSlidingComplete={(pageNumber) => this.onPageChange(pageNumber)}
+                style={styles.sliderView}
+                minimumTrackTintColor="#ffffff"
+                maximumTrackTintColor="#444444"
+                maximumValue={this.state.words ? this.state.words.length - 1 : 0}
+                minimumValue={0}
+                value={this.state.currentPage}
+                disableInitialCallback={true}
+                step={1}
+              >
+                <Text style={styles.pageText}>
+                  {this.state.currentPage + 1}/
+                  {this.state.words ? this.state.words.length : 0}
+                </Text>
+              </Slider>
+            </View>
+            <View style={styles.settingArea}>
+              {(() => {
+                if (!this.state.isAutoPlaying) {
+                  return (
                     <TouchableOpacity
                       onPress={() => this.playback()}
                       style={styles.playStopOpacity}>
-                      <Image
+                      <Icon
+                        name="play-circle"
                         style={styles.playStopButton}
-                        source={require('../png/playback.png')}
-                        resizeMode="contain"
                       />
                     </TouchableOpacity>
-                    <Text style={styles.playStopText}>Play</Text>
-                  </View>
-                );
-              } else {
-                return (
-                  <View>
+                  );
+                } else {
+                  return (
                     <TouchableOpacity
                       onPress={() => this.stopPlaying()}
                       style={styles.playStopOpacity}>
-                      <Image
+                      <Icon
+                        name="stop-circle-sharp"
                         style={styles.playStopButton}
-                        source={require('../png/stop.png')}
-                        resizeMode="contain"
                       />
                     </TouchableOpacity>
-                    <Text style={styles.playStopText}>Stop</Text>
-                  </View>
-                );
-              }
-            })()}
-            <View>
+                  );
+                }
+              })()}
+              <View>
+                <TouchableOpacity
+                  onPress={() => this.shuffle()}
+                  style={styles.shuffleOpacity}>
+                  <Icon
+                    name="shuffle"
+                    style={styles.shuffleButton}
+                  />
+                </TouchableOpacity>
+              </View>
+            </View>
+            <View style={styles.bottomArea}>
               <TouchableOpacity
-                onPress={() => this.shuffle()}
-                style={styles.shuffleOpacity}>
-                <Image
-                  style={styles.shuffleButton}
-                  source={require('../png/shuffle.png')}
-                  resizeMode="contain"
+                onPress={() => this.openAddContent()}>
+                <FoundationIcon
+                  name="plus"
+                  style={styles.plusButton}
                 />
               </TouchableOpacity>
-              <Text style={styles.shuffleText}>Shuffle</Text>
             </View>
+            <Modal
+            style={styles.modalView}
+            visible={this.state.editModalIsVisible}
+            animationType={'slide' || 'fade'}>
+            <View
+            // style={{
+            // flex: 1,
+            // justifyContent: 'center',
+            // alignItems: 'center',
+            // backgroundColor: '#E5ECEE'
+            // }}
+            >
+              <AddContent style={styles.addContentView} />
+              <Text>This is a Modal.</Text>
+              <TouchableOpacity
+                // style={styles.closeButton}
+                onPress={() => {
+                  this.setState({editModalIsVisible: false});
+                }}>
+                <Text>Close</Text>
+              </TouchableOpacity>
+            </View>
+          </Modal>
           </View>
-        </View>
-        <Modal
-          style={styles.modalView}
-          visible={this.state.editModalIsVisible}
-          animationType={'slide' || 'fade'}>
-          <View
-          // style={{
-          // flex: 1,
-          // justifyContent: 'center',
-          // alignItems: 'center',
-          // backgroundColor: '#E5ECEE'
-          // }}
-          >
-            <AddContent style={styles.addContentView} />
-            <Text>This is a Modal.</Text>
-            <TouchableOpacity
-              // style={styles.closeButton}
-              onPress={() => {
-                this.setState({editModalIsVisible: false});
-              }}>
-              <Text>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </Modal>
+        </ImageBackground>
       </View>
     );
   }
@@ -447,6 +464,7 @@ const styles = StyleSheet.create({
     width: width * 0.9,
     height: height * 0.3,
     flex: 1,
+    display: 'flex',
     marginLeft: width * 0.05,
     marginRight: width * 0.05,
     // paddingLeft: '10%',
@@ -470,12 +488,12 @@ const styles = StyleSheet.create({
   card: {
     borderRadius: 10,
     shadowColor: '#ccc',
-    shadowOffset: {
-      width: 0,
-      height: 20,
-    },
+    // shadowOffset: {
+    //   width: 0,
+    //   height: 20,
+    // },
     shadowRadius: 0,
-    shadowOpacity: 1,
+    // shadowOpacity: 1,
     backgroundColor: '#ffffff',
     flex: 1,
     alignItems: 'center',
@@ -521,66 +539,44 @@ const styles = StyleSheet.create({
     bottom: height * 0.005,
   },
   soundImage: {
-    width: 40,
-    height: 40,
+    fontSize: 40,
   },
-  penImage: {
-    width: 30,
-    height: 30,
-    transform: [{scaleX: -1}],
+  penIcon: {
+    fontSize: 40,
+    // transform: [{scaleX: -1}],
   },
   settingArea: {
     alignItems: 'center',
     justifyContent: 'center',
     flex: 1,
     marginVertical: 20,
-  },
-  settingCard: {
-    backgroundColor: '#ffffff',
+    flexDirection: 'row',
     width: width * 0.9,
-    height: height * 0.2,
-    borderRadius: 10,
+    height: height * 0.1,
   },
   playStopButton: {
-    width: 50,
-    height: 50,
+    fontSize: 80,
+    color: '#ffffff',
   },
   shuffleButton: {
-    width: 50,
-    height: 50,
+    fontSize: 50,
+    color: '#ffffff',
   },
   playStopOpacity: {
-    position: 'absolute',
-    left: width * 0.05,
-    top: height * 0.005,
   },
   shuffleOpacity: {
-    position: 'absolute',
-    left: width * 0.2,
-    top: height * 0.005,
   },
   sliderView: {
     // width: '100%',
     marginHorizontal: width * 0.1,
     marginTop: 20,
   },
-  playStopText: {
-    position: 'absolute',
-    left: width * 0.07,
-    top: height * 0.07,
-  },
-  shuffleText: {
-    position: 'absolute',
-    left: width * 0.2,
-    top: height * 0.07,
-  },
   pageText: {
     textAlign: 'right',
     marginTop: 20,
+    color: '#ffffff',
   },
   closeButton: {
-    // width: 20,
-    // height: 20,
   },
   modalView: {
     flex: 1,
@@ -591,6 +587,33 @@ const styles = StyleSheet.create({
   addContentView: {
     flex: 1,
     height: '100%',
+  },
+  wordCardView: {
+    flex: 1,
+  },
+  listContentView: {
+    flex: 1,
+    backgroundColor: '#111111',
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: "cover",
+    justifyContent: "center",
+    width: width,
+    height: height,
+  },
+  background: {
+    backgroundColor: 'rgba(0,0,0, 0.5)',
+    flex: 1,
+  },
+  bottomArea: {
+    bottom: 10,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  plusButton: {
+    fontSize: 60,
+    color: "#ffffff",
   },
 });
 
