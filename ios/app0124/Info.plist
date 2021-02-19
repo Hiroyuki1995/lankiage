@@ -42,6 +42,7 @@
 	<key>UIAppFonts</key>
 	<array>
 		<string>fonts/MaterialIcons.ttf</string>
+		<string>fonts/AntDesign.ttf</string>
 		<string>fonts/MaterialCommunityIcons.ttf</string>
 		<string>fonts/Foundation.ttf</string>
 		<string>fonts/Ionicons.ttf</string>

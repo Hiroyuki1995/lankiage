@@ -62,7 +62,7 @@ const pickerSelectStyles = StyleSheet.create({
     borderRadius: 4,
     // marginLeft: 20,
     // marginRight: 20,
-    marginBottom: 10,
+    // marginBottom: 10,
     padding: 5,
     paddingRight: 20,
     fontSize: 18,

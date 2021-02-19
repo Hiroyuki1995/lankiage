@@ -14,7 +14,7 @@ import {Text} from 'native-base';
 import {Navigation} from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
-// import AntIcon from 'react-native-vector-icons/Foundation';
+// import AntIcon from 'react-native-vector-icons/AntDesign';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import CardFlip from 'react-native-card-flip';
 import Tts from 'react-native-tts';
@@ -23,6 +23,7 @@ import 'react-native-get-random-values';
 const {width, height} = Dimensions.get('window');
 const Realm = require('realm');
 import {WordSchema} from './Schema.js';
+import {FolderSchema} from './Schema.js';
 import AddContent from './AddContent.js';
 import { defaultPath } from 'realm';
 
@@ -64,30 +65,41 @@ class ListContent extends Component {
   componentDidMount() {
     console.log('componentDidMount');
     console.log(Realm.defaultPath);
-    try {
-      Realm.open({
-        schema: [WordSchema],
-        deleteRealmIfMigrationNeeded: true,
-      }).then((realm) => {
-        if (this.state.defalutSortPattern === '1') {
-          this.setState(() => {
-            const defalutWords = realm
-              .objects('Word')
-              .sorted('createdAt', true);
-            return {
-              realm,
-              words: defalutWords,
-            };
-          });
-        }
+    const realm = this.props.realm;
+    if (this.state.defalutSortPattern === '1') {
+      this.setState(() => {
+        const defalutWords = realm
+          .objects('Word')
+          .sorted('createdAt', true);
+        return {
+          realm,
+          words: defalutWords,
+        };
       });
-    } catch (error) {
-      console.log(error);
     }
+    // try {
+    //   Realm.open({
+    //     schema: [WordSchema],
+    //     deleteRealmIfMigrationNeeded: true,
+    //   }).then((realm) => {
+    //     if (this.state.defalutSortPattern === '1') {
+    //       this.setState(() => {
+    //         const defalutWords = realm
+    //           .objects('Word')
+    //           .sorted('createdAt', true);
+    //         return {
+    //           realm,
+    //           words: defalutWords,
+    //         };
+    //       });
+    //     }
+    //   });
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 
   openAddContent() {
-    console.log('aiueo');
     Navigation.push(this.props.componentId, {
       component: {
         name: 'Add',
@@ -138,13 +150,12 @@ class ListContent extends Component {
   }
 
   componentWillUnmount() {
-    console.log('componentWillUnmout is started');
     // Close the realm if there is one open.
-    const {realm} = this.state;
-    if (realm !== null && !realm.isClosed) {
-      console.log('realm will be close');
-      realm.close();
-    }
+    // console.log('componentWillUnmount at ListContent');
+    // const {realm} = this.state;
+    // if (realm !== null && !realm.isClosed) {
+    //   realm.close();
+    // }
   }
 
   speakWord(
@@ -252,7 +263,7 @@ class ListContent extends Component {
     } else {
       wordCards = this.state.words.map((word, key) => {
         return (
-          <View key={word.id} className="oneCard" style={styles.wordCardView}>
+          <View key={word.id} style={styles.wordCardView}>
             <CardFlip
               style={styles.cardContainer}
               flipDirection="x"
@@ -260,7 +271,6 @@ class ListContent extends Component {
               ref={(card) => (this.card[key] = card)}>
               <TouchableOpacity
                 key={word.id}
-                className="card"
                 style={styles.card}
                 onPress={() => {
                   this.clickCard(key, this.card[key], false);
@@ -279,7 +289,6 @@ class ListContent extends Component {
               </TouchableOpacity>
 
               <TouchableOpacity
-                className="card"
                 key={word.id}
                 onPress={() => {
                   this.clickCard(key, this.card[key], true);
@@ -295,11 +304,6 @@ class ListContent extends Component {
                   onPress={() => this.editWord(word)}
                   style={styles.penOpacity}>
                   <Icon name="pencil-sharp" style={styles.penIcon} />
-                  {/* <Image
-                    style={styles.penImage}
-                    resizeMode="contain"
-                    source={require('../png/pen.png')}
-                  /> */}
                 </TouchableOpacity>
               </TouchableOpacity>
             </CardFlip>
