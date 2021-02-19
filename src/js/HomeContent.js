@@ -18,6 +18,7 @@ class HomeContent extends Component {
     this.openFolderEdit = this.openFolderEdit.bind(this);
     this.openFolder = this.openFolder.bind(this);
     this.editFolder = this.editFolder.bind(this);
+    this.deleteFolder = this.deleteFolder.bind(this);
   }
 
   componentDidMount() {
@@ -80,6 +81,18 @@ class HomeContent extends Component {
     this.setState({realm});
   }
 
+  deleteFolder(id) {
+    if (!this.realm) {
+      this.realm = new Realm({schema: [FolderSchema, WordSchema]});
+    }
+    this.realm.write(() => {
+      const target = this.realm.objects('Folder').filtered(`id = "${id}"`);
+      this.realm.delete(target);
+      const realm = this.realm;
+      this.setState({realm});
+    });
+  }
+
   openFolderEdit(folder = null) {
     Navigation.showOverlay({
       component: {
@@ -89,6 +102,7 @@ class HomeContent extends Component {
           editFolder: this.editFolder,
           folder: folder,
           isEditing: folder ? true : false,
+          deleteFolder: this.deleteFolder,
         },
         options: {
           layout: {

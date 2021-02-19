@@ -19,7 +19,9 @@ class AddNewFolder extends Component {
     };
     this.onChange = this.onChange.bind(this);
     this.editFolder = this.editFolder.bind(this);
+    this.deleteFolder = this.deleteFolder.bind(this);
   }
+
 
   componentDidMount() {
     console.log('componentDidMount');
@@ -40,6 +42,15 @@ class AddNewFolder extends Component {
       Navigation.dismissOverlay(this.props.componentId);
     } else {
       console.log('入力してください');
+    }
+  }
+
+  deleteFolder() {
+    console.log('削除します');
+    const {id} = this.state;
+    if (id) {
+      this.props.deleteFolder(id);
+      Navigation.dismissOverlay(this.props.componentId);
     }
   }
 
@@ -105,9 +116,26 @@ class AddNewFolder extends Component {
             style={styles.dissmissButton}
             onPress={() => {
             Navigation.dismissOverlay(this.props.componentId);
-          }}>
+            }}
+          >
             <Text style={styles.buttonText}>Cancel</Text>
           </Button>
+          {(()=> {
+            if (this.props.isEditing)  {
+              return (
+                <Button
+                  block
+                  light
+                  style={styles.dissmissButton}
+                  onPress={() => {
+                    this.deleteFolder();
+                  }}
+                >
+                  <Text style={styles.buttonText}>Delete</Text>
+                </Button>
+              )
+            }
+          })()}
         </View>
       </View>
     );
