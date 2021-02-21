@@ -1,5 +1,6 @@
 import React, {Component} from 'react';
 import {TextInput, View, StyleSheet, Dimensions} from 'react-native';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 const {width, height} = Dimensions.get('window');
 import 'react-native-get-random-values';
 const defalutFrontLang = 'zh-cn';
@@ -45,30 +46,29 @@ class EditOneCard extends Component {
       formStyle = styles.inputForm;
     }
     return (
-      <View className="input-area" style={styles.oneCardInputArea}>
-        <View className="front-input-area" style={styles.oneSideInputArea}>
-          <View className="form-area">
-            <TextInput
-              multiline={true}
-              numberOfLines={10}
-              // maxLength={1000}
-              name="frontWord"
-              ref={(input) => (this.front = input)}
-              value={word.frontWord}
-              style={formStyle}
-              placeholder="front word"
-              inputAccessoryViewID={this.props.inputAccessoryViewID}
-              onChangeText={(value) => {
-                this.props.onChange('frontWord', value, this.props.id);
-              }}
-              onFocus={() => {
-                this.props.onFormFocus(this.props.id, true);
-              }}
-            />
-          </View>
+      <View style={styles.oneCardInputArea}>
+        <View style={styles.oneSideInputArea}>
+          <TextInput
+            multiline={true}
+            numberOfLines={10}
+            // maxLength={1000}
+            name="frontWord"
+            ref={(input) => (this.front = input)}
+            value={word.frontWord}
+            style={formStyle}
+            placeholder="front word"
+            inputAccessoryViewID={this.props.inputAccessoryViewID}
+            onChangeText={(value) => {
+              this.props.onChange('frontWord', value, this.props.id);
+            }}
+            onFocus={() => {
+              this.props.onFormFocus(this.props.id, true);
+            }}
+          />
         </View>
-        <View className="back-input-area" style={styles.oneSideInputArea}>
-          <View className="form-area">
+        <Icon name ="ellipse-outline" style={styles.cardRing}></Icon>
+        <View style={styles.oneSideInputArea}>
+          <View >
             <TextInput
               name="backWord"
               ref={(input) => (this.back = input)}
@@ -103,17 +103,18 @@ const styles = StyleSheet.create({
   },
   oneCardInputArea: {
     flexDirection: 'row',
-    flex: 1,
+    // flex: 1,
     marginBottom: 10,
     marginTop: 10,
   },
   oneSideInputArea: {
-    width: '50%',
+    // width: '50%',
     paddingLeft: '2%',
     paddingRight: '2%',
+    flex: 1,
   },
   inputForm: {
-    flex: 1,
+    // flex: 1,
     height: 100,
     fontSize: 22,
     borderRadius: 4,
@@ -192,6 +193,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  cardRing: {
+    fontSize: 40,
+    position: 'absolute',
+    left: width * 0.5 - 30,
+    color: '#6e6efa',
+    zIndex: 1,
+    transform: [
+      { rotateX: "45deg" }
+    ]
+  }
 });
 
 export default EditOneCard;

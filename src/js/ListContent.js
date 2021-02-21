@@ -25,7 +25,7 @@ const Realm = require('realm');
 import {WordSchema} from './Schema.js';
 import {FolderSchema} from './Schema.js';
 import AddContent from './AddContent.js';
-import { defaultPath } from 'realm';
+import {defaultPath} from 'realm';
 
 class ListContent extends Component {
   constructor(props) {
@@ -63,14 +63,15 @@ class ListContent extends Component {
   }
 
   componentDidMount() {
-    console.log('componentDidMount');
+    console.log('componentDidMount in ListContent');
     console.log(Realm.defaultPath);
     const realm = this.props.realm;
     if (this.state.defalutSortPattern === '1') {
       this.setState(() => {
         const defalutWords = realm
           .objects('Word')
-          .sorted('createdAt', true);
+          .sorted('createdAt', true)
+          .filtered(`folderId = "${this.props.folder.id}"`);
         return {
           realm,
           words: defalutWords,
@@ -99,18 +100,40 @@ class ListContent extends Component {
     // }
   }
 
+  componentDidAppear() {
+    console.log('componentDidAppear in ListContent');
+  }
+
+  componentDidUpdate() {
+    console.log('componentDidUpdate in ListContent');
+  }
+
+  componentDidDisappear() {
+    console.log('componentDidDisappear in ListContent');
+  }
+
+  // registerWords(info) {
+  //   console.log('ListContens' + JSON.stringify(info));
+  //   this.props.registerWords(words)
+  // }
+
   openAddContent() {
     Navigation.push(this.props.componentId, {
       component: {
         name: 'Add',
+        passProps: {
+          realm: this.state.realm,
+          folder: this.props.folder,
+          registerWords: this.props.registerWords,
+        },
         options: {
           topBar: {
             title: {
-              text: 'Add'
-            }
-          }
-        }
-      }
+              text: 'Edit ' + this.props.folder.name,
+            },
+          },
+        },
+      },
     });
   }
 
@@ -134,7 +157,21 @@ class ListContent extends Component {
     }
   }
 
-  // componentDidUpdate(prevProps, prevState, snapshot) {
+  // componentDidUpdate() {
+  //   console.log('componentDidUpdate will start');
+  //   const realm = this.props.realm;
+  //   if (this.state.defalutSortPattern === '1') {
+  //     this.setState(() => {
+  //       const defalutWords = realm
+  //         .objects('Word')
+  //         .sorted('createdAt', true)
+  //         .filtered(`folderId = "${this.props.folder.id}"`);
+  //       return {
+  //         realm,
+  //         words: defalutWords,
+  //       };
+  //     });
+  //   }
   // }
 
   sortWords(data) {
@@ -255,10 +292,18 @@ class ListContent extends Component {
     console.log('render method is called');
     let wordCards;
     if (!this.state.words) {
-      wordCards = <Text style={styles.message}>Loading...</Text>;
+      wordCards = (
+        <View style={styles.messageTextView}>
+          <Text style={styles.message}>Loading...</Text>
+        </View>
+      );
     } else if (this.state.words.length === 0) {
       wordCards = (
-        <Text style={styles.message}>No words have been registered yet</Text>
+        <View style={styles.messageTextView}>
+          <Text style={styles.message}>No words have been registered yet</Text>
+          <Text style={styles.message}>Please register words</Text>
+          <Text style={styles.message}>from the PLUS button below</Text>
+        </View>
       );
     } else {
       wordCards = this.state.words.map((word, key) => {
@@ -316,8 +361,7 @@ class ListContent extends Component {
         <ImageBackground
           style={styles.backgroundImage}
           // resizeMode="contain"
-          source={require('../png/milky-way.jpg')}
-        >
+          source={require('../png/milky-way.jpg')}>
           <View style={styles.background}>
             <ScrollView
               horizontal={true}
@@ -335,16 +379,19 @@ class ListContent extends Component {
             <View>
               <Slider
                 onSlidingStart={() => this.setState({isSliding: true})}
-                onSlidingComplete={(pageNumber) => this.onPageChange(pageNumber)}
+                onSlidingComplete={(pageNumber) =>
+                  this.onPageChange(pageNumber)
+                }
                 style={styles.sliderView}
                 minimumTrackTintColor="#ffffff"
                 maximumTrackTintColor="#444444"
-                maximumValue={this.state.words ? this.state.words.length - 1 : 0}
+                maximumValue={
+                  this.state.words ? this.state.words.length - 1 : 0
+                }
                 minimumValue={0}
                 value={this.state.currentPage}
                 disableInitialCallback={true}
-                step={1}
-              >
+                step={1}>
                 <Text style={styles.pageText}>
                   {this.state.currentPage + 1}/
                   {this.state.words ? this.state.words.length : 0}
@@ -358,10 +405,7 @@ class ListContent extends Component {
                     <TouchableOpacity
                       onPress={() => this.playback()}
                       style={styles.playStopOpacity}>
-                      <Icon
-                        name="play-circle"
-                        style={styles.playStopButton}
-                      />
+                      <Icon name="play-circle" style={styles.playStopButton} />
                     </TouchableOpacity>
                   );
                 } else {
@@ -381,45 +425,38 @@ class ListContent extends Component {
                 <TouchableOpacity
                   onPress={() => this.shuffle()}
                   style={styles.shuffleOpacity}>
-                  <Icon
-                    name="shuffle"
-                    style={styles.shuffleButton}
-                  />
+                  <Icon name="shuffle" style={styles.shuffleButton} />
                 </TouchableOpacity>
               </View>
             </View>
             <View style={styles.bottomArea}>
-              <TouchableOpacity
-                onPress={() => this.openAddContent()}>
-                <FoundationIcon
-                  name="plus"
-                  style={styles.plusButton}
-                />
+              <TouchableOpacity onPress={() => this.openAddContent()}>
+                <FoundationIcon name="plus" style={styles.plusButton} />
               </TouchableOpacity>
             </View>
             <Modal
-            style={styles.modalView}
-            visible={this.state.editModalIsVisible}
-            animationType={'slide' || 'fade'}>
-            <View
-            // style={{
-            // flex: 1,
-            // justifyContent: 'center',
-            // alignItems: 'center',
-            // backgroundColor: '#E5ECEE'
-            // }}
-            >
-              <AddContent style={styles.addContentView} />
-              <Text>This is a Modal.</Text>
-              <TouchableOpacity
-                // style={styles.closeButton}
-                onPress={() => {
-                  this.setState({editModalIsVisible: false});
-                }}>
-                <Text>Close</Text>
-              </TouchableOpacity>
-            </View>
-          </Modal>
+              style={styles.modalView}
+              visible={this.state.editModalIsVisible}
+              animationType={'slide' || 'fade'}>
+              <View
+              // style={{
+              // flex: 1,
+              // justifyContent: 'center',
+              // alignItems: 'center',
+              // backgroundColor: '#E5ECEE'
+              // }}
+              >
+                <AddContent style={styles.addContentView} />
+                <Text>This is a Modal.</Text>
+                <TouchableOpacity
+                  // style={styles.closeButton}
+                  onPress={() => {
+                    this.setState({editModalIsVisible: false});
+                  }}>
+                  <Text>Close</Text>
+                </TouchableOpacity>
+              </View>
+            </Modal>
           </View>
         </ImageBackground>
       </View>
@@ -527,10 +564,11 @@ const styles = StyleSheet.create({
     marginLeft: 30,
   },
   message: {
-    textAlign: 'right',
+    textAlign: 'center',
     width: '100%',
     paddingLeft: 10,
     fontSize: 18,
+    color: '#ffffff',
   },
   soundOpacity: {
     position: 'absolute',
@@ -566,10 +604,6 @@ const styles = StyleSheet.create({
     fontSize: 50,
     color: '#ffffff',
   },
-  playStopOpacity: {
-  },
-  shuffleOpacity: {
-  },
   sliderView: {
     // width: '100%',
     marginHorizontal: width * 0.1,
@@ -579,8 +613,6 @@ const styles = StyleSheet.create({
     textAlign: 'right',
     marginTop: 20,
     color: '#ffffff',
-  },
-  closeButton: {
   },
   modalView: {
     flex: 1,
@@ -601,8 +633,8 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
+    resizeMode: 'cover',
+    justifyContent: 'center',
     width: width,
     height: height,
   },
@@ -617,7 +649,11 @@ const styles = StyleSheet.create({
   },
   plusButton: {
     fontSize: 60,
-    color: "#ffffff",
+    color: '#ffffff',
+  },
+  messageTextView: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

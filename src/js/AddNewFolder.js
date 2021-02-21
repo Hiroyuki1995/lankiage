@@ -10,7 +10,7 @@ import {v4 as uuidv4} from 'uuid';
 class AddNewFolder extends Component {
   constructor(props) {
     super(props);
-    this.state= {
+    this.state = {
       id: this.props.folder ? this.props.folder.id : '',
       folderName: this.props.folder ? this.props.folder.name : '',
       frontLang: this.props.folder ? this.props.folder.defaultFrontLang : '',
@@ -22,13 +22,10 @@ class AddNewFolder extends Component {
     this.deleteFolder = this.deleteFolder.bind(this);
   }
 
-
   componentDidMount() {
     console.log('componentDidMount');
-    console.log(Realm.defaultPath);
     const realm = this.props.state;
   }
-
 
   onChange(v, label) {
     this.setState({[label]: v});
@@ -68,7 +65,8 @@ class AddNewFolder extends Component {
             onChangeText={(_v) => {
               this.onChange(_v, 'folderName');
             }}
-            value={folderName}/>
+            value={folderName}
+          />
         </View>
         <View style={styles.OneLanguageArea}>
           <View style={styles.labelView}>
@@ -97,15 +95,30 @@ class AddNewFolder extends Component {
           </View>
         </View>
         <View style={styles.OneLanguageArea}>
+          {(() => {
+            if (this.props.isEditing) {
+              return (
+                <Button
+                  block
+                  danger
+                  style={styles.dissmissButton}
+                  onPress={() => {
+                    this.deleteFolder();
+                  }}>
+                  <Text style={styles.buttonText}>Delete</Text>
+                </Button>
+              );
+            }
+          })()}
           <Button
             block
             primary
             style={styles.dissmissButton}
             onPress={() => {
               this.editFolder();
-          }}>
+            }}>
             <Text style={styles.buttonText}>
-              {(()=> {
+              {(() => {
                 return this.props.isEditing ? 'Update' : 'Create';
               })()}
             </Text>
@@ -115,27 +128,10 @@ class AddNewFolder extends Component {
             light
             style={styles.dissmissButton}
             onPress={() => {
-            Navigation.dismissOverlay(this.props.componentId);
-            }}
-          >
+              Navigation.dismissOverlay(this.props.componentId);
+            }}>
             <Text style={styles.buttonText}>Cancel</Text>
           </Button>
-          {(()=> {
-            if (this.props.isEditing)  {
-              return (
-                <Button
-                  block
-                  light
-                  style={styles.dissmissButton}
-                  onPress={() => {
-                    this.deleteFolder();
-                  }}
-                >
-                  <Text style={styles.buttonText}>Delete</Text>
-                </Button>
-              )
-            }
-          })()}
         </View>
       </View>
     );
@@ -145,7 +141,7 @@ class AddNewFolder extends Component {
 const styles = StyleSheet.create({
   dissmissButton: {
     flex: 1,
-    marginHorizontal: 30,
+    marginHorizontal: 10,
     // width: 50,
     // height: 50,
   },
@@ -172,7 +168,7 @@ const styles = StyleSheet.create({
   labelView: {
     alignItems: 'flex-start',
     flex: 1,
-    width : width * 0.2,
+    width: width * 0.2,
     justifyContent: 'center',
   },
   languageSelect: {
@@ -194,7 +190,7 @@ const styles = StyleSheet.create({
   },
   inputView: {
     width: width * 0.4,
-  }
+  },
 });
 
 export default AddNewFolder;

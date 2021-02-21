@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  ImageBackground,
-  StyleSheet,
-  View,
-  Dimensions,
-} from 'react-native';
+import {ImageBackground, StyleSheet, View, Dimensions} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import HomeContent from './src/js/HomeContent';
 import ListContent from './src/js/ListContent';
@@ -16,12 +11,9 @@ const {width, height} = Dimensions.get('window');
 const HomeScreen = (props) => {
   return (
     <View style={styles.root}>
-      <ImageBackground
-      style={styles.backgroundImage}
-      source={backGroundImage}
-      >
+      <ImageBackground style={styles.backgroundImage} source={backGroundImage}>
         <View style={styles.background}>
-          <HomeContent {...props}/>
+          <HomeContent {...props} />
         </View>
       </ImageBackground>
     </View>
@@ -31,19 +23,16 @@ const HomeScreen = (props) => {
 const AddNewFolderOverlay = (props) => {
   return (
     <View style={styles.overlay}>
-      <AddNewFolder {...props}/>
+      <AddNewFolder {...props} />
     </View>
-  )
-}
+  );
+};
 
 const ListScreen = (props) => {
   return (
     <View style={styles.root}>
-      <ImageBackground
-      style={styles.backgroundImage}
-      source={backGroundImage}
-      >
-        <ListContent {...props}/>
+      <ImageBackground style={styles.backgroundImage} source={backGroundImage}>
+        <ListContent {...props} />
       </ImageBackground>
     </View>
   );
@@ -52,11 +41,8 @@ const ListScreen = (props) => {
 const AddScreen = (props) => {
   return (
     <View style={styles.root}>
-      <ImageBackground
-      style={styles.backgroundImage}
-      source={backGroundImage}
-      >
-        <AddContent {...props}/>
+      <ImageBackground style={styles.backgroundImage} source={backGroundImage}>
+        <AddContent {...props} />
       </ImageBackground>
     </View>
   );
@@ -78,15 +64,15 @@ Navigation.events().registerAppLaunchedListener(async () => {
               options: {
                 topBar: {
                   title: {
-                    text: 'Home'
-                  }
-                }
-              }
-            }
-          }
-        ]
-      }
-    }
+                    text: 'Home',
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+    },
   });
 });
 
@@ -99,8 +85,8 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    resizeMode: "cover",
-    justifyContent: "center",
+    resizeMode: 'cover',
+    justifyContent: 'center',
     width: width,
     height: height,
   },
@@ -113,22 +99,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#00000050',
-  }
+  },
 });
 
 Navigation.setDefaultOptions({
   statusBar: {
-    backgroundColor: '#000000'
+    backgroundColor: '#000000',
   },
   topBar: {
     title: {
-      color: 'white'
+      color: 'white',
     },
     backButton: {
-      color: 'white'
+      color: 'white',
     },
     background: {
-      color: '#111111'
-    }
+      color: '#111111',
+    },
   },
 });

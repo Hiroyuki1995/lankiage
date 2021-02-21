@@ -9,6 +9,9 @@ import {
   InputAccessoryView,
   Button as NativeButton,
 } from 'react-native';
+import {Navigation} from 'react-native-navigation';
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import IonIcon from 'react-native-vector-icons/Ionicons';
 import {Button} from 'native-base';
 import {Text} from 'react-native-elements';
 import LanguageSelect from './LanguageSelect';
@@ -19,15 +22,12 @@ import {v4 as uuidv4} from 'uuid';
 const Realm = require('realm');
 import {WordSchema} from './Schema.js';
 import EditOneCard from './EditOneCard';
-const defalutFrontLang = 'zh-cn';
-const defalutBackLang = 'ja';
+import {ScrollView} from 'react-native';
 const wordSchema = {
   frontWord: '',
   backWord: '',
   isRegisterd: false,
 };
-var rightArrowButton = require('../png/right_arrow.png');
-var leftArrowButton = require('../png/left_arrow.png');
 var nextButton = require('../png/next.png');
 var backButton = require('../png/back.png');
 const inputAccessoryViewID = 'uniqueID';
@@ -38,8 +38,8 @@ class AddContent extends Component {
     this.state = {
       words: [],
       loading: false,
-      frontLang: defalutFrontLang,
-      backLang: defalutBackLang,
+      frontLang: this.props.folder.defaultFrontLang,
+      backLang: this.props.folder.defaultBackLang,
       numberOfWords: 5,
       message: '',
       // realm: null,
@@ -183,25 +183,33 @@ class AddContent extends Component {
     const {words, frontLang, backLang} = this.state;
     const updatedWords = [];
     let numberOfRegisterd = 0;
+    console.log(`${this.props.folder.id}`);
+    // try {
+    this.props.registerWords(this.state, this.props.folder.id);
+    // } catch (error) {
+    //   console.log(error);
+    //   return;
+    // }
     for (const word of words) {
       if (word.frontWord && frontLang && word.backWord && backLang) {
         // this.setState({loading: true});
-        Realm.open({
-          schema: [WordSchema],
-          deleteRealmIfMigrationNeeded: true,
-        }).then((realm) => {
-          realm.write(() => {
-            realm.create('Word', {
-              id: uuidv4(),
-              frontWord: word.frontWord,
-              frontLang: frontLang,
-              backWord: word.backWord,
-              backLang: backLang,
-              createdAt: new Date(),
-            });
-          });
-          // this.setState({realm});
-        });
+        // Realm.open({
+        //   schema: [WordSchema],
+        //   deleteRealmIfMigrationNeeded: true,
+        //   schemaVersion: 2,
+        // }).then((realm) => {
+        //   realm.write(() => {
+        //     realm.create('Word', {
+        //       id: uuidv4(),
+        //       frontWord: word.frontWord,
+        //       frontLang: frontLang,
+        //       backWord: word.backWord,
+        //       backLang: backLang,
+        //       createdAt: new Date(),
+        //     });
+        //   });
+        //   // this.setState({realm});
+        // });
         updatedWords.push({
           ...word,
           isRegisterd: true,
@@ -220,6 +228,23 @@ class AddContent extends Component {
       }
       return {words: updatedWords, message: message};
     });
+    // Navigation.push(this.props.componentId, {
+    //   component: {
+    //     name: 'Add',
+    //     passProps: {
+    //       realm: this.state.realm,
+    //       folder: this.props.folder,
+    //       registerWords: this.props.registerWords,
+    //     },
+    //     options: {
+    //       topBar: {
+    //         title: {
+    //           text: 'Edit ' + this.props.folder.name,
+    //         },
+    //       },
+    //     },
+    //   },
+    // });
   }
 
   resetWords() {
@@ -233,17 +258,17 @@ class AddContent extends Component {
   }
 
   componentWillUnmount() {
-    // Close the realm if there is one open.
-    // const {realm} = this.state;
-    // if (realm !== null && !realm.isClosed) {
-    //   realm.close();
-    // }
+    console.log('componentWillUnmount in AddContent');
+  }
+
+  componentDidDisappear() {
+    console.log('componentDidDisappear in AddContent');
   }
 
   render() {
     const {words, numberOfWords, message, frontLang, backLang} = this.state;
     return (
-      <View className="input-area" style={styles.inputArea}>
+      <ScrollView style={styles.inputArea}>
         {(() => {
           if (message) {
             return (
@@ -264,16 +289,22 @@ class AddContent extends Component {
           </View>
           <View style={styles.buttonArea}>
             <TouchableOpacity onPress={() => this.translate(true)}>
-              <Image
+              <IonIcon name="arrow-redo" style={styles.translationButton} />
+              {/* <Image
                 source={rightArrowButton}
                 style={styles.translationButton}
-              />
+              /> */}
             </TouchableOpacity>
+            <Icon name="google-translate" style={styles.translateIcon} />
             <TouchableOpacity onPress={() => this.translate(false)}>
-              <Image
-                source={leftArrowButton}
-                style={styles.translationButton}
+              <IonIcon
+                name="arrow-redo"
+                style={[styles.translationButton, styles.reverseButton]}
               />
+              {/* <Image
+                source={rightArrowButton}
+                style={styles.translationButton}
+              /> */}
             </TouchableOpacity>
           </View>
           <View style={styles.oneLanguageSelectArea}>
@@ -347,6 +378,7 @@ class AddContent extends Component {
             <View style={styles.submitButtonView}>
               <Button
                 block
+                primary
                 variant="contained"
                 style={[styles.button, styles.submitButton]}
                 onPress={this.registerWords}>
@@ -356,6 +388,7 @@ class AddContent extends Component {
               </Button>
               <Button
                 block
+                light
                 variant="contained"
                 style={[styles.button, styles.resetButton]}
                 onPress={this.resetWords}>
@@ -366,7 +399,7 @@ class AddContent extends Component {
             </View>
           </View>
         </View>
-      </View>
+      </ScrollView>
     );
   }
 }
@@ -421,14 +454,14 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   submitButton: {
-    backgroundColor: '#2c8ef4',
-    color: 'white',
+    // backgroundColor: '#2c8ef4',
+    // color: 'white',
   },
   resetButton: {
-    borderColor: '#2c8ef4',
-    borderWidth: 1,
-    backgroundColor: 'white',
-    color: '#2c8ef4',
+    // borderColor: '#2c8ef4',
+    // borderWidth: 1,
+    // backgroundColor: 'white',
+    // color: '#2c8ef4',
   },
   submitButtonView: {
     alignItems: 'center',
@@ -441,10 +474,10 @@ const styles = StyleSheet.create({
     // height: height * 0.2,
   },
   submitButtonText: {
-    color: 'white',
+    color: '#ffffff',
   },
   resetButtonText: {
-    color: '#2c8ef4',
+    color: '#ffffff',
   },
   messageView: {
     alignItems: 'center',
@@ -454,13 +487,15 @@ const styles = StyleSheet.create({
     // margin: 10,
   },
   messageText: {
-    color: 'red',
+    color: '#ffffff',
     fontSize: 20,
     // padding: 10,
   },
   translationButton: {
-    width: 30,
-    height: 30,
+    // width: 30,
+    // height: 30,
+    fontSize: 40,
+    color: '#ffffff',
   },
   buttonArea: {
     flexDirection: 'column',
@@ -524,6 +559,13 @@ const styles = StyleSheet.create({
     width: 18,
     height: 18,
     marginHorizontal: 10,
+  },
+  translateIcon: {
+    fontSize: 25,
+    color: '#ffffff',
+  },
+  reverseButton: {
+    transform: [{rotate: '180deg'}],
   },
 });
 

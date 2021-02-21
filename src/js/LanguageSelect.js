@@ -66,6 +66,7 @@ const pickerSelectStyles = StyleSheet.create({
     padding: 5,
     paddingRight: 20,
     fontSize: 18,
+    backgroundColor: '#ffffff',
     // width: '100%',
     // paddingVertical: 12,
     // paddingHorizontal: 10,

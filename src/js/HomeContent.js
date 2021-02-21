@@ -1,5 +1,13 @@
 import React, {Component} from 'react';
-import {TouchableOpacity, ScrollView, Text, View, Button, StyleSheet, Dimensions} from 'react-native';
+import {
+  TouchableOpacity,
+  ScrollView,
+  Text,
+  View,
+  Button,
+  StyleSheet,
+  Dimensions,
+} from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
@@ -19,6 +27,7 @@ class HomeContent extends Component {
     this.openFolder = this.openFolder.bind(this);
     this.editFolder = this.editFolder.bind(this);
     this.deleteFolder = this.deleteFolder.bind(this);
+    this.registerWords = this.registerWords.bind(this);
   }
 
   componentDidMount() {
@@ -35,14 +44,15 @@ class HomeContent extends Component {
         deleteRealmIfMigrationNeeded: true,
       }).then((realm) => {
         this.setState({realm});
-      })
+      });
     } catch (error) {
       console.log(error);
     }
   }
 
   componentDidUpdate() {
-    console.log('componentDidMount at componentDidUpdate');
+    console.log('componentDidUpdate at HomeContent');
+    console.log(JSON.stringify(this.state.realm.objects('Word')));
   }
 
   componentWillUnmount() {
@@ -54,19 +64,50 @@ class HomeContent extends Component {
     }
   }
 
+  registerWords(info, folderId) {
+    console.log('HomeContent' + JSON.stringify(info));
+    if (!this.realm) {
+      this.realm = new Realm({schema: [FolderSchema, WordSchema]});
+    }
+    for (let word of info.words) {
+      if (word.frontWord && info.frontLang && word.backWord && info.backLang) {
+        this.realm.write(() => {
+          this.realm.create('Word', {
+            id: uuidv4(),
+            frontWord: word.frontWord,
+            frontLang: info.frontLang,
+            backWord: word.backWord,
+            backLang: info.backLang,
+            createdAt: new Date(),
+            folderId: folderId,
+          });
+        });
+      }
+    }
+    const realm = this.realm;
+    this.setState({realm});
+    Navigation.updateProps(this.props.componentId, {
+      realm: realm,
+    });
+  }
+
   editFolder(object, isEditing) {
     if (!this.realm) {
       this.realm = new Realm({schema: [FolderSchema, WordSchema]});
     }
     this.realm.write(() => {
       if (isEditing) {
-        this.realm.create('Folder', {
-          id: object.id,
-          name: object.folderName,
-          defaultFrontLang: object.frontLang,
-          defaultBackLang: object.backLang,
-          createdAt: new Date(),
-        }, 'modified');
+        this.realm.create(
+          'Folder',
+          {
+            id: object.id,
+            name: object.folderName,
+            defaultFrontLang: object.frontLang,
+            defaultBackLang: object.backLang,
+            createdAt: new Date(),
+          },
+          'modified',
+        );
       } else {
         this.realm.create('Folder', {
           id: uuidv4(),
@@ -106,13 +147,13 @@ class HomeContent extends Component {
         },
         options: {
           layout: {
-                componentBackgroundColor: 'transparent',
-              },
+            componentBackgroundColor: 'transparent',
+          },
           overlay: {
-            interceptTouchOutside: true
-          }
-        }
-      }
+            interceptTouchOutside: true,
+          },
+        },
+      },
     });
   }
 
@@ -120,18 +161,21 @@ class HomeContent extends Component {
     console.log(folder);
     Navigation.push(this.props.componentId, {
       component: {
+        id: 'List',
         name: 'List',
         passProps: {
           realm: this.state.realm,
+          folder: folder,
+          registerWords: this.registerWords,
         },
         options: {
           topBar: {
             title: {
               text: folder.name,
-            }
-          }
-        }
-      }
+            },
+          },
+        },
+      },
     });
   }
 
@@ -139,55 +183,41 @@ class HomeContent extends Component {
     let foldersObj;
     if (this.state.realm) {
       if (this.state.realm.objects('Folder')) {
-        foldersObj = this.state.realm.objects('Folder').sorted('createdAt', false).map((folder, key) => {
-          return (
-            <View key={key} style={{flexDirection: "row"}}>
-              <TouchableOpacity>
-                <TouchableOpacity
-                  style={styles.editIconOpacity}
-                  onPress={() => this.openFolderEdit(folder)}
-                >
-                  <Icon name="pencil-sharp" style={styles.penIcon} />
+        foldersObj = this.state.realm
+          .objects('Folder')
+          .sorted('createdAt', false)
+          .map((folder, key) => {
+            return (
+              <View key={key} style={{flexDirection: "row"}}>
+                <TouchableOpacity>
+                  <TouchableOpacity
+                    style={styles.editIconOpacity}
+                    onPress={() => this.openFolderEdit(folder)}>
+                    <Icon name="pencil-sharp" style={styles.penIcon} />
+                  </TouchableOpacity>
                 </TouchableOpacity>
-              </TouchableOpacity>
-              <TouchableOpacity
-                key={key}
-                style={styles.folderCard}
-                onPress={() => this.openFolder(folder)}
-              >
-                <FontIcon name="folder" style={styles.folderIcon} />
-                <Text style={styles.folderText}>{folder.name}</Text>
-                <Icon name="arrow-forward" style={styles.folderArrowicon} />
-              </TouchableOpacity>
-            </View>
-            
-          );
-        });
+                <TouchableOpacity
+                  key={key}
+                  style={styles.folderCard}
+                  onPress={() => this.openFolder(folder)}>
+                  <FontIcon name="folder" style={styles.folderIcon} />
+                  <Text style={styles.folderText}>{folder.name}</Text>
+                  <Icon name="arrow-forward" style={styles.folderArrowicon} />
+                </TouchableOpacity>
+              </View>
+            );
+          });
       }
     }
     return (
       <ScrollView style={styles.container}>
         <View style={styles.addIconView}>
-          <FoundationIcon style={styles.folderAddIcon} onPress={() => this.openFolderEdit()} name="folder-add" />
+          <FoundationIcon
+            style={styles.folderAddIcon}
+            onPress={() => this.openFolderEdit()}
+            name="folder-add"
+          />
         </View>
-        {/* <Button
-        title='Push List Screen'
-        color='#710ce3'
-        onPress={() => {
-          console.log(this.props);
-          Navigation.push(this.props.componentId, {
-            component: {
-              name: 'List',
-              options: {
-                topBar: {
-                  title: {
-                    text: 'List'
-                  }
-                }
-              }
-            }
-          });
-        }} /> */}
         <View style={styles.foldersArea}>{foldersObj}</View>
       </ScrollView>
     );
@@ -208,7 +238,7 @@ const styles = StyleSheet.create({
   folderCard: {
     marginVertical: 10,
     width: width * 0.8,
-    height : height * 0.1,
+    height: height * 0.1,
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
@@ -255,7 +285,7 @@ const styles = StyleSheet.create({
   folderArrowicon: {
     fontSize: 30,
     flex: 1,
-  }
+  },
 });
 
 export default HomeContent;
