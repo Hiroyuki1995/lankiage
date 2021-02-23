@@ -13,18 +13,19 @@ class AddNewFolder extends Component {
     this.state = {
       id: this.props.folder ? this.props.folder.id : '',
       folderName: this.props.folder ? this.props.folder.name : '',
-      frontLang: this.props.folder ? this.props.folder.defaultFrontLang : '',
-      backLang: this.props.folder ? this.props.folder.defaultBackLang : '',
+      frontLangCode: this.props.folder.frontLangCode,
+      backLangCode: this.props.folder.backLangCode,
       realm: null,
     };
     this.onChange = this.onChange.bind(this);
     this.editFolder = this.editFolder.bind(this);
     this.deleteFolder = this.deleteFolder.bind(this);
+    this.getLangName = this.getLangName.bins(this);
   }
 
   componentDidMount() {
     console.log('componentDidMount');
-    const realm = this.props.state;
+    const realm = this.props.realm;
   }
 
   onChange(v, label) {
@@ -32,11 +33,12 @@ class AddNewFolder extends Component {
   }
 
   editFolder() {
-    const {folderName, frontLang, backLang} = this.state;
+    const {folderName, frontLangCode, backLangCode} = this.state;
     // console.log(this.props.realm.isClosed);
-    if (folderName && frontLang && backLang) {
+    if (folderName && frontLangCode && backLangCode) {
       this.props.editFolder(this.state, this.props.isEditing);
-      Navigation.dismissOverlay(this.props.componentId);
+      // Navigation.dismissOverlay(this.props.componentId);
+      this.props.goBack();
     } else {
       console.log('入力してください');
     }
@@ -47,12 +49,12 @@ class AddNewFolder extends Component {
     const {id} = this.state;
     if (id) {
       this.props.deleteFolder(id);
-      Navigation.dismissOverlay(this.props.componentId);
+      this.props.goBack();
     }
   }
 
   render() {
-    const {folderName, frontLang, backLang} = this.state;
+    const {folderName, frontLangCode, backLangCode} = this.state;
     console.log(`isEditing ${this.props.isEditing}`);
     return (
       <View style={styles.view}>
@@ -74,10 +76,10 @@ class AddNewFolder extends Component {
           </View>
           <View style={styles.inputView}>
             <LanguageSelect
-              label="frontLang"
+              label="frontLangCode"
               style={styles.languageSelect}
-              value={frontLang}
-              onValueChange={(v) => this.onChange(v, 'frontLang')}
+              value={frontLangCode}
+              onValueChange={(v) => this.onChange(v, 'frontLangCode')}
             />
           </View>
         </View>
@@ -87,10 +89,10 @@ class AddNewFolder extends Component {
           </View>
           <View style={styles.inputView}>
             <LanguageSelect
-              label="backLang"
+              label="backLangCode"
               style={styles.languageSelect}
-              value={backLang}
-              onValueChange={(v) => this.onChange(v, 'backLang')}
+              value={backLangCode}
+              onValueChange={(v) => this.onChange(v, 'backLangCode')}
             />
           </View>
         </View>
@@ -128,7 +130,7 @@ class AddNewFolder extends Component {
             light
             style={styles.dissmissButton}
             onPress={() => {
-              Navigation.dismissOverlay(this.props.componentId);
+              this.props.goBack();
             }}>
             <Text style={styles.buttonText}>Cancel</Text>
           </Button>
@@ -150,12 +152,18 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   view: {
+    flex: 1,
+    justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'whitesmoke',
+    backgroundColor: '#ffffff',
     width: width * 0.8,
-    elevation: 4,
+    // height: height * 0.6,
+    // opacity: 0.98,
+    // height: '50%',
+    // elevation: 4,
     padding: 16,
     borderRadius: 10,
+    marginVertical: '77%',
   },
   text: {
     fontSize: 20,
@@ -185,6 +193,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     borderRadius: 4,
     padding: 5,
+    backgroundColor: '#ffffff',
     // fontSize: 40,
     // width: width * 0.8,
   },

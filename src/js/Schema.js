@@ -4,8 +4,8 @@ export const FolderSchema = {
   properties: {
     id: 'string',
     name: 'string',
-    defaultFrontLang: 'string',
-    defaultBackLang: 'string',
+    frontLangCode: 'string',
+    backLangCode: 'string',
     createdAt: 'date',
   },
 };
@@ -16,9 +16,7 @@ export const WordSchema = {
   properties: {
     id: 'string',
     frontWord: 'string',
-    frontLang: 'string',
     backWord: 'string',
-    backLang: 'string',
     createdAt: 'date',
     folderId: 'string',
   },

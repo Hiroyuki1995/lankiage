@@ -11,7 +11,6 @@ import {
   ImageBackground,
 } from 'react-native';
 import {Text} from 'native-base';
-import {Navigation} from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
 // import AntIcon from 'react-native-vector-icons/AntDesign';
@@ -22,10 +21,7 @@ import Slider from '@react-native-community/slider';
 import 'react-native-get-random-values';
 const {width, height} = Dimensions.get('window');
 const Realm = require('realm');
-import {WordSchema} from './Schema.js';
-import {FolderSchema} from './Schema.js';
 import AddContent from './AddContent.js';
-import {defaultPath} from 'realm';
 
 class ListContent extends Component {
   constructor(props) {
@@ -34,12 +30,6 @@ class ListContent extends Component {
     this.isFront = true;
     this.state = {
       words: [],
-      message: {
-        frontWord: '',
-        backWord: '',
-        frontLang: '',
-        backLang: '',
-      },
       loading: false,
       realm: null,
       currentCardId: '',
@@ -65,13 +55,19 @@ class ListContent extends Component {
   componentDidMount() {
     console.log('componentDidMount in ListContent');
     console.log(Realm.defaultPath);
-    const realm = this.props.realm;
+    // const realm = this.props.realm;
+    const {realm} = this.props.route.params;
+    console.log(`realm: ${JSON.stringify(realm)}`);
+    this.props.navigation.addListener('focus', () => {
+      console.log('eventlistener comes out');
+      this.props.navigation.setParams({realm: this.props.route.params.realm});
+    });
     if (this.state.defalutSortPattern === '1') {
       this.setState(() => {
         const defalutWords = realm
           .objects('Word')
           .sorted('createdAt', true)
-          .filtered(`folderId = "${this.props.folder.id}"`);
+          .filtered(`folderId = "${this.props.route.params.folder.id}"`);
         return {
           realm,
           words: defalutWords,
@@ -118,22 +114,10 @@ class ListContent extends Component {
   // }
 
   openAddContent() {
-    Navigation.push(this.props.componentId, {
-      component: {
-        name: 'Add',
-        passProps: {
-          realm: this.state.realm,
-          folder: this.props.folder,
-          registerWords: this.props.registerWords,
-        },
-        options: {
-          topBar: {
-            title: {
-              text: 'Edit ' + this.props.folder.name,
-            },
-          },
-        },
-      },
+    this.props.navigation.navigate('Add', {
+      realm: this.state.realm,
+      folder: this.props.route.params.folder,
+      registerWords: this.props.route.params.registerWords,
     });
   }
 
@@ -158,20 +142,6 @@ class ListContent extends Component {
   }
 
   // componentDidUpdate() {
-  //   console.log('componentDidUpdate will start');
-  //   const realm = this.props.realm;
-  //   if (this.state.defalutSortPattern === '1') {
-  //     this.setState(() => {
-  //       const defalutWords = realm
-  //         .objects('Word')
-  //         .sorted('createdAt', true)
-  //         .filtered(`folderId = "${this.props.folder.id}"`);
-  //       return {
-  //         realm,
-  //         words: defalutWords,
-  //       };
-  //     });
-  //   }
   // }
 
   sortWords(data) {
@@ -186,27 +156,22 @@ class ListContent extends Component {
     this.autoScroll(pageNumber);
   }
 
-  componentWillUnmount() {
-    // Close the realm if there is one open.
-    // console.log('componentWillUnmount at ListContent');
-    // const {realm} = this.state;
-    // if (realm !== null && !realm.isClosed) {
-    //   realm.close();
-    // }
-  }
+  // componentWillUnmount() {
+  // }
 
   speakWord(
     pageNumber = this.state.currentPage,
     speakFrontWord = this.isFront,
   ) {
     const word = this.state.words[pageNumber];
+    const {frontLangCode, backLangCode} = this.props.route.params;
     let uttr = {};
     if (speakFrontWord) {
       uttr.text = word.frontWord;
-      uttr.voice = word.frontLang;
+      uttr.voice = frontLangCode;
     } else {
       uttr.text = word.backWord;
-      uttr.voice = word.backLang;
+      uttr.voice = backLangCode;
     }
     Tts.setDefaultLanguage(uttr.voice);
     Tts.speak(uttr.text);
@@ -220,7 +185,22 @@ class ListContent extends Component {
 
   editWord(word) {
     console.log('単語を編集します');
-    this.setState({editModalIsVisible: true});
+    const wordsObj = [
+      {
+        id: word.id,
+        frontWord: word.frontWord,
+        backWord: word.backWord,
+        isRegisterd: false,
+      },
+    ];
+    this.props.navigation.navigate('Add', {
+      realm: this.state.realm,
+      folder: this.props.route.params.folder,
+      registerWords: this.props.route.params.registerWords,
+      words: wordsObj,
+      numberOfWords: 1,
+      isEditing: true,
+    });
   }
 
   // setIntervalを使う方法
@@ -376,6 +356,7 @@ class ListContent extends Component {
               onScroll={(event) => this.scrollCardView(event)}>
               {wordCards}
             </ScrollView>
+            <Icon name="list" style={{fontSize: 30}} />
             <View>
               <Slider
                 onSlidingStart={() => this.setState({isSliding: true})}

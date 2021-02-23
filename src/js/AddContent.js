@@ -8,19 +8,20 @@ import {
   Image,
   InputAccessoryView,
   Button as NativeButton,
+  ImageBackground,
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import {Button} from 'native-base';
 import {Text} from 'react-native-elements';
-import LanguageSelect from './LanguageSelect';
 const {width, height} = Dimensions.get('window');
 import 'react-native-get-random-values';
 import translate from 'translate-google-api';
 import {v4 as uuidv4} from 'uuid';
 const Realm = require('realm');
 import {WordSchema} from './Schema.js';
+import {Languages} from './Languages.js';
 import EditOneCard from './EditOneCard';
 import {ScrollView} from 'react-native';
 const wordSchema = {
@@ -36,11 +37,13 @@ class AddContent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      words: [],
+      words: this.props.route.params.words ? this.props.route.params.words : [],
       loading: false,
-      frontLang: this.props.folder.defaultFrontLang,
-      backLang: this.props.folder.defaultBackLang,
-      numberOfWords: 5,
+      frontLangCode: this.props.route.params.folder.frontLangCode,
+      backLangCode: this.props.route.params.folder.backLangCode,
+      numberOfWords: this.props.route.params.numberOfWords
+        ? this.props.route.params.numberOfWords
+        : 5,
       message: '',
       // realm: null,
       currentFocus: {
@@ -59,13 +62,46 @@ class AddContent extends Component {
     this.focusNextWord = this.focusNextWord.bind(this);
     this.focusBackWord = this.focusBackWord.bind(this);
     this.formFocus = this.formFocus.bind(this);
+    this.backToList = this.backToList.bind(this);
+    this.langLangName = this.getLangName.bind(this);
+  }
+
+  backToList() {
+    console.log('aaa');
+    this.props.navigation.goBack();
+  }
+
+  getLangName(langCode) {
+    console.log(`langCode ${langCode}`);
+    if (langCode) {
+      for (let language of Languages) {
+        if (language.code === langCode) {
+          return language.name;
+        }
+      }
+    }
+    return null;
+  }
+
+  getLangTranslateCode(langCode) {
+    console.log(`langCode ${langCode}`);
+    if (langCode) {
+      for (let language of Languages) {
+        if (language.code === langCode) {
+          return language.translateCode;
+        }
+      }
+    }
+    return null;
   }
 
   translate(isForword = true) {
     this.setState({message: ''});
-    const {words, frontLang, backLang} = this.state;
-    const fromLang = isForword ? frontLang : backLang;
-    const toLang = !isForword ? frontLang : backLang;
+    const {words, frontLangCode, backLangCode} = this.state;
+    const frontLangTranslateCode = this.getLangTranslateCode(frontLangCode);
+    const backLangTranslateCode = this.getLangTranslateCode(backLangCode);
+    const fromLang = isForword ? frontLangTranslateCode : backLangTranslateCode;
+    const toLang = !isForword ? frontLangTranslateCode : backLangTranslateCode;
     if (!fromLang || !toLang) {
       this.setState({message: 'Please set the languages'});
     } else {
@@ -178,38 +214,20 @@ class AddContent extends Component {
     });
   }
 
-  registerWords() {
+  registerWords(isEditing = false) {
     this.setState({message: ''});
-    const {words, frontLang, backLang} = this.state;
+    const {words, frontLangCode, backLangCode} = this.state;
     const updatedWords = [];
     let numberOfRegisterd = 0;
-    console.log(`${this.props.folder.id}`);
+    console.log(`${this.props.route.params.folder.id}`);
     // try {
-    this.props.registerWords(this.state, this.props.folder.id);
-    // } catch (error) {
-    //   console.log(error);
-    //   return;
-    // }
+    this.props.route.params.registerWords(
+      this.state,
+      this.props.route.params.folder.id,
+      isEditing,
+    );
     for (const word of words) {
-      if (word.frontWord && frontLang && word.backWord && backLang) {
-        // this.setState({loading: true});
-        // Realm.open({
-        //   schema: [WordSchema],
-        //   deleteRealmIfMigrationNeeded: true,
-        //   schemaVersion: 2,
-        // }).then((realm) => {
-        //   realm.write(() => {
-        //     realm.create('Word', {
-        //       id: uuidv4(),
-        //       frontWord: word.frontWord,
-        //       frontLang: frontLang,
-        //       backWord: word.backWord,
-        //       backLang: backLang,
-        //       createdAt: new Date(),
-        //     });
-        //   });
-        //   // this.setState({realm});
-        // });
+      if (word.frontWord && frontLangCode && word.backWord && backLangCode) {
         updatedWords.push({
           ...word,
           isRegisterd: true,
@@ -224,27 +242,14 @@ class AddContent extends Component {
       if (numberOfRegisterd === 0) {
         message = 'There are no words that can be registed';
       } else {
-        message = `Registerd ${numberOfRegisterd} words`;
+        if (!isEditing) {
+          message = `Registerd ${numberOfRegisterd} words`;
+        } else {
+          message = `Edited ${numberOfRegisterd} words`;
+        }
       }
       return {words: updatedWords, message: message};
     });
-    // Navigation.push(this.props.componentId, {
-    //   component: {
-    //     name: 'Add',
-    //     passProps: {
-    //       realm: this.state.realm,
-    //       folder: this.props.folder,
-    //       registerWords: this.props.registerWords,
-    //     },
-    //     options: {
-    //       topBar: {
-    //         title: {
-    //           text: 'Edit ' + this.props.folder.name,
-    //         },
-    //       },
-    //     },
-    //   },
-    // });
   }
 
   resetWords() {
@@ -266,140 +271,170 @@ class AddContent extends Component {
   }
 
   render() {
-    const {words, numberOfWords, message, frontLang, backLang} = this.state;
+    const {
+      words,
+      numberOfWords,
+      message,
+      frontLangCode,
+      backLangCode,
+    } = this.state;
     return (
-      <ScrollView style={styles.inputArea}>
-        {(() => {
-          if (message) {
-            return (
-              <View style={styles.messageView}>
-                <Text style={styles.messageText}>{message}</Text>
+      <ImageBackground
+        style={styles.backgroundImage}
+        // resizeMode="contain"
+        source={require('../png/milky-way.jpg')}>
+        <View style={styles.container}>
+          <ScrollView style={styles.inputArea}>
+            {(() => {
+              if (message) {
+                return (
+                  <View style={styles.messageView}>
+                    <Text style={styles.messageText}>{message}</Text>
+                  </View>
+                );
+              }
+            })()}
+            <View style={styles.languageSelectArea}>
+              <View style={styles.oneLanguageSelectArea}>
+                <Text style={styles.languageText}>
+                  {this.getLangName(frontLangCode)}
+                </Text>
               </View>
-            );
-          }
-        })()}
-        <View style={styles.languageSelectArea}>
-          <View style={styles.oneLanguageSelectArea}>
-            <LanguageSelect
-              label="frontLang"
-              style={styles.languageSelect}
-              value={frontLang}
-              onValueChange={(v) => this.changeLanguage(v, 'frontLang')}
-            />
-          </View>
-          <View style={styles.buttonArea}>
-            <TouchableOpacity onPress={() => this.translate(true)}>
-              <IonIcon name="arrow-redo" style={styles.translationButton} />
-              {/* <Image
-                source={rightArrowButton}
-                style={styles.translationButton}
-              /> */}
-            </TouchableOpacity>
-            <Icon name="google-translate" style={styles.translateIcon} />
-            <TouchableOpacity onPress={() => this.translate(false)}>
-              <IonIcon
-                name="arrow-redo"
-                style={[styles.translationButton, styles.reverseButton]}
-              />
-              {/* <Image
-                source={rightArrowButton}
-                style={styles.translationButton}
-              /> */}
-            </TouchableOpacity>
-          </View>
-          <View style={styles.oneLanguageSelectArea}>
-            <LanguageSelect
-              label="backLang"
-              style={styles.languageSelect}
-              value={backLang}
-              onValueChange={(v) => this.changeLanguage(v, 'backLang')}
-            />
-          </View>
-        </View>
-        {(() => {
-          const items = [];
-          for (let i = 0; i < numberOfWords; i++) {
-            let formStyle = {};
-            if (words[i].isRegisterd) {
-              formStyle = [styles.inputForm, styles.inputRegisterdForm];
-            } else {
-              formStyle = styles.inputForm;
-            }
-            items.push(
-              // <View>
-              <EditOneCard
-                id={i}
-                key={i}
-                word={words[i]}
-                currentFocusKey={this.state.currentFocus.key}
-                currentFocusSide={this.state.currentFocus.isFront}
-                onChange={this.changeContent}
-                onFormFocus={this.formFocus}
-                inputAccessoryViewID={inputAccessoryViewID}
-              />,
-            );
-          }
-          return <View>{items}</View>;
-        })()}
-        <InputAccessoryView
-          nativeID={inputAccessoryViewID}
-          backgroundColor="#ffffff"
-          // style={styles.keyboradToolbar}
-        >
-          <View style={styles.keyboradToolbar}>
-            <View style={styles.directionButtons}>
-              <TouchableOpacity
-                style={false ? {display: 'none'} : {display: 'flex'}}
-                onPress={this.focusBackWord}>
-                <Image source={backButton} style={styles.directionButton} />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={false ? {display: 'none'} : {display: 'flex'}}
-                onPress={this.focusNextWord}>
-                <Image source={nextButton} style={styles.directionButton} />
-              </TouchableOpacity>
-            </View>
-            <View style={styles.actionButtons}>
-              <NativeButton
-                style={styles.keyboardButton}
-                onPress={this.registerWords}
-                title="Save"
-              />
-              <NativeButton
-                style={styles.keyboardButton}
-                onPress={this.resetWords}
-                title="Reset"
-              />
-            </View>
-          </View>
-        </InputAccessoryView>
-        <View>
-          <View style={{flex: 1}}>
-            <View style={styles.submitButtonView}>
-              <Button
-                block
-                primary
-                variant="contained"
-                style={[styles.button, styles.submitButton]}
-                onPress={this.registerWords}>
-                <Text h3 style={styles.submitButtonText}>
-                  Save
+              <View style={styles.buttonArea}>
+                <TouchableOpacity onPress={() => this.translate(true)}>
+                  <IonIcon name="arrow-redo" style={styles.translationButton} />
+                </TouchableOpacity>
+                <Icon name="google-translate" style={styles.translateIcon} />
+                <TouchableOpacity onPress={() => this.translate(false)}>
+                  <IonIcon
+                    name="arrow-redo"
+                    style={[styles.translationButton, styles.reverseButton]}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.oneLanguageSelectArea}>
+                <Text style={styles.languageText}>
+                  {this.getLangName(backLangCode)}
                 </Text>
-              </Button>
-              <Button
-                block
-                light
-                variant="contained"
-                style={[styles.button, styles.resetButton]}
-                onPress={this.resetWords}>
-                <Text h3 style={styles.resetButtonText}>
-                  Reset
-                </Text>
-              </Button>
+              </View>
             </View>
-          </View>
+            {(() => {
+              const items = [];
+              for (let i = 0; i < numberOfWords; i++) {
+                let formStyle = {};
+                if (words[i].isRegisterd) {
+                  formStyle = [styles.inputForm, styles.inputRegisterdForm];
+                } else {
+                  formStyle = styles.inputForm;
+                }
+                items.push(
+                  // <View>
+                  <EditOneCard
+                    id={i}
+                    key={i}
+                    word={words[i]}
+                    currentFocusKey={this.state.currentFocus.key}
+                    currentFocusSide={this.state.currentFocus.isFront}
+                    onChange={this.changeContent}
+                    onFormFocus={this.formFocus}
+                    inputAccessoryViewID={inputAccessoryViewID}
+                  />,
+                );
+              }
+              return <View>{items}</View>;
+            })()}
+            <InputAccessoryView
+              nativeID={inputAccessoryViewID}
+              backgroundColor="#ffffff"
+              // style={styles.keyboradToolbar}
+            >
+              <View style={styles.keyboradToolbar}>
+                <View style={styles.directionButtons}>
+                  <TouchableOpacity
+                    style={false ? {display: 'none'} : {display: 'flex'}}
+                    onPress={this.focusBackWord}>
+                    <Image source={backButton} style={styles.directionButton} />
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={false ? {display: 'none'} : {display: 'flex'}}
+                    onPress={this.focusNextWord}>
+                    <Image source={nextButton} style={styles.directionButton} />
+                  </TouchableOpacity>
+                </View>
+                <View style={styles.actionButtons}>
+                  <NativeButton
+                    style={styles.keyboardButton}
+                    onPress={this.registerWords}
+                    title="Save"
+                  />
+                  <NativeButton
+                    style={styles.keyboardButton}
+                    onPress={this.resetWords}
+                    title="Reset"
+                  />
+                </View>
+              </View>
+            </InputAccessoryView>
+            <View>
+              <View style={{flex: 1}}>
+                {(() => {
+                  if (!this.props.route.params.isEditing) {
+                    return (
+                      <View style={styles.submitButtonView}>
+                        <Button
+                          block
+                          primary
+                          variant="contained"
+                          style={[styles.button, styles.submitButton]}
+                          onPress={this.registerWords}>
+                          <Text h3 style={styles.submitButtonText}>
+                            Save
+                          </Text>
+                        </Button>
+                        <Button
+                          block
+                          light
+                          variant="contained"
+                          style={[styles.button, styles.resetButton]}
+                          onPress={this.resetWords}>
+                          <Text h3 style={styles.resetButtonText}>
+                            Reset
+                          </Text>
+                        </Button>
+                      </View>
+                    );
+                  } else {
+                    return (
+                      <View style={styles.submitButtonView}>
+                        <Button
+                          block
+                          primary
+                          variant="contained"
+                          style={[styles.button, styles.submitButton]}
+                          onPress={() => this.registerWords(true)}>
+                          <Text h3 style={styles.submitButtonText}>
+                            Save
+                          </Text>
+                        </Button>
+                        <Button
+                          block
+                          light
+                          variant="contained"
+                          style={[styles.button, styles.resetButton]}
+                          onPress={this.backToList}>
+                          <Text h3 style={styles.resetButtonText}>
+                            Cancel
+                          </Text>
+                        </Button>
+                      </View>
+                    );
+                  }
+                })()}
+              </View>
+            </View>
+          </ScrollView>
         </View>
-      </ScrollView>
+      </ImageBackground>
     );
   }
 }
@@ -411,6 +446,7 @@ const styles = StyleSheet.create({
     marginLeft: width * 0.02,
     marginRight: width * 0.02,
     flex: 1,
+    // backgroundColor: 'rgba(0,0,0, 0.5)',
     // alignItems: 'center',
     // justifyContent: 'center',
   },
@@ -566,6 +602,21 @@ const styles = StyleSheet.create({
   },
   reverseButton: {
     transform: [{rotate: '180deg'}],
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    justifyContent: 'center',
+    width: width,
+    height: height,
+  },
+  container: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0, 0.5)',
+  },
+  languageText: {
+    fontSize: 30,
+    color: '#ffffff',
   },
 });
 

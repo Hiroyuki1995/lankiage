@@ -241,6 +241,8 @@ PODS:
   - React-jsinspector (0.63.4)
   - react-native-get-random-values (1.5.1):
     - React-Core
+  - react-native-safe-area-context (3.1.9):
+    - React-Core
   - react-native-slider (2.0.9):
     - React
   - React-RCTActionSheet (0.63.4):
@@ -315,9 +317,13 @@ PODS:
   - RealmJS (10.2.0):
     - GCDWebServer
     - React
+  - RNCMaskedView (0.1.10):
+    - React
   - RNCPicker (1.8.1):
     - React-Core
   - RNGestureHandler (1.10.1):
+    - React-Core
+  - RNReanimated (1.13.2):
     - React-Core
   - RNSVG (12.1.0):
     - React
@@ -367,6 +373,7 @@ DEPENDENCIES:
   - React-jsiexecutor (from `../node_modules/react-native/ReactCommon/jsiexecutor`)
   - React-jsinspector (from `../node_modules/react-native/ReactCommon/jsinspector`)
   - react-native-get-random-values (from `../node_modules/react-native-get-random-values`)
+  - react-native-safe-area-context (from `../node_modules/react-native-safe-area-context`)
   - "react-native-slider (from `../node_modules/@react-native-community/slider`)"
   - React-RCTActionSheet (from `../node_modules/react-native/Libraries/ActionSheetIOS`)
   - React-RCTAnimation (from `../node_modules/react-native/Libraries/NativeAnimation`)
@@ -380,8 +387,10 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - ReactNativeNavigation (from `../node_modules/react-native-navigation`)
   - RealmJS (from `../node_modules/realm`)
+  - "RNCMaskedView (from `../node_modules/@react-native-community/masked-view`)"
   - "RNCPicker (from `../node_modules/@react-native-community/picker`)"
   - RNGestureHandler (from `../node_modules/react-native-gesture-handler`)
+  - RNReanimated (from `../node_modules/react-native-reanimated`)
   - RNSVG (from `../node_modules/react-native-svg`)
   - RNVectorIcons (from `../node_modules/react-native-vector-icons`)
   - TextToSpeech (from `../node_modules/react-native-tts`)
@@ -436,6 +445,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon/jsinspector"
   react-native-get-random-values:
     :path: "../node_modules/react-native-get-random-values"
+  react-native-safe-area-context:
+    :path: "../node_modules/react-native-safe-area-context"
   react-native-slider:
     :path: "../node_modules/@react-native-community/slider"
   React-RCTActionSheet:
@@ -462,10 +473,14 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native-navigation"
   RealmJS:
     :path: "../node_modules/realm"
+  RNCMaskedView:
+    :path: "../node_modules/@react-native-community/masked-view"
   RNCPicker:
     :path: "../node_modules/@react-native-community/picker"
   RNGestureHandler:
     :path: "../node_modules/react-native-gesture-handler"
+  RNReanimated:
+    :path: "../node_modules/react-native-reanimated"
   RNSVG:
     :path: "../node_modules/react-native-svg"
   RNVectorIcons:
@@ -504,6 +519,7 @@ SPEC CHECKSUMS:
   React-jsiexecutor: 93bd528844ad21dc07aab1c67cb10abae6df6949
   React-jsinspector: 58aef7155bc9a9683f5b60b35eccea8722a4f53a
   react-native-get-random-values: 41f0c91ac0da870e47b307e07752e9e54bc2dc7e
+  react-native-safe-area-context: b6e0e284002381d2ff29fa4fff42b4d8282e3c94
   react-native-slider: e51492f1264d882a8815b71c5870f8978e52887d
   React-RCTActionSheet: 89a0ca9f4a06c1f93c26067af074ccdce0f40336
   React-RCTAnimation: 1bde3ecc0c104c55df246eda516e0deb03c4e49b
@@ -517,8 +533,10 @@ SPEC CHECKSUMS:
   ReactCommon: 73d79c7039f473b76db6ff7c6b159c478acbbb3b
   ReactNativeNavigation: 127c9a6fc375a79fcad473cd8b793d7ce3f58534
   RealmJS: 5195064e9aeccf94ae3756bd9d0f2301b9074b07
+  RNCMaskedView: 5a8ec07677aa885546a0d98da336457e2bea557f
   RNCPicker: 914b557e20b3b8317b084aca9ff4b4edb95f61e4
   RNGestureHandler: 5e58135436aacc1c5d29b75547d3d2b9430d052c
+  RNReanimated: e03f7425cb7a38dcf1b644d680d1bfc91c3337ad
   RNSVG: ce9d996113475209013317e48b05c21ee988d42e
   RNVectorIcons: f67a1abce2ec73e62fe4606e8110e95a832bc859
   TextToSpeech: 4e2fc50c7495416c6da5a1662ad3f750c58d3c85
