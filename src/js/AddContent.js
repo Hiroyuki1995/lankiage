@@ -63,7 +63,7 @@ class AddContent extends Component {
     this.focusBackWord = this.focusBackWord.bind(this);
     this.formFocus = this.formFocus.bind(this);
     this.backToList = this.backToList.bind(this);
-    this.langLangName = this.getLangName.bind(this);
+    this.getLangName = this.getLangName.bind(this);
   }
 
   backToList() {
@@ -215,6 +215,7 @@ class AddContent extends Component {
   }
 
   registerWords(isEditing = false) {
+    console.log(`isEditing`, isEditing);
     this.setState({message: ''});
     const {words, frontLangCode, backLangCode} = this.state;
     const updatedWords = [];
@@ -364,7 +365,7 @@ class AddContent extends Component {
                 <View style={styles.actionButtons}>
                   <NativeButton
                     style={styles.keyboardButton}
-                    onPress={this.registerWords}
+                    onPress={() => this.registerWords()}
                     title="Save"
                   />
                   <NativeButton
@@ -386,10 +387,8 @@ class AddContent extends Component {
                           primary
                           variant="contained"
                           style={[styles.button, styles.submitButton]}
-                          onPress={this.registerWords}>
-                          <Text h3 style={styles.submitButtonText}>
-                            Save
-                          </Text>
+                          onPress={() => this.registerWords()}>
+                          <Text style={styles.submitButtonText}>Save</Text>
                         </Button>
                         <Button
                           block
@@ -397,9 +396,7 @@ class AddContent extends Component {
                           variant="contained"
                           style={[styles.button, styles.resetButton]}
                           onPress={this.resetWords}>
-                          <Text h3 style={styles.resetButtonText}>
-                            Reset
-                          </Text>
+                          <Text style={styles.resetButtonText}>Reset</Text>
                         </Button>
                       </View>
                     );
@@ -412,9 +409,7 @@ class AddContent extends Component {
                           variant="contained"
                           style={[styles.button, styles.submitButton]}
                           onPress={() => this.registerWords(true)}>
-                          <Text h3 style={styles.submitButtonText}>
-                            Save
-                          </Text>
+                          <Text style={styles.submitButtonText}>Save</Text>
                         </Button>
                         <Button
                           block
@@ -422,9 +417,7 @@ class AddContent extends Component {
                           variant="contained"
                           style={[styles.button, styles.resetButton]}
                           onPress={this.backToList}>
-                          <Text h3 style={styles.resetButtonText}>
-                            Cancel
-                          </Text>
+                          <Text style={styles.resetButtonText}>Cancel</Text>
                         </Button>
                       </View>
                     );
@@ -442,13 +435,10 @@ class AddContent extends Component {
 const styles = StyleSheet.create({
   inputArea: {
     flexDirection: 'column',
-    marginTop: height * 0.06,
-    marginLeft: width * 0.02,
-    marginRight: width * 0.02,
+    paddingTop: height * 0.06,
+    paddingLeft: width * 0.02,
+    paddingRight: width * 0.02,
     flex: 1,
-    // backgroundColor: 'rgba(0,0,0, 0.5)',
-    // alignItems: 'center',
-    // justifyContent: 'center',
   },
   oneCardInputArea: {
     flexDirection: 'row',
@@ -490,14 +480,10 @@ const styles = StyleSheet.create({
     margin: 10,
   },
   submitButton: {
-    // backgroundColor: '#2c8ef4',
-    // color: 'white',
+    width: '30%',
   },
   resetButton: {
-    // borderColor: '#2c8ef4',
-    // borderWidth: 1,
-    // backgroundColor: 'white',
-    // color: '#2c8ef4',
+    width: '30%',
   },
   submitButtonView: {
     alignItems: 'center',
@@ -511,9 +497,11 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: '#ffffff',
+    fontSize: 20,
   },
   resetButtonText: {
     color: '#ffffff',
+    fontSize: 20,
   },
   messageView: {
     alignItems: 'center',
@@ -615,8 +603,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0, 0.5)',
   },
   languageText: {
-    fontSize: 30,
+    fontSize: 20,
     color: '#ffffff',
+    textAlign: 'center',
   },
 });
 

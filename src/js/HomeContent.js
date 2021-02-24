@@ -37,6 +37,7 @@ class HomeContent extends Component {
     this.deleteFolder = this.deleteFolder.bind(this);
     this.registerWords = this.registerWords.bind(this);
     this.showAllCards = this.showAllCards.bind(this);
+    this.deleteWords = this.deleteWords.bind(this);
   }
 
   componentDidMount() {
@@ -48,16 +49,6 @@ class HomeContent extends Component {
         schema: [FolderSchema, WordSchema],
         // schemaVersion: 1,
         deleteRealmIfMigrationNeeded: true,
-        // migration: (oldRealm, newRealm) => {
-        //   if (oldRealm.schemaVersion < 4) {
-        //     const oldObjects = oldRealm.objects('Word');
-        //     const newObjects = newRealm.objects('Word');
-        //     for (let i = 0; i < oldObjects.length; i++) {
-        //       newObjects[i].frontLangCode = oldObjects[i].frontLangCode;
-        //       newObjects[i].backLangCode = oldObjects[i].backLangCode;
-        //     }
-        //   }
-        // },
       });
       const realm = this.realm;
       this.setState({realm});
@@ -90,26 +81,35 @@ class HomeContent extends Component {
     console.log('aaa');
   }
 
+  deleteWords(targetIds) {
+    if (!this.realm) {
+      this.realm = new Realm({schema: [FolderSchema, WordSchema]});
+    }
+    let realm = this.state.realm;
+    console.log('HomeContent' + JSON.stringify(targetIds));
+    for (let id of targetIds) {
+      this.realm.write(() => {
+        const target = this.realm.objects('Word').filtered(`id = "${id}"`);
+        this.realm.delete(target);
+        realm = this.realm;
+      });
+    }
+    this.setState({realm});
+  }
+
   registerWords(info, folderId, isEditing) {
     console.log('HomeContent' + JSON.stringify(info));
     if (!this.realm) {
       this.realm = new Realm({schema: [FolderSchema, WordSchema]});
     }
     for (let word of info.words) {
-      if (
-        word.frontWord &&
-        info.frontLangCode &&
-        word.backWordCode &&
-        info.backLangCode
-      ) {
+      if (word.frontWord && word.backWord) {
         if (!isEditing) {
           this.realm.write(() => {
             this.realm.create('Word', {
               id: uuidv4(),
               frontWord: word.frontWord,
-              frontLang: info.frontLangCode,
               backWord: word.backWord,
-              backLang: info.backLangCode,
               createdAt: new Date(),
               folderId: folderId,
             });
@@ -152,7 +152,6 @@ class HomeContent extends Component {
             name: object.folderName,
             frontLangCode: object.frontLangCode,
             backLangCode: object.backLangCode,
-            createdAt: new Date(),
           },
           'modified',
         );
@@ -195,6 +194,7 @@ class HomeContent extends Component {
       folder: folder,
       registerWords: this.registerWords,
       showAllCards: this.showAllCards,
+      deleteWords: this.deleteWords,
     });
   }
 
@@ -220,7 +220,9 @@ class HomeContent extends Component {
                   style={styles.folderCard}
                   onPress={() => this.openFolder(folder)}>
                   <FontIcon name="folder" style={styles.folderIcon} />
-                  <Text style={styles.folderText}>{folder.name}</Text>
+                  <Text style={styles.folderText} numberOfLines={1}>
+                    {folder.name}
+                  </Text>
                   <Icon name="arrow-forward" style={styles.folderArrowicon} />
                 </TouchableOpacity>
               </View>
@@ -245,7 +247,7 @@ class HomeContent extends Component {
           <Modal
             style={styles.modal}
             visible={this.state.modalIsVisible}
-            animationType={'slide' || 'fade'}
+            animationType={'fade'}
             backdropOpacity={0.5}
             // backdropColor="#rbga(0,0,0,0.6)"
             // tranparent={false}

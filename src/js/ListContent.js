@@ -13,7 +13,8 @@ import {
 import {Text} from 'native-base';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
-// import AntIcon from 'react-native-vector-icons/AntDesign';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import AntIcon from 'react-native-vector-icons/AntDesign';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import CardFlip from 'react-native-card-flip';
 import Tts from 'react-native-tts';
@@ -30,9 +31,7 @@ class ListContent extends Component {
     this.isFront = true;
     this.state = {
       words: [],
-      loading: false,
       realm: null,
-      currentCardId: '',
       horizontalScroll: 0,
       currentPage: 0,
       isSliding: false,
@@ -115,7 +114,6 @@ class ListContent extends Component {
 
   openAddContent() {
     this.props.navigation.navigate('Add', {
-      realm: this.state.realm,
       folder: this.props.route.params.folder,
       registerWords: this.props.route.params.registerWords,
     });
@@ -164,7 +162,7 @@ class ListContent extends Component {
     speakFrontWord = this.isFront,
   ) {
     const word = this.state.words[pageNumber];
-    const {frontLangCode, backLangCode} = this.props.route.params;
+    const {frontLangCode, backLangCode} = this.props.route.params.folder;
     let uttr = {};
     if (speakFrontWord) {
       uttr.text = word.frontWord;
@@ -173,6 +171,7 @@ class ListContent extends Component {
       uttr.text = word.backWord;
       uttr.voice = backLangCode;
     }
+    console.log(uttr.voice, uttr.text);
     Tts.setDefaultLanguage(uttr.voice);
     Tts.speak(uttr.text);
   }
@@ -194,7 +193,6 @@ class ListContent extends Component {
       },
     ];
     this.props.navigation.navigate('Add', {
-      realm: this.state.realm,
       folder: this.props.route.params.folder,
       registerWords: this.props.route.params.registerWords,
       words: wordsObj,
@@ -300,17 +298,30 @@ class ListContent extends Component {
                 onPress={() => {
                   this.clickCard(key, this.card[key], false);
                 }}>
-                <Text style={styles.cardWord}>{word.frontWord}</Text>
-                <TouchableOpacity
-                  onPress={() => this.speakWord(key, true)}
-                  style={styles.soundOpacity}>
-                  <FoundationIcon name="sound" style={styles.soundImage} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => this.editWord(word)}
-                  style={styles.penOpacity}>
-                  <Icon name="pencil-sharp" style={styles.penIcon} />
-                </TouchableOpacity>
+                <View style={styles.wordArea}>
+                  <Text
+                    numberOfLines={4}
+                    adjustsFontSizeToFit={true}
+                    style={styles.cardWord}>
+                    {word.frontWord}
+                  </Text>
+                </View>
+                <View style={styles.buttonArea}>
+                  <View style={styles.soundOpacity}>
+                    <AntIcon
+                      name="sound"
+                      style={styles.soundImage}
+                      onPress={() => this.speakWord(key, true)}
+                    />
+                  </View>
+                  <View style={styles.penOpacity}>
+                    <Icon
+                      name="pencil-sharp"
+                      style={styles.penIcon}
+                      onPress={() => this.editWord(word)}
+                    />
+                  </View>
+                </View>
               </TouchableOpacity>
 
               <TouchableOpacity
@@ -319,17 +330,30 @@ class ListContent extends Component {
                   this.clickCard(key, this.card[key], true);
                 }}
                 style={[styles.card, styles.backCard]}>
-                <Text style={styles.cardWord}>{word.backWord}</Text>
-                <TouchableOpacity
-                  onPress={() => this.speakWord(key, false)}
-                  style={styles.soundOpacity}>
-                  <FoundationIcon name="sound" style={styles.soundImage} />
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => this.editWord(word)}
-                  style={styles.penOpacity}>
-                  <Icon name="pencil-sharp" style={styles.penIcon} />
-                </TouchableOpacity>
+                <View style={styles.wordArea}>
+                  <Text
+                    numberOfLines={4}
+                    adjustsFontSizeToFit={true}
+                    style={styles.cardWord}>
+                    {word.backWord}
+                  </Text>
+                </View>
+                <View style={styles.buttonArea}>
+                  <View style={styles.soundOpacity}>
+                    <AntIcon
+                      name="sound"
+                      style={styles.soundImage}
+                      onPress={() => this.speakWord(key, false)}
+                    />
+                  </View>
+                  <View style={styles.penOpacity}>
+                    <Icon
+                      name="pencil-sharp"
+                      style={styles.penIcon}
+                      onPress={() => this.editWord(word)}
+                    />
+                  </View>
+                </View>
               </TouchableOpacity>
             </CardFlip>
           </View>
@@ -412,7 +436,7 @@ class ListContent extends Component {
             </View>
             <View style={styles.bottomArea}>
               <TouchableOpacity onPress={() => this.openAddContent()}>
-                <FoundationIcon name="plus" style={styles.plusButton} />
+                <MaterialIcon name="playlist-add" style={styles.plusButton} />
               </TouchableOpacity>
             </View>
             <Modal
@@ -489,33 +513,17 @@ const styles = StyleSheet.create({
     display: 'flex',
     marginLeft: width * 0.05,
     marginRight: width * 0.05,
-    // paddingLeft: '10%',
-    // paddingRight: '10%',
-    // borderRadius: 5,
-    // shadowColor: 'rgba(0,0,0,0.5)',
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 1,
-    // },
-    // shadowOpacity: 0.5,
-    // backgroundColor: '#FE474C',
-    // shadowColor: '#ccc',
-    // shadowOffset: {
-    //   width: 0,
-    //   height: 100,
-    // },
-    // shadowRadius: 0,
-    // shadowOpacity: 1,
   },
   card: {
     borderRadius: 10,
-    shadowColor: '#ccc',
+    shadowColor: '#fff',
+    padding: 10,
     // shadowOffset: {
-    //   width: 0,
+    //   width: 10,
     //   height: 20,
     // },
-    shadowRadius: 0,
-    // shadowOpacity: 1,
+    shadowRadius: 10,
+    shadowOpacity: 0.8,
     backgroundColor: '#ffffff',
     flex: 1,
     alignItems: 'center',
@@ -526,6 +534,7 @@ const styles = StyleSheet.create({
   },
   cardWord: {
     fontSize: 40,
+    justifyContent: 'center',
   },
   cardsArea: {
     flexDirection: 'row',
@@ -552,14 +561,20 @@ const styles = StyleSheet.create({
     color: '#ffffff',
   },
   soundOpacity: {
-    position: 'absolute',
-    left: width * 0.05,
-    bottom: 0,
+    flex: 1,
+    // position: 'absolute',
+    alignItems: 'flex-start',
+    marginLeft: 20,
+    // left: width * 0.05,
+    // bottom: 0,
   },
   penOpacity: {
-    position: 'absolute',
-    right: width * 0.05,
-    bottom: height * 0.005,
+    flex: 1,
+    // position: 'absolute',
+    // right: width * 0.05,
+    // bottom: height * 0.005,
+    alignItems: 'flex-end',
+    marginRight: 20,
   },
   soundImage: {
     fontSize: 40,
@@ -635,6 +650,15 @@ const styles = StyleSheet.create({
   messageTextView: {
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  wordArea: {
+    flex: 4,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  buttonArea: {
+    flexDirection: 'row',
+    flex: 1,
   },
 });
 

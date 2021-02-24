@@ -12,6 +12,7 @@
   "dependencies": {
     "@google-cloud/storage": "^5.7.2",
     "@google-cloud/translate": "^6.1.0",
+    "@react-native-community/checkbox": "^0.5.7",
     "@react-native-community/masked-view": "^0.1.10",
     "@react-native-community/picker": "^1.8.1",
     "@react-native-community/slider": "^2.0.9",

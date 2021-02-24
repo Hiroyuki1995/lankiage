@@ -13,14 +13,13 @@ class AddNewFolder extends Component {
     this.state = {
       id: this.props.folder ? this.props.folder.id : '',
       folderName: this.props.folder ? this.props.folder.name : '',
-      frontLangCode: this.props.folder.frontLangCode,
-      backLangCode: this.props.folder.backLangCode,
+      frontLangCode: this.props.folder ? this.props.folder.frontLangCode : '',
+      backLangCode: this.props.folder ? this.props.folder.backLangCode : '',
       realm: null,
     };
     this.onChange = this.onChange.bind(this);
     this.editFolder = this.editFolder.bind(this);
     this.deleteFolder = this.deleteFolder.bind(this);
-    this.getLangName = this.getLangName.bins(this);
   }
 
   componentDidMount() {

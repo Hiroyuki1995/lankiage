@@ -15,69 +15,10 @@ const {width, height} = Dimensions.get('window');
 import HomeContent from './HomeContent';
 import ListContent from './ListContent';
 import AddContent from './AddContent';
-import AddNewFolder from './AddNewFolder';
-
-import backGroundImage from '../png/milky-way.jpg';
-
-// function HomeScreen() {
-//   return (
-//     <View style={{flex: 1, alignItems: 'center', justifyContent: 'center'}}>
-//       <Text>Home Screen</Text>
-//     </View>
-//   );
-// }
+import AllWordsContent from './AllWordsContent';
 
 const Stack = createStackNavigator();
-// const MainStack = createStackNavigator();
-// const RootStack = createStackNavigator();
 
-// const Stack = createStackNavigator(
-//   {
-//     App: createStackNavigator({
-//       Home: HomeContent,
-//       List: ListContent,
-//       Add: AddContent,
-//     }),
-//     Modal: createStackNavigator({
-//       Folder: AddNewFolder,
-//     }),
-//   },
-//   {
-//     mode: 'modal',
-//     headerMode: 'none', // ?
-//   },
-// );
-
-// function MainStackScreen() {
-//   return (
-//     <MainStack.Navigator
-//       initialRouteName="Home"
-//       screenOptions={{
-//         headerStyle: {
-//           backgroundColor: '#111111',
-//         },
-//         headerTintColor: '#fff',
-//         headerTitleStyle: {
-//           fontWeight: 'bold',
-//         },
-//         cardStyle: {
-//           opacity: 1,
-//         },
-//       }}>
-//       <MainStack.Screen name="Home" component={HomeContent} />
-//       <MainStack.Screen
-//         name="List"
-//         component={ListContent}
-//         options={({route}) => ({title: route.params.folder.name})}
-//       />
-//       <MainStack.Screen
-//         name="Add"
-//         component={AddContent}
-//         options={({route}) => ({title: 'Edit ' + route.params.folder.name})}
-//       />
-//     </MainStack.Navigator>
-//   );
-// }
 function App() {
   return (
     <NavigationContainer>
@@ -103,13 +44,20 @@ function App() {
         <Stack.Screen
           name="List"
           component={ListContent}
-          options={({route}) => ({
+          options={({route, navigation}) => ({
             title: route.params.folder.name,
             headerRight: () => (
               <Icon
                 name="list"
                 style={styles.listIcon}
-                onPress={route.params.showAllCards}
+                onPress={() => {
+                  navigation.navigate('AllWords', {
+                    realm: route.params.realm,
+                    folder: route.params.folder,
+                    registerWords: route.params.registerWords,
+                    deleteWords: route.params.deleteWords,
+                  });
+                }}
               />
             ),
           })}
@@ -118,6 +66,11 @@ function App() {
           name="Add"
           component={AddContent}
           options={({route}) => ({title: 'Edit ' + route.params.folder.name})}
+        />
+        <Stack.Screen
+          name="AllWords"
+          component={AllWordsContent}
+          options={({route}) => ({title: route.params.folder.name})}
         />
       </Stack.Navigator>
     </NavigationContainer>

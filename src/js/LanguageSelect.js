@@ -3,11 +3,18 @@ import {Text, StyleSheet, Dimensions} from 'react-native';
 import RNPickerSelect from 'react-native-picker-select';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 const {width, height} = Dimensions.get('window');
+import {Languages} from './Languages.js';
 import 'react-native-get-random-values';
 
 class LanguageSelect extends Component {
   constructor(props) {
     super(props);
+    this.languages = Languages.map((language) => {
+      return {
+        label: language.name,
+        value: language.code,
+      };
+    });
   }
 
   render() {
@@ -16,11 +23,7 @@ class LanguageSelect extends Component {
       <RNPickerSelect
         label={label}
         onValueChange={(_v) => onValueChange(_v)}
-        items={[
-          {label: '日本語', value: 'ja'},
-          {label: '中文', value: 'zh-cn'},
-          {label: 'English', value: 'en'},
-        ]}
+        items={this.languages}
         style={pickerSelectStyles}
         placeholder={{label: 'Select...', value: ''}}
         Icon={() => (

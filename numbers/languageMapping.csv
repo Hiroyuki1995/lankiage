@@ -1,0 +1,42 @@
+code,name,translateCode
+ar-SA,Arabic (Saudi Arabia),ar
+zh-HK,Chinese (Hong Kong S.A.R.),zh-TW
+zh-CN,Chinese (People's Republic of China),zh-CN
+zh-TW,Chinese (Taiwan),zh-TW
+cs-CZ,Czech (Czech Republic),cs
+da-DK,Danish (Denmark),da
+nl-BE,Dutch (Belgium),nl
+nl-NL,Dutch (Netherlands),nl
+en,English,en
+en-AU,English (Australia),en
+en-IN,English (India),en
+en-IE,English (Ireland),en
+en-ZA,English (South Africa),en
+en-GB,English (United Kingdom),en
+en-US,English (United States),en
+fi-FI,Finnish (Finland),fi
+fr-CA,French (Canada),fr
+fr-FR,French (France),fr
+de-DE,German (Germany),de
+el-GR,Greek (Greece),el
+he-IL,Hebrew (Israel),he
+hi-IN,Hindi (India),hi
+hu-HU,Hungarian (Hungary),hu
+id-ID,Indonesian (Indonesia),id
+it-IT,Italian (Italy),it
+ja-JP,Japanese (Japan),ja
+ko-KR,Korean (Korea),ko
+nb-NO,"Norwegian, Bokmål (Norway)",no
+pl-PL,Polish (Poland),pl
+pt-BR,Portuguese (Brazil),pt
+pt-PT,Portuguese (Portugal),pt
+ro-RO,Romanian (Romania),ro
+ru-RU,Russian (Russia),ru
+sk-SK,Slovak (Slovakia),sk
+es-AR,Spanish (Argentina),es
+es-MX,Spanish (Mexico),es
+es-ES,Spanish (Spain),es
+es-US,Spanish (United States),es
+sv-SE,Swedish (Sweden),sv
+th-TH,Thai (Thailand),th
+tr-TR,Turkish (Turkey),tr
