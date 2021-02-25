@@ -15,6 +15,7 @@ import {useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
 import FontIcon from 'react-native-vector-icons/FontAwesome';
+import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 const Realm = require('realm');
 import {WordSchema} from './Schema.js';
 const {width, height} = Dimensions.get('window');
@@ -26,41 +27,48 @@ class HomeContent extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      realm: null,
-      modalIsVisible: false,
+      realm: new Realm({
+        schema: [FolderSchema, WordSchema],
+        // schemaVersion: 1,
+        deleteRealmIfMigrationNeeded: true,
+      }),
+      isEditorVisible: false,
+      isEditor2Visible: false,
       folder: null,
     };
-    this.realm = null;
+    // this.realm = null;
     this.openFolderEdit = this.openFolderEdit.bind(this);
+    this.openFolderEdit2 = this.openFolderEdit2.bind(this);
     this.openFolder = this.openFolder.bind(this);
     this.editFolder = this.editFolder.bind(this);
     this.deleteFolder = this.deleteFolder.bind(this);
     this.registerWords = this.registerWords.bind(this);
     this.showAllCards = this.showAllCards.bind(this);
     this.deleteWords = this.deleteWords.bind(this);
+    this.createFolder = this.createFolder.bind(this);
   }
 
   componentDidMount() {
     const route = this.props.navigation;
     console.log(`route ${route}`);
     console.log('componentDidMount at HomeContent');
-    try {
-      this.realm = new Realm({
-        schema: [FolderSchema, WordSchema],
-        // schemaVersion: 1,
-        deleteRealmIfMigrationNeeded: true,
-      });
-      const realm = this.realm;
-      this.setState({realm});
-      Realm.open({
-        schema: [FolderSchema, WordSchema],
-        deleteRealmIfMigrationNeeded: true,
-      }).then((realm) => {
-        this.setState({realm});
-      });
-    } catch (error) {
-      console.log(error);
-    }
+    // try {
+    //   this.setState({
+    //     realm: new Realm({
+    //       schema: [FolderSchema, WordSchema],
+    //       // schemaVersion: 1,
+    //       deleteRealmIfMigrationNeeded: true,
+    //     }),
+    //   });
+    //   Realm.open({
+    //     schema: [FolderSchema, WordSchema],
+    //     deleteRealmIfMigrationNeeded: true,
+    //   }).then((realm) => {
+    //     this.setState({realm});
+    //   });
+    // } catch (error) {
+    //   console.log(error);
+    // }
   }
 
   // componentDidUpdate() {
@@ -82,31 +90,35 @@ class HomeContent extends Component {
   }
 
   deleteWords(targetIds) {
-    if (!this.realm) {
-      this.realm = new Realm({schema: [FolderSchema, WordSchema]});
-    }
+    // if (!this.realm) {
+    //   this.realm = new Realm({schema: [FolderSchema, WordSchema]});
+    // }
     let realm = this.state.realm;
     console.log('HomeContent' + JSON.stringify(targetIds));
     for (let id of targetIds) {
-      this.realm.write(() => {
-        const target = this.realm.objects('Word').filtered(`id = "${id}"`);
-        this.realm.delete(target);
-        realm = this.realm;
+      realm.write(() => {
+        const target = realm.objects('Word').filtered(`id = "${id}"`);
+        realm.delete(target);
       });
     }
     this.setState({realm});
   }
 
+  createFolder() {
+    console.log('createFolder()');
+  }
+
   registerWords(info, folderId, isEditing) {
     console.log('HomeContent' + JSON.stringify(info));
-    if (!this.realm) {
-      this.realm = new Realm({schema: [FolderSchema, WordSchema]});
-    }
+    // if (!this.realm) {
+    //   this.realm = new Realm({schema: [FolderSchema, WordSchema]});
+    // }
+    let realm = this.state.realm;
     for (let word of info.words) {
       if (word.frontWord && word.backWord) {
         if (!isEditing) {
-          this.realm.write(() => {
-            this.realm.create('Word', {
+          realm.write(() => {
+            realm.create('Word', {
               id: uuidv4(),
               frontWord: word.frontWord,
               backWord: word.backWord,
@@ -115,8 +127,8 @@ class HomeContent extends Component {
             });
           });
         } else {
-          this.realm.write(() => {
-            this.realm.create(
+          realm.write(() => {
+            realm.create(
               'Word',
               {
                 id: word.id,
@@ -129,10 +141,10 @@ class HomeContent extends Component {
         }
       }
     }
-    console.log(
-      JSON.stringify(this.realm.objects('Word').sorted('createdAt', true)),
-    );
-    const realm = this.realm;
+    // console.log(
+    //   JSON.stringify(this.realm.objects('Word').sorted('createdAt', true)),
+    // );
+    // const realm = this.realm;
     this.setState({realm});
     // Navigation.updateProps(this.props.componentId, {
     //   realm: realm,
@@ -140,12 +152,13 @@ class HomeContent extends Component {
   }
 
   editFolder(object, isEditing) {
-    if (!this.realm) {
-      this.realm = new Realm({schema: [FolderSchema, WordSchema]});
-    }
-    this.realm.write(() => {
+    // if (!this.realm) {
+    //   this.realm = new Realm({schema: [FolderSchema, WordSchema]});
+    // }
+    let realm = this.state.realm;
+    realm.write(() => {
       if (isEditing) {
-        this.realm.create(
+        realm.create(
           'Folder',
           {
             id: object.id,
@@ -156,7 +169,7 @@ class HomeContent extends Component {
           'modified',
         );
       } else {
-        this.realm.create('Folder', {
+        realm.create('Folder', {
           id: uuidv4(),
           name: object.folderName,
           frontLangCode: object.frontLangCode,
@@ -165,26 +178,31 @@ class HomeContent extends Component {
         });
       }
     });
-    const realm = this.realm;
     this.setState({realm});
   }
 
   deleteFolder(id) {
-    if (!this.realm) {
-      this.realm = new Realm({schema: [FolderSchema, WordSchema]});
-    }
-    this.realm.write(() => {
-      const target = this.realm.objects('Folder').filtered(`id = "${id}"`);
-      this.realm.delete(target);
-      const realm = this.realm;
-      this.setState({realm});
+    // if (!this.realm) {
+    //   this.realm = new Realm({schema: [FolderSchema, WordSchema]});
+    // }
+    let realm = this.state.realm;
+    realm.write(() => {
+      const target = realm.objects('Folder').filtered(`id = "${id}"`);
+      realm.delete(target);
     });
+    this.setState({realm});
   }
 
   openFolderEdit(folder = null) {
     this.setState({
-      modalIsVisible: true,
+      isEditorVisible: true,
       folder: folder,
+    });
+  }
+
+  openFolderEdit2() {
+    this.setState({
+      isEditor2Visible: true,
     });
   }
 
@@ -236,30 +254,56 @@ class HomeContent extends Component {
         // resizeMode="contain"
         source={require('../png/milky-way.jpg')}>
         <ScrollView style={styles.container}>
-          <View style={styles.addIconView}>
-            <FoundationIcon
-              style={styles.folderAddIcon}
-              onPress={() => this.openFolderEdit()}
-              name="folder-add"
-            />
+          <View style={styles.buttonArea}>
+            <View style={styles.addIconView}>
+              <MaterialIcon
+                name="folder-multiple"
+                style={styles.folderCopyIcon}
+                onPress={() => this.openFolderEdit()}
+              />
+            </View>
+            <View style={styles.addIconView}>
+              <FoundationIcon
+                style={styles.folderAddIcon}
+                onPress={() => this.openFolderEdit()}
+                name="folder-add"
+              />
+            </View>
           </View>
           <View style={styles.foldersArea}>{foldersObj}</View>
           <Modal
+            coverScreen={false}
             style={styles.modal}
-            visible={this.state.modalIsVisible}
+            visible={this.state.isEditorVisible}
             animationType={'fade'}
             backdropOpacity={0.5}
             // backdropColor="#rbga(0,0,0,0.6)"
             // tranparent={false}
             hasBackdrop={true}
-            onBackdropPress={() => this.setState({modalIsVisible: false})}>
+            onBackdropPress={() => this.setState({isEditorVisible: false})}>
             <AddNewFolder
               realm={this.state.realm}
               editFolder={this.editFolder}
               folder={this.state.folder}
               isEditing={this.state.folder ? true : false}
               deleteFolder={this.deleteFolder}
-              goBack={() => this.setState({modalIsVisible: false})}
+              goBack={() => this.setState({isEditorVisible: false})}
+            />
+          </Modal>
+          <Modal
+            coverScreen={false}
+            style={styles.modal}
+            visible={this.state.isEditor2Visible}
+            animationType={'fade'}
+            backdropOpacity={0.5}
+            // backdropColor="#rbga(0,0,0,0.6)"
+            // tranparent={false}
+            hasBackdrop={true}
+            onBackdropPress={() => this.setState({isEditor2Visible: false})}>
+            <AddNewFolder
+              realm={this.state.realm}
+              createFolder={this.createFolder}
+              goBack={() => this.setState({isEditor2Visible: false})}
             />
           </Modal>
         </ScrollView>
@@ -300,14 +344,23 @@ const styles = StyleSheet.create({
     textAlign: 'left',
   },
   addIconView: {
-    flex: 1,
-    alignItems: 'flex-end',
+    // flex: 1,
+    // alignItems: 'flex-end',
     justifyContent: 'center',
     margin: 20,
+  },
+  buttonArea: {
+    alignItems: 'flex-end',
+    justifyContent: 'flex-end',
+    flexDirection: 'row',
   },
   folderAddIcon: {
     flex: 1,
     fontSize: 60,
+    color: '#ffffff',
+  },
+  folderCopyIcon: {
+    fontSize: 55,
     color: '#ffffff',
   },
   folderIcon: {

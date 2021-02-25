@@ -25,14 +25,14 @@ class LanguageSelect extends Component {
         onValueChange={(_v) => onValueChange(_v)}
         items={this.languages}
         style={pickerSelectStyles}
-        placeholder={{label: 'Select...', value: ''}}
+        placeholder={{label: 'Select a language', value: ''}}
         Icon={() => (
           <Text
             style={{
               position: 'absolute',
               right: 10,
-              top: 5,
-              fontSize: 18,
+              top: 7,
+              fontSize: 24,
               color: '#789'
             }}>
             ▼
@@ -68,7 +68,9 @@ const pickerSelectStyles = StyleSheet.create({
     // marginBottom: 10,
     padding: 5,
     paddingRight: 20,
-    fontSize: 18,
+    fontSize: 20,
+    width: 270,
+    // height: 40,
     backgroundColor: '#ffffff',
     // width: '100%',
     // paddingVertical: 12,

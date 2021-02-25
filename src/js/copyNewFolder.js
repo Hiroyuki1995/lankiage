@@ -8,15 +8,11 @@ import {FolderSchema} from './Schema.js';
 import {v4 as uuidv4} from 'uuid';
 import Modal from 'react-native-modal';
 
-class AddNewFolder extends Component {
+class copyNewFolder extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      id: this.props.folder ? this.props.folder.id : '',
-      folderName: this.props.folder ? this.props.folder.name : '',
-      frontLangCode: this.props.folder ? this.props.folder.frontLangCode : '',
-      backLangCode: this.props.folder ? this.props.folder.backLangCode : '',
-      realm: null,
+      realm: this.props.realm,
       message: null,
       isConfirmarionVisible: false,
     };
@@ -44,15 +40,6 @@ class AddNewFolder extends Component {
     } else {
       console.log('入力してください');
       this.setState({message: 'Please fill out all the fields'});
-    }
-  }
-
-  deleteFolder() {
-    console.log('削除します');
-    const {id} = this.state;
-    if (id) {
-      this.props.deleteFolder(id);
-      this.props.goBack();
     }
   }
 
@@ -284,4 +271,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default AddNewFolder;
+export default copyNewFolder;

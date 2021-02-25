@@ -115,8 +115,9 @@ const styles = StyleSheet.create({
   },
   inputForm: {
     // flex: 1,
-    height: 100,
-    fontSize: 22,
+    maxHeight: 100,
+    minHeight: 40,
+    fontSize: 24,
     borderRadius: 4,
     // paddingHorizontal: 30,
     backgroundColor: '#ffffff',

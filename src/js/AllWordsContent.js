@@ -8,6 +8,7 @@ import {
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import IonIcon from 'react-native-vector-icons/Ionicons';
+import Modal from 'react-native-modal';
 import {Button} from 'native-base';
 import {Text} from 'react-native-elements';
 const {width, height} = Dimensions.get('window');
@@ -33,10 +34,12 @@ class AllWordsContent extends Component {
       updatedWords.push(word);
     }
     this.state = {
+      realm: this.props.route.params.realm,
       words: updatedWords,
       frontLangCode: this.props.route.params.folder.frontLangCode,
       backLangCode: this.props.route.params.folder.backLangCode,
       message: '',
+      modalIsVisible: false,
     };
     this.getLangName = this.getLangName.bind(this);
     this.openAddContent = this.openAddContent.bind(this);
@@ -72,20 +75,17 @@ class AllWordsContent extends Component {
     let targetIds = [];
     let message;
     try {
+      let updatedWords = [];
       for (let word of this.state.words) {
         if (word.isSelected === true) {
           targetIds.push(word.id);
+        } else {
+          updatedWords.push(word);
         }
       }
-      // let updatedWords = [];
-      // for (let word of this.state.words) {
-      //   if (!targetIds.includes({id: word.id})) {
-      //     updatedWords.push(word);
-      //   }
-      // }
-      // this.setState({words: updatedWords});
-      this.props.navigation.goBack();
-      this.props.route.params.deleteWords(targetIds);
+      this.setState({words: updatedWords, modalIsVisible: false}, () => {
+        this.props.route.params.deleteWords(targetIds);
+      });
       message = `Deleted ${targetIds.length} words`;
     } catch (e) {
       console.log(e);
@@ -211,7 +211,7 @@ class AllWordsContent extends Component {
                     disabled={this.canDelete()}
                     variant="contained"
                     style={[styles.button, styles.submitButton]}
-                    onPress={() => this.deleteWords()}>
+                    onPress={() => this.setState({modalIsVisible: true})}>
                     <Text h3 style={styles.submitButtonText}>
                       Delete
                     </Text>
@@ -221,7 +221,7 @@ class AllWordsContent extends Component {
                     light
                     variant="contained"
                     style={[styles.button, styles.resetButton]}
-                    onPress={this.resetWords}>
+                    onPress={() => this.props.navigation.goBack()}>
                     <Text h3 style={styles.resetButtonText}>
                       Cancel
                     </Text>
@@ -229,6 +229,42 @@ class AllWordsContent extends Component {
                 </View>
               </View>
             </View>
+            <Modal
+              style={styles.modal}
+              visible={this.state.modalIsVisible}
+              animationType={'fade'}
+              backdropOpacity={0.5}
+              // backdropColor="#rbga(0,0,0,0.6)"
+              // tranparent={false}
+              hasBackdrop={true}
+              onBackdropPress={() => this.setState({modalIsVisible: false})}>
+              <Text style={styles.modalText}>
+                Are you sure you want to delete these words?
+              </Text>
+              <View style={styles.modalButtonArea}>
+                <Button
+                  block
+                  danger
+                  disabled={this.canDelete()}
+                  variant="contained"
+                  style={[styles.button, styles.modalSubmitButton]}
+                  onPress={() => this.deleteWords()}>
+                  <Text h3 style={styles.submitButtonText}>
+                    Delete
+                  </Text>
+                </Button>
+                <Button
+                  block
+                  light
+                  variant="contained"
+                  style={[styles.button, styles.modalCancelButton]}
+                  onPress={() => this.setState({modalIsVisible: false})}>
+                  <Text h3 style={styles.resetButtonText}>
+                    Cancel
+                  </Text>
+                </Button>
+              </View>
+            </Modal>
           </ScrollView>
         </View>
       </ImageBackground>
@@ -445,6 +481,32 @@ const styles = StyleSheet.create({
     // flex: 1,
     width: 20,
     marginRight: 20,
+  },
+  modal: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: width * 0.8,
+    marginVertical: '85%',
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    flex: 1,
+    padding: 20,
+  },
+  modalText: {
+    fontSize: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  modalSubmitButton: {
+    flex: 1,
+  },
+  modalCancelButton: {
+    flex: 1,
+  },
+  modalButtonArea: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
 

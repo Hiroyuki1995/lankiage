@@ -39,7 +39,7 @@ function App() {
         <Stack.Screen
           name="Home"
           component={HomeContent}
-          options={{title: 'Overview'}}
+          options={{title: 'Home'}}
         />
         <Stack.Screen
           name="List"

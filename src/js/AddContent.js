@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import {Navigation} from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import {Button} from 'native-base';
 import {Text} from 'react-native-elements';
@@ -29,8 +30,8 @@ const wordSchema = {
   backWord: '',
   isRegisterd: false,
 };
-var nextButton = require('../png/next.png');
-var backButton = require('../png/back.png');
+// var nextButton = require('../png/next.png');
+// var backButton = require('../png/back.png');
 const inputAccessoryViewID = 'uniqueID';
 
 class AddContent extends Component {
@@ -72,7 +73,6 @@ class AddContent extends Component {
   }
 
   getLangName(langCode) {
-    console.log(`langCode ${langCode}`);
     if (langCode) {
       for (let language of Languages) {
         if (language.code === langCode) {
@@ -165,6 +165,7 @@ class AddContent extends Component {
   }
 
   focusBackWord() {
+    console.log('focusBackWord');
     this.setState((prevState) => {
       const currentFocusKey = prevState.currentFocus.key;
       if (
@@ -337,7 +338,7 @@ class AddContent extends Component {
                     currentFocusKey={this.state.currentFocus.key}
                     currentFocusSide={this.state.currentFocus.isFront}
                     onChange={this.changeContent}
-                    onFormFocus={this.formFocus}
+                    onFormFocus={() => this.formFocus()}
                     inputAccessoryViewID={inputAccessoryViewID}
                   />,
                 );
@@ -347,20 +348,29 @@ class AddContent extends Component {
             <InputAccessoryView
               nativeID={inputAccessoryViewID}
               backgroundColor="#ffffff"
-              // style={styles.keyboradToolbar}
-            >
+              style={styles.keyboradToolbar}>
               <View style={styles.keyboradToolbar}>
                 <View style={styles.directionButtons}>
-                  <TouchableOpacity
+                  <MaterialIcon
+                    name="arrow-back-ios"
+                    style={styles.directionButton}
+                    onPress={this.focusBackWord}
+                  />
+                  {/* <TouchableOpacity
                     style={false ? {display: 'none'} : {display: 'flex'}}
                     onPress={this.focusBackWord}>
                     <Image source={backButton} style={styles.directionButton} />
-                  </TouchableOpacity>
-                  <TouchableOpacity
+                  </TouchableOpacity> */}
+                  <MaterialIcon
+                    name="arrow-forward-ios"
+                    style={styles.directionButton}
+                    onPress={this.focusNextWord}
+                  />
+                  {/* <TouchableOpacity
                     style={false ? {display: 'none'} : {display: 'flex'}}
                     onPress={this.focusNextWord}>
                     <Image source={nextButton} style={styles.directionButton} />
-                  </TouchableOpacity>
+                  </TouchableOpacity> */}
                 </View>
                 <View style={styles.actionButtons}>
                   <NativeButton
@@ -580,9 +590,11 @@ const styles = StyleSheet.create({
     right: 10,
   },
   directionButton: {
+    fontSize: 20,
     width: 18,
     height: 18,
     marginHorizontal: 10,
+    color: 'rgb(10,132,255)',
   },
   translateIcon: {
     fontSize: 25,
