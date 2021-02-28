@@ -269,8 +269,6 @@ const styles = StyleSheet.create({
     height: 200,
     flexDirection: 'column',
     padding: 30,
-    borderColor: '#000000',
-    borderWidth: 1,
     borderRadius: 10,
   },
   confirmationButtonArea: {

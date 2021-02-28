@@ -31,13 +31,42 @@ class AllWordsContent extends Component {
     this.getLangName = this.getLangName.bind(this);
     this.openAddContent = this.openAddContent.bind(this);
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
-    this.canDelete = this.canDelete.bind(this);
+    this.canChange = this.canChange.bind(this);
     this.deleteWords = this.deleteWords.bind(this);
     this.searchWords = this.searchWords.bind(this);
+    this.changeLevel = this.changeLevel.bind(this);
+  }
+
+  changeLevel(level) {
+    console.log(level);
+    try {
+      console.log(this.state.targetIds);
+      for (let id of this.state.targetIds) {
+        this.state.realm.write(() => {
+          this.state.realm.create(
+            'Word',
+            {
+              id: id,
+              proficiencyLevel: level,
+            },
+            'modified',
+          );
+        });
+      }
+      const message = `Changed selected words' level to ${level}`;
+      this.setState({
+        realm: this.state.realm,
+        targetIds: [],
+        message: message,
+      });
+    } catch (e) {
+      console.log(e);
+      this.setState({message: e});
+    }
   }
 
   searchWords(v) {
-    this.setState({seachString: v, targetIds: []});
+    this.setState({searchString: v, message: '', targetIds: []});
   }
 
   getLangName(langCode) {
@@ -51,7 +80,7 @@ class AllWordsContent extends Component {
     return null;
   }
 
-  canDelete() {
+  canChange() {
     if (this.state.targetIds.length > 0) {
       return false;
     }
@@ -91,7 +120,7 @@ class AllWordsContent extends Component {
         targetIds.splice(index, 1);
       }
       console.log(JSON.stringify(targetIds));
-      return {targetIds};
+      return {targetIds, message: ''};
     });
   }
 
@@ -133,22 +162,29 @@ class AllWordsContent extends Component {
   }
 
   render() {
-    const {message, seachString, targetIds} = this.state;
+    const {message, searchString, targetIds} = this.state;
     const words = this.state.realm
       .objects('Word')
-      .filtered(`folderId = "${this.props.route.params.folder.id}"`);
+      .sorted('order', true)
+      .filtered(
+        `folderId = "${this.props.route.params.folder.id}"` +
+          ` AND (frontWord LIKE "*${searchString}*"` +
+          ` OR backWord LIKE "*${searchString}*")`,
+      );
     return (
       <ImageBackground
         style={styles.backgroundImage}
-        // resizeMode="contain"
         source={require('../png/milky-way.jpg')}>
         <View style={styles.container}>
           <ScrollView style={styles.inputArea}>
-            <View style={styles.seachArea}>
+            <View style={styles.searchArea}>
+              <IonIcon name="search" style={styles.searchIcon} />
               <TextInput
+                placeholder="front word or back word"
                 style={styles.searhText}
+                onFocus={() => this.setState({message: ''})}
                 onChangeText={this.searchWords}
-                value={seachString}
+                value={searchString}
               />
             </View>
             {(() => {
@@ -165,7 +201,7 @@ class AllWordsContent extends Component {
                 <Button
                   block
                   danger
-                  disabled={this.canDelete()}
+                  disabled={this.canChange()}
                   variant="contained"
                   style={[styles.button, styles.submitButton]}
                   onPress={() => this.setState({modalIsVisible: true})}>
@@ -173,23 +209,36 @@ class AllWordsContent extends Component {
                 </Button>
                 <Button
                   block
-                  light
+                  warning
+                  disabled={this.canChange()}
                   variant="contained"
                   style={[styles.button, styles.resetButton]}
-                  onPress={() => this.props.navigation.goBack()}>
-                  <Text style={styles.resetButtonText}>Cancel</Text>
+                  onPress={() => this.changeLevel(1)}>
+                  <Text style={styles.starButtonText}>★</Text>
+                </Button>
+                <Button
+                  block
+                  warning
+                  disabled={this.canChange()}
+                  variant="contained"
+                  style={[styles.button, styles.resetButton]}
+                  onPress={() => this.changeLevel(2)}>
+                  <Text style={styles.starButtonText}>★★</Text>
+                </Button>
+                <Button
+                  block
+                  warning
+                  disabled={this.canChange()}
+                  variant="contained"
+                  style={[styles.button, styles.resetButton]}
+                  onPress={() => this.changeLevel(3)}>
+                  <Text style={styles.starButtonText}>★★★</Text>
                 </Button>
               </View>
             </View>
             {(() => {
-              const items = [];
+              let items = [];
               for (let i = 0; i < words.length; i++) {
-                let formStyle = {};
-                if (words[i].isRegisterd) {
-                  formStyle = [styles.inputForm, styles.inputRegisterdForm];
-                } else {
-                  formStyle = styles.inputForm;
-                }
                 items.push(
                   <View key={i} style={styles.oneCardView}>
                     <CheckBox
@@ -198,7 +247,7 @@ class AllWordsContent extends Component {
                       boxType="square"
                       style={styles.checkBox}
                       disabled={false}
-                      value={targetIds.includes(words[i].id ? true : false)}
+                      value={targetIds.includes(words[i].id) ? true : false}
                       onValueChange={() => this.toggleCheckBox(words[i].id)}
                     />
                     <TouchableOpacity
@@ -207,7 +256,6 @@ class AllWordsContent extends Component {
                       <View style={{flexDirection: 'column', flex: 5}}>
                         <Stars
                           styles={styles}
-                          changeLevel={this.changeLevel}
                           proficiencyLevel={words[i].proficiencyLevel}
                           value={words[i].id}
                         />
@@ -225,15 +273,13 @@ class AllWordsContent extends Component {
               }
               return <View style={styles.cardArea}>{items}</View>;
             })()}
-            <Modal
-              style={styles.modal}
-              visible={this.state.modalIsVisible}
-              animationType={'fade'}
-              backdropOpacity={0.5}
-              // backdropColor="#rbga(0,0,0,0.6)"
-              // tranparent={false}
-              hasBackdrop={true}
-              onBackdropPress={() => this.setState({modalIsVisible: false})}>
+          </ScrollView>
+          <Modal
+            style={styles.modal}
+            visible={this.state.modalIsVisible}
+            animationType={'fade'}
+            onBackdropPress={() => this.setState({modalIsVisible: false})}>
+            <View style={styles.confirmationView}>
               <Text style={styles.modalText}>
                 Are you sure you want to delete these words?
               </Text>
@@ -241,7 +287,6 @@ class AllWordsContent extends Component {
                 <Button
                   block
                   danger
-                  disabled={this.canDelete()}
                   variant="contained"
                   style={[styles.button, styles.modalSubmitButton]}
                   onPress={() => this.deleteWords()}>
@@ -256,8 +301,8 @@ class AllWordsContent extends Component {
                   <Text style={styles.resetButtonText}>Cancel</Text>
                 </Button>
               </View>
-            </Modal>
-          </ScrollView>
+            </View>
+          </Modal>
         </View>
       </ImageBackground>
     );
@@ -303,9 +348,9 @@ const styles = StyleSheet.create({
   searhText: {
     borderRadius: 4,
     backgroundColor: '#ffffff',
-    fontSize: 20,
-    height: 30,
-    flex: 1,
+    fontSize: 24,
+    height: 40,
+    flex: 6,
     paddingHorizontal: 10,
   },
   inputRegisterdForm: {
@@ -344,6 +389,10 @@ const styles = StyleSheet.create({
     fontSize: 20,
   },
   resetButtonText: {
+    color: '#ffffff',
+    fontSize: 20,
+  },
+  starButtonText: {
     color: '#ffffff',
     fontSize: 20,
   },
@@ -484,12 +533,22 @@ const styles = StyleSheet.create({
   modal: {
     alignItems: 'center',
     justifyContent: 'center',
-    width: width * 0.8,
-    marginVertical: '85%',
-    backgroundColor: '#ffffff',
+    width: '100%',
+    // marginVertical: '85%',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     borderRadius: 10,
+    left: -20,
+    bottom: -20,
     flex: 1,
-    padding: 20,
+    // padding: 20,
+  },
+  confirmationView: {
+    backgroundColor: '#ffffff',
+    width: 300,
+    height: 200,
+    flexDirection: 'column',
+    padding: 30,
+    borderRadius: 10,
   },
   modalText: {
     fontSize: 20,
@@ -515,8 +574,16 @@ const styles = StyleSheet.create({
   starArea: {
     flexDirection: 'row',
   },
-  seachArea: {
+  searchArea: {
     marginHorizontal: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  searchIcon: {
+    fontSize: 24,
+    marginRight: 10,
+    color: '#ffffff',
   },
 });
 

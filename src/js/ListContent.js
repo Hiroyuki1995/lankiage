@@ -505,14 +505,14 @@ class ListContent extends Component {
                 minimumValue={0}
                 value={this.state.currentPage}
                 disableInitialCallback={true}
-                step={1}>
-                <Text style={styles.pageText}>
-                  {this.state.currentPage + 1}/
-                  {this.getWordsFromRealm(this.state.realm)
-                    ? this.getWordsFromRealm(this.state.realm).length
-                    : 0}
-                </Text>
-              </Slider>
+                step={1}
+              />
+              <Text style={styles.pageText}>
+                {this.state.currentPage + 1}/
+                {this.getWordsFromRealm(this.state.realm)
+                  ? this.getWordsFromRealm(this.state.realm).length
+                  : 0}
+              </Text>
             </View>
             <View style={styles.settingArea}>
               <TouchableOpacity
@@ -787,7 +787,7 @@ const styles = StyleSheet.create({
   },
   pageText: {
     textAlign: 'right',
-    marginTop: 20,
+    marginRight: width * 0.1,
     color: '#ffffff',
   },
   addContentView: {
@@ -860,8 +860,6 @@ const styles = StyleSheet.create({
     width: 330,
     padding: 16,
     borderRadius: 10,
-    borderColor: '#000000',
-    borderWidth: 1,
   },
   modalText: {
     fontSize: 18,
@@ -898,8 +896,6 @@ const styles = StyleSheet.create({
     height: 200,
     flexDirection: 'column',
     padding: 30,
-    borderColor: '#000000',
-    borderWidth: 1,
     borderRadius: 10,
   },
   dissmissButton: {

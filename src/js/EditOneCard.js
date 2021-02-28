@@ -28,6 +28,7 @@ class EditOneCard extends Component {
   }
 
   componentDidUpdate() {
+    // console.log('componentDidUpdate', this.props.currentFocusKey, this.props.currentFocusSide);
     if (this.props.currentFocusKey === this.props.id) {
       if (this.props.currentFocusSide) {
         this.front.focus();

@@ -4,14 +4,11 @@ import {
   ScrollView,
   Text,
   View,
-  Button,
   StyleSheet,
   Dimensions,
   ImageBackground,
 } from 'react-native';
 import Modal from 'react-native-modal';
-import {Navigation} from 'react-native-navigation';
-import {useRoute} from '@react-navigation/native';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
 import FontIcon from 'react-native-vector-icons/FontAwesome';

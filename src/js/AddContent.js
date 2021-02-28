@@ -5,12 +5,11 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  Image,
   InputAccessoryView,
   Button as NativeButton,
   ImageBackground,
+  Image,
 } from 'react-native';
-import {Navigation} from 'react-native-navigation';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
@@ -19,9 +18,6 @@ import {Text} from 'react-native-elements';
 const {width, height} = Dimensions.get('window');
 import 'react-native-get-random-values';
 import translate from 'translate-google-api';
-import {v4 as uuidv4} from 'uuid';
-const Realm = require('realm');
-import {WordSchema} from './Schema.js';
 import {Languages} from './Languages.js';
 import EditOneCard from './EditOneCard';
 import {ScrollView} from 'react-native';
@@ -30,18 +26,14 @@ const wordSchema = {
   backWord: '',
   isRegisterd: false,
 };
-// var nextButton = require('../png/next.png');
-// var backButton = require('../png/back.png');
 const inputAccessoryViewID = 'uniqueID';
+const nextButton = require('../png/right_arrow.png');
 
 class AddContent extends Component {
   constructor(props) {
     super(props);
     this.state = {
       words: this.props.route.params.words ? this.props.route.params.words : [],
-      loading: false,
-      frontLangCode: this.props.route.params.folder.frontLangCode,
-      backLangCode: this.props.route.params.folder.backLangCode,
       numberOfWords: this.props.route.params.numberOfWords
         ? this.props.route.params.numberOfWords
         : 5,
@@ -52,6 +44,8 @@ class AddContent extends Component {
         isFront: true,
       },
     };
+    this.frontLangCode = this.props.route.params.folder.frontLangCode;
+    this.backLangCode = this.props.route.params.folder.backLangCode;
     for (let i = 0; i < this.state.numberOfWords; i++) {
       this.state.words.push(wordSchema);
     }
@@ -68,7 +62,6 @@ class AddContent extends Component {
   }
 
   backToList() {
-    console.log('aaa');
     this.props.navigation.goBack();
   }
 
@@ -97,9 +90,11 @@ class AddContent extends Component {
 
   translate(isForword = true) {
     this.setState({message: ''});
-    const {words, frontLangCode, backLangCode} = this.state;
-    const frontLangTranslateCode = this.getLangTranslateCode(frontLangCode);
-    const backLangTranslateCode = this.getLangTranslateCode(backLangCode);
+    const {words} = this.state;
+    const frontLangTranslateCode = this.getLangTranslateCode(
+      this.frontLangCode,
+    );
+    const backLangTranslateCode = this.getLangTranslateCode(this.backLangCode);
     const fromLang = isForword ? frontLangTranslateCode : backLangTranslateCode;
     const toLang = !isForword ? frontLangTranslateCode : backLangTranslateCode;
     if (!fromLang || !toLang) {
@@ -143,7 +138,7 @@ class AddContent extends Component {
     }
   }
 
-  changeContent = (name, value, i) => {
+  changeContent(name, value, i) {
     this.setState((prevState) => {
       const updatedWords = prevState.words.map((word, index) => {
         if (index === i) {
@@ -156,16 +151,13 @@ class AddContent extends Component {
       });
       return {words: updatedWords};
     });
-  };
+  }
 
   changeLanguage(v, label) {
-    this.setState((prevState) => {
-      return {[label]: v};
-    });
+    this.setState({[label]: v});
   }
 
   focusBackWord() {
-    console.log('focusBackWord');
     this.setState((prevState) => {
       const currentFocusKey = prevState.currentFocus.key;
       if (
@@ -185,6 +177,7 @@ class AddContent extends Component {
   }
 
   focusNextWord() {
+    console.log('focusNextWord');
     this.setState((prevState) => {
       const currentFocusKey = prevState.currentFocus.key;
       if (
@@ -207,6 +200,7 @@ class AddContent extends Component {
   }
 
   formFocus(key, isFront) {
+    console.log(key, isFront);
     this.setState({
       currentFocus: {
         key: key,
@@ -216,9 +210,8 @@ class AddContent extends Component {
   }
 
   registerWords(isEditing = false) {
-    console.log(`isEditing`, isEditing);
     this.setState({message: ''});
-    const {words, frontLangCode, backLangCode} = this.state;
+    const {words} = this.state;
     const updatedWords = [];
     let numberOfRegisterd = 0;
     console.log(`${this.props.route.params.folder.id}`);
@@ -229,7 +222,12 @@ class AddContent extends Component {
       isEditing,
     );
     for (const word of words) {
-      if (word.frontWord && frontLangCode && word.backWord && backLangCode) {
+      if (
+        word.frontWord &&
+        this.frontLangCode &&
+        word.backWord &&
+        this.backLangCode
+      ) {
         updatedWords.push({
           ...word,
           isRegisterd: true,
@@ -273,13 +271,8 @@ class AddContent extends Component {
   }
 
   render() {
-    const {
-      words,
-      numberOfWords,
-      message,
-      frontLangCode,
-      backLangCode,
-    } = this.state;
+    console.log(`currentFocus ${JSON.stringify(this.state.currentFocus)}`);
+    const {words, numberOfWords, message} = this.state;
     return (
       <ImageBackground
         style={styles.backgroundImage}
@@ -299,7 +292,7 @@ class AddContent extends Component {
             <View style={styles.languageSelectArea}>
               <View style={styles.oneLanguageSelectArea}>
                 <Text style={styles.languageText}>
-                  {this.getLangName(frontLangCode)}
+                  {this.getLangName(this.frontLangCode)}
                 </Text>
               </View>
               <View style={styles.buttonArea}>
@@ -316,7 +309,7 @@ class AddContent extends Component {
               </View>
               <View style={styles.oneLanguageSelectArea}>
                 <Text style={styles.languageText}>
-                  {this.getLangName(backLangCode)}
+                  {this.getLangName(this.backLangCode)}
                 </Text>
               </View>
             </View>
@@ -338,7 +331,7 @@ class AddContent extends Component {
                     currentFocusKey={this.state.currentFocus.key}
                     currentFocusSide={this.state.currentFocus.isFront}
                     onChange={this.changeContent}
-                    onFormFocus={() => this.formFocus()}
+                    onFormFocus={this.formFocus}
                     inputAccessoryViewID={inputAccessoryViewID}
                   />,
                 );
@@ -367,7 +360,7 @@ class AddContent extends Component {
                     onPress={this.focusNextWord}
                   />
                   {/* <TouchableOpacity
-                    style={false ? {display: 'none'} : {display: 'flex'}}
+                    style={styles.directionButton}
                     onPress={this.focusNextWord}>
                     <Image source={nextButton} style={styles.directionButton} />
                   </TouchableOpacity> */}
@@ -554,6 +547,7 @@ const styles = StyleSheet.create({
   },
   keyboardButton: {
     textAlign: 'center',
+    flex: 1,
     // paddingHorizontal: 10,
   },
   inputAccessoryView: {
@@ -569,9 +563,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   keyboradToolbar: {
-    flex: 1,
+    // flex: 1,
     justifyContent: 'center',
-    flexDirection: 'row',
+    // flexDirection: 'row',
     alignItems: 'center',
     // backgroundColor: '#F8F8F8',
     // paddingHorizontal: 8,
@@ -586,10 +580,10 @@ const styles = StyleSheet.create({
   },
   actionButtons: {
     alignItems: 'flex-end',
-    flexDirection: 'row',
+    // flexDirection: 'row',
     justifyContent: 'flex-end',
-    position: 'absolute',
-    right: 10,
+    // position: 'absolute',
+    // right: 10,
   },
   directionButton: {
     fontSize: 20,
