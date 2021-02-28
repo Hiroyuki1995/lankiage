@@ -5,6 +5,7 @@ import {
   Dimensions,
   TouchableOpacity,
   ImageBackground,
+  TextInput,
 } from 'react-native';
 import CheckBox from '@react-native-community/checkbox';
 import IonIcon from 'react-native-vector-icons/Ionicons';
@@ -15,37 +16,28 @@ const {width, height} = Dimensions.get('window');
 import 'react-native-get-random-values';
 import {Languages} from './Languages.js';
 import {ScrollView} from 'react-native';
-const wordSchema = {
-  frontWord: '',
-  backWord: '',
-  isRegisterd: false,
-};
+import Stars from './Stars';
 
 class AllWordsContent extends Component {
   constructor(props) {
     super(props);
-    const words = this.props.route.params.realm
-      .objects('Word')
-      .sorted('createdAt', true)
-      .filtered(`folderId = "${this.props.route.params.folder.id}"`);
-    let updatedWords = [];
-    for (let word of words) {
-      word.isSelected = false;
-      updatedWords.push(word);
-    }
     this.state = {
       realm: this.props.route.params.realm,
-      words: updatedWords,
-      frontLangCode: this.props.route.params.folder.frontLangCode,
-      backLangCode: this.props.route.params.folder.backLangCode,
+      targetIds: [],
       message: '',
       modalIsVisible: false,
+      searchString: '',
     };
     this.getLangName = this.getLangName.bind(this);
     this.openAddContent = this.openAddContent.bind(this);
     this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.canDelete = this.canDelete.bind(this);
     this.deleteWords = this.deleteWords.bind(this);
+    this.searchWords = this.searchWords.bind(this);
+  }
+
+  searchWords(v) {
+    this.setState({seachString: v, targetIds: []});
   }
 
   getLangName(langCode) {
@@ -60,64 +52,62 @@ class AllWordsContent extends Component {
   }
 
   canDelete() {
-    console.log(`canDelete ${JSON.stringify(this.state.words)}`);
-    for (let word of this.state.words) {
-      if (word.isSelected) {
-        console.log('return false');
-        return false;
-      }
+    if (this.state.targetIds.length > 0) {
+      return false;
     }
-    console.log('return true');
     return true;
   }
 
   deleteWords() {
-    let targetIds = [];
-    let message;
     try {
-      let updatedWords = [];
-      for (let word of this.state.words) {
-        if (word.isSelected === true) {
-          targetIds.push(word.id);
-        } else {
-          updatedWords.push(word);
-        }
+      console.log(this.state.targetIds);
+      for (let id of this.state.targetIds) {
+        this.state.realm.write(() => {
+          this.state.realm.delete(
+            this.state.realm.objects('Word').filtered(`id = "${id}"`),
+          );
+        });
       }
-      this.setState({words: updatedWords, modalIsVisible: false}, () => {
-        this.props.route.params.deleteWords(targetIds);
+      const message = `Deleted ${this.state.targetIds.length} words`;
+      this.setState({
+        realm: this.state.realm,
+        targetIds: [],
+        message: message,
+        modalIsVisible: false,
       });
-      message = `Deleted ${targetIds.length} words`;
     } catch (e) {
       console.log(e);
-      message = e;
-    } finally {
-      this.setState({message: message});
+      this.setState({message: e});
     }
   }
 
-  toggleCheckBox(index) {
+  toggleCheckBox(wordId) {
     this.setState((prevState) => {
-      let updatedWords = [];
-      prevState.words.forEach((word, key) => {
-        if (index === key) {
-          word.isSelected = !word.isSelected;
-        }
-        updatedWords.push(word);
-      });
-      return {words: updatedWords};
+      let targetIds = prevState.targetIds;
+      const index = targetIds.indexOf(wordId);
+      if (index === -1) {
+        targetIds.push(wordId);
+      } else {
+        targetIds.splice(index, 1);
+      }
+      console.log(JSON.stringify(targetIds));
+      return {targetIds};
     });
   }
 
   componentDidMount() {
-    console.log('allwords', JSON.stringify(this.state.words));
+    this.removeListener = this.props.navigation.addListener('focus', () => {
+      this.props.navigation.setParams({realm: this.props.route.params.realm});
+    });
   }
 
-  componentDidUpdate() {
-    console.log('allwords', JSON.stringify(this.state.words));
-  }
+  // componentDidUpdate() {
+  //   console.log('allwords', JSON.stringify(this.state.words));
+  // }
 
   componentWillUnmount() {
     console.log('componentWillUnmount in AllWordsContent');
+    this.removeListener();
   }
 
   componentDidDisappear() {
@@ -143,13 +133,10 @@ class AllWordsContent extends Component {
   }
 
   render() {
-    const {
-      words,
-      numberOfWords,
-      message,
-      frontLangCode,
-      backLangCode,
-    } = this.state;
+    const {message, seachString, targetIds} = this.state;
+    const words = this.state.realm
+      .objects('Word')
+      .filtered(`folderId = "${this.props.route.params.folder.id}"`);
     return (
       <ImageBackground
         style={styles.backgroundImage}
@@ -157,6 +144,13 @@ class AllWordsContent extends Component {
         source={require('../png/milky-way.jpg')}>
         <View style={styles.container}>
           <ScrollView style={styles.inputArea}>
+            <View style={styles.seachArea}>
+              <TextInput
+                style={styles.searhText}
+                onChangeText={this.searchWords}
+                value={seachString}
+              />
+            </View>
             {(() => {
               if (message) {
                 return (
@@ -166,6 +160,27 @@ class AllWordsContent extends Component {
                 );
               }
             })()}
+            <View style={{flex: 1}}>
+              <View style={styles.submitButtonView}>
+                <Button
+                  block
+                  danger
+                  disabled={this.canDelete()}
+                  variant="contained"
+                  style={[styles.button, styles.submitButton]}
+                  onPress={() => this.setState({modalIsVisible: true})}>
+                  <Text style={styles.submitButtonText}>Delete</Text>
+                </Button>
+                <Button
+                  block
+                  light
+                  variant="contained"
+                  style={[styles.button, styles.resetButton]}
+                  onPress={() => this.props.navigation.goBack()}>
+                  <Text style={styles.resetButtonText}>Cancel</Text>
+                </Button>
+              </View>
+            </View>
             {(() => {
               const items = [];
               for (let i = 0; i < words.length; i++) {
@@ -183,15 +198,23 @@ class AllWordsContent extends Component {
                       boxType="square"
                       style={styles.checkBox}
                       disabled={false}
-                      value={words[i].isSelected}
-                      onValueChange={() => this.toggleCheckBox(i)}
+                      value={targetIds.includes(words[i].id ? true : false)}
+                      onValueChange={() => this.toggleCheckBox(words[i].id)}
                     />
                     <TouchableOpacity
                       style={styles.wordCard}
                       onPress={() => this.openAddContent(words[i])}>
-                      <Text style={styles.cardText} numberOfLines={1}>
-                        {words[i].frontWord}
-                      </Text>
+                      <View style={{flexDirection: 'column', flex: 5}}>
+                        <Stars
+                          styles={styles}
+                          changeLevel={this.changeLevel}
+                          proficiencyLevel={words[i].proficiencyLevel}
+                          value={words[i].id}
+                        />
+                        <Text style={styles.cardText} numberOfLines={1}>
+                          {words[i].frontWord}
+                        </Text>
+                      </View>
                       <IonIcon
                         name="arrow-forward"
                         style={styles.folderArrowicon}
@@ -202,33 +225,6 @@ class AllWordsContent extends Component {
               }
               return <View style={styles.cardArea}>{items}</View>;
             })()}
-            <View>
-              <View style={{flex: 1}}>
-                <View style={styles.submitButtonView}>
-                  <Button
-                    block
-                    danger
-                    disabled={this.canDelete()}
-                    variant="contained"
-                    style={[styles.button, styles.submitButton]}
-                    onPress={() => this.setState({modalIsVisible: true})}>
-                    <Text h3 style={styles.submitButtonText}>
-                      Delete
-                    </Text>
-                  </Button>
-                  <Button
-                    block
-                    light
-                    variant="contained"
-                    style={[styles.button, styles.resetButton]}
-                    onPress={() => this.props.navigation.goBack()}>
-                    <Text h3 style={styles.resetButtonText}>
-                      Cancel
-                    </Text>
-                  </Button>
-                </View>
-              </View>
-            </View>
             <Modal
               style={styles.modal}
               visible={this.state.modalIsVisible}
@@ -249,9 +245,7 @@ class AllWordsContent extends Component {
                   variant="contained"
                   style={[styles.button, styles.modalSubmitButton]}
                   onPress={() => this.deleteWords()}>
-                  <Text h3 style={styles.submitButtonText}>
-                    Delete
-                  </Text>
+                  <Text style={styles.submitButtonText}>Delete</Text>
                 </Button>
                 <Button
                   block
@@ -259,9 +253,7 @@ class AllWordsContent extends Component {
                   variant="contained"
                   style={[styles.button, styles.modalCancelButton]}
                   onPress={() => this.setState({modalIsVisible: false})}>
-                  <Text h3 style={styles.resetButtonText}>
-                    Cancel
-                  </Text>
+                  <Text style={styles.resetButtonText}>Cancel</Text>
                 </Button>
               </View>
             </Modal>
@@ -308,6 +300,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textAlignVertical: 'top',
   },
+  searhText: {
+    borderRadius: 4,
+    backgroundColor: '#ffffff',
+    fontSize: 20,
+    height: 30,
+    flex: 1,
+    paddingHorizontal: 10,
+  },
   inputRegisterdForm: {
     backgroundColor: '#87cefa',
   },
@@ -341,9 +341,11 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     color: '#ffffff',
+    fontSize: 20,
   },
   resetButtonText: {
     color: '#ffffff',
+    fontSize: 20,
   },
   messageView: {
     alignItems: 'center',
@@ -372,12 +374,8 @@ const styles = StyleSheet.create({
   },
   languageSelectArea: {
     flexDirection: 'row',
-    // flex: 1,
-    // alignItems: 'center',
-    // justifyContent: 'center',
   },
   oneLanguageSelectArea: {
-    // width: '40%',
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
@@ -459,13 +457,14 @@ const styles = StyleSheet.create({
   },
   cardText: {
     fontSize: 30,
-    margin: 10,
+    marginBottom: 10,
     flex: 5,
     textAlign: 'center',
   },
   cardArea: {
     justifyContent: 'center',
     alignItems: 'center',
+    marginBottom: 50,
   },
   folderArrowicon: {
     fontSize: 30,
@@ -507,6 +506,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  star: {
+    fontSize: 20,
+    // paddingHorizontal: 10,
+    color: '#ffd400',
+  },
+  starArea: {
+    flexDirection: 'row',
+  },
+  seachArea: {
+    marginHorizontal: 20,
   },
 });
 

@@ -7,12 +7,14 @@ import {
   StyleSheet,
   Dimensions,
   Item,
-  Modal,
   ImageBackground,
 } from 'react-native';
+import {Button} from 'native-base';
 import {Text} from 'native-base';
+import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
+import CommunityICon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import AntIcon from 'react-native-vector-icons/AntDesign';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
@@ -23,6 +25,7 @@ import 'react-native-get-random-values';
 const {width, height} = Dimensions.get('window');
 const Realm = require('realm');
 import AddContent from './AddContent.js';
+import Stars from './Stars';
 
 class ListContent extends Component {
   constructor(props) {
@@ -30,8 +33,7 @@ class ListContent extends Component {
     this.card = [];
     this.isFront = true;
     this.state = {
-      words: [],
-      realm: null,
+      realm: this.props.route.params.realm,
       horizontalScroll: 0,
       currentPage: 0,
       isSliding: false,
@@ -39,6 +41,9 @@ class ListContent extends Component {
       defalutSortPattern: '1',
       isAutoPlaying: false,
       editModalIsVisible: false,
+      isDeleteModalVisible: false,
+      filtered: false,
+      deleteTargetId: null,
     };
     this.ScrollView = React.createRef();
     this.clickCard = this.clickCard.bind(this);
@@ -49,54 +54,24 @@ class ListContent extends Component {
     this.scrollCardView = this.scrollCardView.bind(this);
     this.shuffle = this.shuffle.bind(this);
     this.openAddContent = this.openAddContent.bind(this);
+    this.changeLevel = this.changeLevel.bind(this);
+    this.changeFilterLevel = this.changeFilterLevel.bind(this);
+    this.isFiltered = this.isFiltered.bind(this);
+    this.deleteWord = this.deleteWord.bind(this);
+    // this.removeListener = this.removeListener.bind(this);
   }
 
   componentDidMount() {
     console.log('componentDidMount in ListContent');
-    console.log(Realm.defaultPath);
-    // const realm = this.props.realm;
-    const {realm} = this.props.route.params;
-    console.log(`realm: ${JSON.stringify(realm)}`);
-    this.props.navigation.addListener('focus', () => {
+    this.removeListener = this.props.navigation.addListener('focus', () => {
       console.log('eventlistener comes out');
       this.props.navigation.setParams({realm: this.props.route.params.realm});
     });
-    if (this.state.defalutSortPattern === '1') {
-      this.setState(() => {
-        const defalutWords = realm
-          .objects('Word')
-          .sorted('createdAt', true)
-          .filtered(`folderId = "${this.props.route.params.folder.id}"`);
-        return {
-          realm,
-          words: defalutWords,
-        };
-      });
-    }
-    // try {
-    //   Realm.open({
-    //     schema: [WordSchema],
-    //     deleteRealmIfMigrationNeeded: true,
-    //   }).then((realm) => {
-    //     if (this.state.defalutSortPattern === '1') {
-    //       this.setState(() => {
-    //         const defalutWords = realm
-    //           .objects('Word')
-    //           .sorted('createdAt', true);
-    //         return {
-    //           realm,
-    //           words: defalutWords,
-    //         };
-    //       });
-    //     }
-    //   });
-    // } catch (error) {
-    //   console.log(error);
-    // }
   }
 
-  componentDidAppear() {
-    console.log('componentDidAppear in ListContent');
+  componentWillUnmount() {
+    console.log('componentWillUnmount in ListContent');
+    this.removeListener();
   }
 
   componentDidUpdate() {
@@ -107,16 +82,65 @@ class ListContent extends Component {
     console.log('componentDidDisappear in ListContent');
   }
 
-  // registerWords(info) {
-  //   console.log('ListContens' + JSON.stringify(info));
-  //   this.props.registerWords(words)
-  // }
+  getWordsFromRealm(realm) {
+    const folder = realm
+      .objects('Folder')
+      .filtered(`id = "${this.props.route.params.folder.id}"`)[0];
+    return realm
+      .objects('Word')
+      .sorted('order', true)
+      .filtered(
+        `folderId = "${folder.id}" AND proficiencyLevel >= ${folder.displayStarFrom} AND proficiencyLevel <= ${folder.displayStarTo}`,
+      );
+  }
 
   openAddContent() {
     this.props.navigation.navigate('Add', {
       folder: this.props.route.params.folder,
       registerWords: this.props.route.params.registerWords,
     });
+  }
+
+  changeLevel(level, wordId) {
+    this.state.realm.write(() => {
+      this.state.realm.create(
+        'Word',
+        {
+          id: wordId,
+          proficiencyLevel: level,
+        },
+        'modified',
+      );
+    });
+    this.setState({realm: this.state.realm});
+  }
+
+  changeFilterLevel(level, folderId, isFrom) {
+    console.log('aaa', level, folderId, isFrom);
+    if (isFrom === true) {
+      this.state.realm.write(() => {
+        this.state.realm.create(
+          'Folder',
+          {
+            id: folderId,
+            displayStarFrom: level,
+          },
+          'modified',
+        );
+      });
+    } else if (isFrom === false) {
+      this.state.realm.write(() => {
+        this.state.realm.create(
+          'Folder',
+          {
+            id: folderId,
+            displayStarTo: level,
+          },
+          'modified',
+        );
+      });
+    }
+    this.setState({realm: this.state.realm});
   }
 
   scrollCardView(event) {
@@ -129,14 +153,40 @@ class ListContent extends Component {
   }
 
   shuffle() {
-    if (this.state.words) {
-      let temp = this.state.words.slice();
-      for (var i = temp.length - 1; i > 0; i--) {
-        var j = Math.floor(Math.random() * (i + 1));
-        [temp[i], temp[j]] = [temp[j], temp[i]];
-      }
-      this.setState({words: temp, currentPage: 0});
+    const allWords = this.state.realm
+      .objects('Word')
+      .filtered(`folderId = "${this.props.route.params.folder.id}"`);
+    let orderNumberArray = allWords.map((word) => {
+      return word.order;
+    });
+    console.log('orderNumberArray', orderNumberArray);
+    for (let i = orderNumberArray.length - 1; i > 0; i--) {
+      // 0〜(i+1)の範囲で値を取得
+      var r = Math.floor(Math.random() * (i + 1));
+      // 要素の並び替えを実行
+      var tmp = orderNumberArray[i];
+      orderNumberArray[i] = orderNumberArray[r];
+      orderNumberArray[r] = tmp;
     }
+    console.log('orderNumberArray', orderNumberArray);
+    let i = 0;
+    for (const word of allWords) {
+      this.state.realm.write(() => {
+        this.state.realm.create(
+          'Word',
+          {
+            id: word.id,
+            order: orderNumberArray[i],
+          },
+          'modified',
+        );
+      });
+      i++;
+    }
+    this.setState({
+      realm: this.state.realm,
+      currentPage: 0,
+    });
   }
 
   // componentDidUpdate() {
@@ -154,14 +204,11 @@ class ListContent extends Component {
     this.autoScroll(pageNumber);
   }
 
-  // componentWillUnmount() {
-  // }
-
   speakWord(
     pageNumber = this.state.currentPage,
     speakFrontWord = this.isFront,
   ) {
-    const word = this.state.words[pageNumber];
+    const word = this.getWordsFromRealm(this.state.realm)[pageNumber];
     const {frontLangCode, backLangCode} = this.props.route.params.folder;
     let uttr = {};
     if (speakFrontWord) {
@@ -171,7 +218,6 @@ class ListContent extends Component {
       uttr.text = word.backWord;
       uttr.voice = backLangCode;
     }
-    console.log(uttr.voice, uttr.text);
     Tts.setDefaultLanguage(uttr.voice);
     Tts.speak(uttr.text);
   }
@@ -198,6 +244,19 @@ class ListContent extends Component {
       words: wordsObj,
       numberOfWords: 1,
       isEditing: true,
+    });
+  }
+
+  deleteWord() {
+    this.state.realm.write(() => {
+      const target = this.state.realm
+        .objects('Word')
+        .filtered(`id = "${this.state.deleteTargetId}"`);
+      this.state.realm.delete(target);
+    });
+    this.setState({
+      realm: this.state.realm,
+      isDeleteModalVisible: false,
     });
   }
 
@@ -230,7 +289,8 @@ class ListContent extends Component {
         // 自動再生中でない場合、または最後のカードの裏の場合、自動再生を止める。
         if (
           !this.state.isAutoPlaying ||
-          (this.state.currentPage === this.state.words.length - 1 &&
+          (this.state.currentPage ===
+            this.getWordsFromRealm(this.state.realm).length - 1 &&
             !this.isFront)
         ) {
           this.setState({isAutoPlaying: false});
@@ -266,16 +326,28 @@ class ListContent extends Component {
     });
   }
 
+  isFiltered() {
+    const folder = this.state.realm
+      .objects('Folder')
+      .filtered(`id = "${this.props.route.params.folder.id}"`)[0];
+    const displayStarFrom = folder.displayStarFrom;
+    const displayStarTo = folder.displayStarTo;
+    if (displayStarFrom === 1 && displayStarTo === 3) {
+      return false;
+    }
+    return true;
+  }
+
   render() {
     console.log('render method is called');
     let wordCards;
-    if (!this.state.words) {
+    if (!this.getWordsFromRealm(this.state.realm)) {
       wordCards = (
         <View style={styles.messageTextView}>
           <Text style={styles.message}>Loading...</Text>
         </View>
       );
-    } else if (this.state.words.length === 0) {
+    } else if (this.getWordsFromRealm(this.state.realm).length === 0) {
       wordCards = (
         <View style={styles.messageTextView}>
           <Text style={styles.message}>No words have been registered yet</Text>
@@ -284,7 +356,7 @@ class ListContent extends Component {
         </View>
       );
     } else {
-      wordCards = this.state.words.map((word, key) => {
+      wordCards = this.getWordsFromRealm(this.state.realm).map((word, key) => {
         return (
           <View key={word.id} style={styles.wordCardView}>
             <CardFlip
@@ -298,6 +370,12 @@ class ListContent extends Component {
                 onPress={() => {
                   this.clickCard(key, this.card[key], false);
                 }}>
+                <Stars
+                  styles={styles}
+                  changeLevel={this.changeLevel}
+                  proficiencyLevel={word.proficiencyLevel}
+                  value={word.id}
+                />
                 <View style={styles.wordArea}>
                   <Text
                     numberOfLines={4}
@@ -307,6 +385,18 @@ class ListContent extends Component {
                   </Text>
                 </View>
                 <View style={styles.buttonArea}>
+                  <View style={styles.deleteOpacity}>
+                    <AntIcon
+                      name="delete"
+                      style={styles.deleteImage}
+                      onPress={() => {
+                        this.setState({
+                          isDeleteModalVisible: true,
+                          deleteTargetId: word.id,
+                        });
+                      }}
+                    />
+                  </View>
                   <View style={styles.soundOpacity}>
                     <AntIcon
                       name="sound"
@@ -330,6 +420,11 @@ class ListContent extends Component {
                   this.clickCard(key, this.card[key], true);
                 }}
                 style={[styles.card, styles.backCard]}>
+                <Stars
+                  styles={styles}
+                  changeLevel={this.changeLevel}
+                  proficiencyLevel={word.proficiencyLevel}
+                />
                 <View style={styles.wordArea}>
                   <Text
                     numberOfLines={4}
@@ -339,11 +434,23 @@ class ListContent extends Component {
                   </Text>
                 </View>
                 <View style={styles.buttonArea}>
+                  <View style={styles.deleteOpacity}>
+                    <AntIcon
+                      name="delete"
+                      style={styles.deleteImage}
+                      onPress={() => {
+                        this.setState({
+                          isDeleteModalVisible: true,
+                          deleteTargetId: word.id,
+                        });
+                      }}
+                    />
+                  </View>
                   <View style={styles.soundOpacity}>
                     <AntIcon
                       name="sound"
                       style={styles.soundImage}
-                      onPress={() => this.speakWord(key, false)}
+                      onPress={() => this.speakWord(key, true)}
                     />
                   </View>
                   <View style={styles.penOpacity}>
@@ -391,7 +498,9 @@ class ListContent extends Component {
                 minimumTrackTintColor="#ffffff"
                 maximumTrackTintColor="#444444"
                 maximumValue={
-                  this.state.words ? this.state.words.length - 1 : 0
+                  this.getWordsFromRealm(this.state.realm)
+                    ? this.getWordsFromRealm(this.state.realm).length - 1
+                    : 0
                 }
                 minimumValue={0}
                 value={this.state.currentPage}
@@ -399,11 +508,18 @@ class ListContent extends Component {
                 step={1}>
                 <Text style={styles.pageText}>
                   {this.state.currentPage + 1}/
-                  {this.state.words ? this.state.words.length : 0}
+                  {this.getWordsFromRealm(this.state.realm)
+                    ? this.getWordsFromRealm(this.state.realm).length
+                    : 0}
                 </Text>
               </Slider>
             </View>
             <View style={styles.settingArea}>
+              <TouchableOpacity
+                onPress={() => this.shuffle()}
+                style={styles.shuffleOpacity}>
+                <Icon name="shuffle" style={styles.shuffleButton} />
+              </TouchableOpacity>
               {(() => {
                 if (!this.state.isAutoPlaying) {
                   return (
@@ -426,44 +542,120 @@ class ListContent extends Component {
                   );
                 }
               })()}
-              <View>
-                <TouchableOpacity
-                  onPress={() => this.shuffle()}
-                  style={styles.shuffleOpacity}>
-                  <Icon name="shuffle" style={styles.shuffleButton} />
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity
+                onPress={() => this.setState({editModalIsVisible: true})}
+                style={styles.shuffleOpacity}>
+                {(() => {
+                  if (this.isFiltered() === true) {
+                    return (
+                      <CommunityICon
+                        name="filter"
+                        style={styles.shuffleButton}
+                      />
+                    );
+                  }
+                  return (
+                    <CommunityICon
+                      name="filter-outline"
+                      style={styles.shuffleButton}
+                    />
+                  );
+                })()}
+              </TouchableOpacity>
             </View>
             <View style={styles.bottomArea}>
               <TouchableOpacity onPress={() => this.openAddContent()}>
                 <MaterialIcon name="playlist-add" style={styles.plusButton} />
               </TouchableOpacity>
             </View>
-            <Modal
-              style={styles.modalView}
-              visible={this.state.editModalIsVisible}
-              animationType={'slide' || 'fade'}>
-              <View
-              // style={{
-              // flex: 1,
-              // justifyContent: 'center',
-              // alignItems: 'center',
-              // backgroundColor: '#E5ECEE'
-              // }}
-              >
-                <AddContent style={styles.addContentView} />
-                <Text>This is a Modal.</Text>
-                <TouchableOpacity
-                  // style={styles.closeButton}
-                  onPress={() => {
-                    this.setState({editModalIsVisible: false});
-                  }}>
-                  <Text>Close</Text>
-                </TouchableOpacity>
-              </View>
-            </Modal>
           </View>
         </ImageBackground>
+        <Modal
+          style={styles.modal}
+          visible={this.state.editModalIsVisible}
+          animationType={'fade'}
+          backdropOpacity={0.5}
+          hasBackdrop={true}
+          onBackdropPress={() => this.setState({editModalIsVisible: false})}>
+          <View style={styles.modalView}>
+            <View style={styles.modalTextArea}>
+              <View style={styles.modalTextInsideArea}>
+                <Text style={styles.modalText}>proficiency level</Text>
+              </View>
+              <View style={styles.modalConditionArea}>
+                <Stars
+                  styles={styles}
+                  changeLevel={this.changeFilterLevel}
+                  proficiencyLevel={
+                    this.state.realm
+                      .objects('Folder')
+                      .filtered(`id="${this.props.route.params.folder.id}"`)[0]
+                      .displayStarFrom
+                  }
+                  value={this.props.route.params.folder.id}
+                  isFrom={true}
+                />
+                <Text style={styles.modalSymbol}>〜</Text>
+                <Stars
+                  styles={styles}
+                  changeLevel={this.changeFilterLevel}
+                  proficiencyLevel={
+                    this.state.realm
+                      .objects('Folder')
+                      .filtered(`id="${this.props.route.params.folder.id}"`)[0]
+                      .displayStarTo
+                  }
+                  value={this.props.route.params.folder.id}
+                  isFrom={false}
+                />
+              </View>
+            </View>
+            <View style={styles.buttonArea}>
+              <Button
+                block
+                primary
+                style={styles.okButton}
+                onPress={() => {
+                  this.setState({editModalIsVisible: false});
+                }}>
+                <Text style={styles.buttonText}>OK</Text>
+              </Button>
+            </View>
+          </View>
+        </Modal>
+        <Modal
+          style={styles.modal}
+          visible={this.state.isDeleteModalVisible}
+          animationType={'fade'}
+          backdropOpacity={0.5}
+          hasBackdrop={true}
+          onBackdropPress={() => this.setState({isDeleteModalVisible: false})}>
+          <View style={styles.confirmationView}>
+            <Text style={styles.modalText}>
+              Are you sure you want to delete these words?
+            </Text>
+            <View style={styles.confirmationButtonArea}>
+              <Button
+                block
+                danger
+                style={styles.dissmissButton}
+                onPress={() => {
+                  this.deleteWord();
+                }}>
+                <Text style={styles.buttonText}>Delete</Text>
+              </Button>
+              <Button
+                block
+                light
+                style={styles.dissmissButton}
+                onPress={() => {
+                  this.setState({isDeleteModalVisible: false});
+                }}>
+                <Text style={styles.buttonText}>Cancel</Text>
+              </Button>
+            </View>
+          </View>
+        </Modal>
       </View>
     );
   }
@@ -518,10 +710,6 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     shadowColor: '#fff',
     padding: 10,
-    // shadowOffset: {
-    //   width: 10,
-    //   height: 20,
-    // },
     shadowRadius: 10,
     shadowOpacity: 0.8,
     backgroundColor: '#ffffff',
@@ -541,18 +729,6 @@ const styles = StyleSheet.create({
     flex: 1,
     marginTop: height * 0.1,
   },
-  pickerSelectStyles: {
-    fontSize: 16,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderWidth: 1,
-    borderColor: '#789',
-    borderRadius: 4,
-    color: '#789',
-    paddingRight: 30, // to ensure the text is never behind the icon
-    width: 300,
-    marginLeft: 30,
-  },
   message: {
     textAlign: 'center',
     width: '100%',
@@ -562,17 +738,16 @@ const styles = StyleSheet.create({
   },
   soundOpacity: {
     flex: 1,
-    // position: 'absolute',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  deleteOpacity: {
     alignItems: 'flex-start',
+    flex: 1,
     marginLeft: 20,
-    // left: width * 0.05,
-    // bottom: 0,
   },
   penOpacity: {
     flex: 1,
-    // position: 'absolute',
-    // right: width * 0.05,
-    // bottom: height * 0.005,
     alignItems: 'flex-end',
     marginRight: 20,
   },
@@ -581,7 +756,9 @@ const styles = StyleSheet.create({
   },
   penIcon: {
     fontSize: 40,
-    // transform: [{scaleX: -1}],
+  },
+  deleteImage: {
+    fontSize: 40,
   },
   settingArea: {
     alignItems: 'center',
@@ -591,14 +768,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: width * 0.9,
     height: height * 0.1,
+    left: 20,
   },
   playStopButton: {
     fontSize: 80,
     color: '#ffffff',
+    marginHorizontal: 20,
   },
   shuffleButton: {
     fontSize: 50,
     color: '#ffffff',
+    marginHorizontal: 20,
   },
   sliderView: {
     // width: '100%',
@@ -610,12 +790,6 @@ const styles = StyleSheet.create({
     marginTop: 20,
     color: '#ffffff',
   },
-  modalView: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
-  },
   addContentView: {
     flex: 1,
     height: '100%',
@@ -625,7 +799,7 @@ const styles = StyleSheet.create({
   },
   listContentView: {
     flex: 1,
-    backgroundColor: '#111111',
+    // backgroundColor: '#111111',
   },
   backgroundImage: {
     flex: 1,
@@ -659,6 +833,88 @@ const styles = StyleSheet.create({
   buttonArea: {
     flexDirection: 'row',
     flex: 1,
+  },
+  starArea: {
+    flexDirection: 'row',
+  },
+  star: {
+    fontSize: 36,
+    paddingHorizontal: 10,
+    color: '#ffd400',
+  },
+  modal: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    left: -20,
+    bottom: -20,
+    width: '100%',
+    flex: 1,
+  },
+  modalView: {
+    // flex: 1,
+    height: 200,
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff',
+    width: 330,
+    padding: 16,
+    borderRadius: 10,
+    borderColor: '#000000',
+    borderWidth: 1,
+  },
+  modalText: {
+    fontSize: 18,
+  },
+  modalSymbol: {
+    transform: [{rotate: '90deg'}],
+  },
+  modalTextArea: {
+    // flex: 1,
+    flexDirection: 'row',
+  },
+  modalTextInsideArea: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    textAlign: 'center',
+  },
+  modalConditionArea: {
+    flexDirection: 'column',
+    flex: 1.5,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  okButton: {
+    width: '30%',
+    margin: 20,
+  },
+  buttonText: {
+    fontSize: 22,
+  },
+  confirmationView: {
+    backgroundColor: '#ffffff',
+    width: 300,
+    height: 200,
+    flexDirection: 'column',
+    padding: 30,
+    borderColor: '#000000',
+    borderWidth: 1,
+    borderRadius: 10,
+  },
+  dissmissButton: {
+    flex: 1,
+    marginHorizontal: 10,
+    // width: 50,
+    // height: 50,
+  },
+  // buttonText: {
+  //   fontSize: 20,
+  //   color: '#ffffff',
+  // },
+  confirmationButtonArea: {
+    flexDirection: 'row',
+    marginTop: 20,
   },
 });
 

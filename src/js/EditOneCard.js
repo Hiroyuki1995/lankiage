@@ -68,11 +68,13 @@ class EditOneCard extends Component {
         </View>
         <Icon name ="ellipse-outline" style={styles.cardRing}></Icon>
         <View style={styles.oneSideInputArea}>
-          <View >
+          <View>
             <TextInput
               name="backWord"
+              numberOfLines={10}
               ref={(input) => (this.back = input)}
               multiline={true}
+              blurOnSubmit={true}
               value={word.backWord}
               style={formStyle}
               placeholder="back word"
@@ -200,10 +202,8 @@ const styles = StyleSheet.create({
     left: width * 0.5 - 30,
     color: '#6e6efa',
     zIndex: 1,
-    transform: [
-      { rotateX: "45deg" }
-    ]
-  }
+    transform: [{rotateX: '45deg'}],
+  },
 });
 
 export default EditOneCard;

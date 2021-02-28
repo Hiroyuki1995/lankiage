@@ -6,6 +6,8 @@ export const FolderSchema = {
     name: 'string',
     frontLangCode: 'string',
     backLangCode: 'string',
+    displayStarFrom: 'int',
+    displayStarTo: 'int',
     createdAt: 'date',
   },
 };
@@ -15,9 +17,11 @@ export const WordSchema = {
   primaryKey: 'id',
   properties: {
     id: 'string',
+    folderId: 'string',
     frontWord: 'string',
     backWord: 'string',
+    proficiencyLevel: 'int',
+    order: 'int',
     createdAt: 'date',
-    folderId: 'string',
   },
 };

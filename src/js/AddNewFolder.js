@@ -92,8 +92,6 @@ class AddNewFolder extends Component {
               onValueChange={(v) => this.onChange(v, 'frontLangCode')}
             />
           </View>
-          {/* <View style={styles.inputView}>
-          </View> */}
         </View>
         <View style={styles.OneLanguageArea}>
           <View style={styles.labelView}>
@@ -153,8 +151,6 @@ class AddNewFolder extends Component {
           visible={this.state.isConfirmarionVisible}
           animationType={'fade'}
           backdropOpacity={0.5}
-          // backdropColor="#rbga(0,0,0,0.6)"
-          // tranparent={false}
           hasBackdrop={true}
           onBackdropPress={() => this.setState({isConfirmarionVisible: false})}>
           <View style={styles.confirmationView}>
@@ -262,6 +258,10 @@ const styles = StyleSheet.create({
   confirmationModal: {
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    left: -20,
+    bottom: -20,
+    width: '100%',
   },
   confirmationView: {
     backgroundColor: '#ffffff',

@@ -524,6 +524,8 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 20,
     // padding: 10,
+    fontStyle: 'italic',
+    textDecorationLine: 'underline',
   },
   translationButton: {
     // width: 30,

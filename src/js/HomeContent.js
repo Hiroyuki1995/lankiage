@@ -45,12 +45,12 @@ class HomeContent extends Component {
     this.registerWords = this.registerWords.bind(this);
     this.showAllCards = this.showAllCards.bind(this);
     this.deleteWords = this.deleteWords.bind(this);
-    this.createFolder = this.createFolder.bind(this);
   }
 
   componentDidMount() {
     const route = this.props.navigation;
     console.log(`route ${route}`);
+    console.log(Realm.defaultPath);
     console.log('componentDidMount at HomeContent');
     // try {
     //   this.setState({
@@ -90,9 +90,6 @@ class HomeContent extends Component {
   }
 
   deleteWords(targetIds) {
-    // if (!this.realm) {
-    //   this.realm = new Realm({schema: [FolderSchema, WordSchema]});
-    // }
     let realm = this.state.realm;
     console.log('HomeContent' + JSON.stringify(targetIds));
     for (let id of targetIds) {
@@ -102,10 +99,6 @@ class HomeContent extends Component {
       });
     }
     this.setState({realm});
-  }
-
-  createFolder() {
-    console.log('createFolder()');
   }
 
   registerWords(info, folderId, isEditing) {
@@ -120,10 +113,14 @@ class HomeContent extends Component {
           realm.write(() => {
             realm.create('Word', {
               id: uuidv4(),
+              folderId: folderId,
               frontWord: word.frontWord,
               backWord: word.backWord,
+              proficiencyLevel: 1,
+              order:
+                realm.objects('Word').filtered(`folderId="${folderId}"`)
+                  .length + 1,
               createdAt: new Date(),
-              folderId: folderId,
             });
           });
         } else {
@@ -152,9 +149,6 @@ class HomeContent extends Component {
   }
 
   editFolder(object, isEditing) {
-    // if (!this.realm) {
-    //   this.realm = new Realm({schema: [FolderSchema, WordSchema]});
-    // }
     let realm = this.state.realm;
     realm.write(() => {
       if (isEditing) {
@@ -174,6 +168,8 @@ class HomeContent extends Component {
           name: object.folderName,
           frontLangCode: object.frontLangCode,
           backLangCode: object.backLangCode,
+          displayStarFrom: 1,
+          displayStarTo: 3,
           createdAt: new Date(),
         });
       }
@@ -182,9 +178,6 @@ class HomeContent extends Component {
   }
 
   deleteFolder(id) {
-    // if (!this.realm) {
-    //   this.realm = new Realm({schema: [FolderSchema, WordSchema]});
-    // }
     let realm = this.state.realm;
     realm.write(() => {
       const target = realm.objects('Folder').filtered(`id = "${id}"`);
@@ -272,14 +265,10 @@ class HomeContent extends Component {
           </View>
           <View style={styles.foldersArea}>{foldersObj}</View>
           <Modal
-            coverScreen={false}
+            coverScreen={true}
             style={styles.modal}
             visible={this.state.isEditorVisible}
             animationType={'fade'}
-            backdropOpacity={0.5}
-            // backdropColor="#rbga(0,0,0,0.6)"
-            // tranparent={false}
-            hasBackdrop={true}
             onBackdropPress={() => this.setState({isEditorVisible: false})}>
             <AddNewFolder
               realm={this.state.realm}
@@ -295,10 +284,6 @@ class HomeContent extends Component {
             style={styles.modal}
             visible={this.state.isEditor2Visible}
             animationType={'fade'}
-            backdropOpacity={0.5}
-            // backdropColor="#rbga(0,0,0,0.6)"
-            // tranparent={false}
-            hasBackdrop={true}
             onBackdropPress={() => this.setState({isEditor2Visible: false})}>
             <AddNewFolder
               realm={this.state.realm}
@@ -353,6 +338,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'flex-end',
     flexDirection: 'row',
+    flex: 1,
   },
   folderAddIcon: {
     flex: 1,
@@ -388,14 +374,18 @@ const styles = StyleSheet.create({
   },
   backgroundImage: {
     flex: 1,
-    resizeMode: 'cover',
+    // resizeMode: 'cover',
     justifyContent: 'center',
-    width: width,
-    height: height,
+    // width: width,
+    // height: height,
   },
   modal: {
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    left: -20,
+    bottom: -20,
+    width: '100%',
   },
 });
 

@@ -80,42 +80,9 @@ function App() {
 export default App;
 
 const styles = StyleSheet.create({
-  root: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#000000',
-  },
-  backgroundImage: {
-    flex: 1,
-    resizeMode: 'cover',
-    justifyContent: 'center',
-    width: width,
-    height: height,
-  },
-  background: {
-    backgroundColor: 'rgba(0,0,0, 0.5)',
-    flex: 1,
-  },
-  overlay: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#00000050',
-  },
   listIcon: {
     fontSize: 35,
     marginRight: 20,
     color: '#ffffff',
   },
 });
-
-// import React, {Component} from 'react';
-// //ローカルインポート
-// import AppNavigator from './AppNavigator';
-
-// export default class App extends Component {
-//   render() {
-//     return <AppNavigator />;
-//   }
-// }
