@@ -14,7 +14,7 @@ import {Text} from 'native-base';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Ionicons';
 import FoundationIcon from 'react-native-vector-icons/Foundation';
-import CommunityICon from 'react-native-vector-icons/MaterialCommunityIcons';
+import CommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import AntIcon from 'react-native-vector-icons/AntDesign';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
@@ -65,7 +65,7 @@ class ListContent extends Component {
     console.log('componentDidMount in ListContent');
     this.removeListener = this.props.navigation.addListener('focus', () => {
       console.log('eventlistener comes out');
-      this.props.navigation.setParams({realm: this.props.route.params.realm});
+      this.props.navigation.setParams({realm: this.state.realm});
     });
   }
 
@@ -450,7 +450,7 @@ class ListContent extends Component {
                     <AntIcon
                       name="sound"
                       style={styles.soundImage}
-                      onPress={() => this.speakWord(key, true)}
+                      onPress={() => this.speakWord(key, false)}
                     />
                   </View>
                   <View style={styles.penOpacity}>
@@ -548,14 +548,14 @@ class ListContent extends Component {
                 {(() => {
                   if (this.isFiltered() === true) {
                     return (
-                      <CommunityICon
+                      <CommunityIcon
                         name="filter"
                         style={styles.shuffleButton}
                       />
                     );
                   }
                   return (
-                    <CommunityICon
+                    <CommunityIcon
                       name="filter-outline"
                       style={styles.shuffleButton}
                     />
@@ -565,7 +565,7 @@ class ListContent extends Component {
             </View>
             <View style={styles.bottomArea}>
               <TouchableOpacity onPress={() => this.openAddContent()}>
-                <MaterialIcon name="playlist-add" style={styles.plusButton} />
+                <CommunityIcon name="card-plus" style={styles.plusButton} />
               </TouchableOpacity>
             </View>
           </View>

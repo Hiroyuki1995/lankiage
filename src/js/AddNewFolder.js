@@ -19,6 +19,7 @@ class AddNewFolder extends Component {
       realm: null,
       message: null,
       isConfirmarionVisible: false,
+      focusForm: '',
     };
     this.onChange = this.onChange.bind(this);
     this.editFolder = this.editFolder.bind(this);
@@ -74,22 +75,36 @@ class AddNewFolder extends Component {
           <View style={styles.labelView}>
             <Text style={styles.labelText}>Folder Name</Text>
             <TextInput
+              ref={(input) => (this.text = input)}
+              autoFocus={this.props.isEditing ? false : true}
+              label="folderName"
               style={styles.inputForm}
               onChangeText={(_v) => {
                 this.onChange(_v, 'folderName');
               }}
               value={folderName}
+              returnKeyType="next"
+              onSubmitEditing={() => {
+                this.setState({focusForm: 'frontLangCode'});
+              }}
             />
           </View>
         </View>
         <View style={styles.OneLanguageArea}>
           <View style={styles.labelView}>
-            <Text style={styles.labelText}>Front Language</Text>
+            <Text style={styles.labelText}> Front Language</Text>
             <LanguageSelect
+              focusForm={this.state.focusForm}
               label="frontLangCode"
               style={styles.languageSelect}
               value={frontLangCode}
               onValueChange={(v) => this.onChange(v, 'frontLangCode')}
+              onDonePress={() => this.setState({focusForm: 'backLangCode'})}
+              onDownArrow={() => this.setState({focusForm: 'backLangCode'})}
+              onUpArrow={() => {
+                this.setState({focusForm: 'folderName'});
+                this.text.focus();
+              }}
             />
           </View>
         </View>
@@ -97,10 +112,14 @@ class AddNewFolder extends Component {
           <View style={styles.labelView}>
             <Text style={styles.labelText}>Back Language</Text>
             <LanguageSelect
+              focusForm={this.state.focusForm}
               label="backLangCode"
               style={styles.languageSelect}
               value={backLangCode}
               onValueChange={(v) => this.onChange(v, 'backLangCode')}
+              onUpArrow={() => this.setState({focusForm: 'frontLangCode'})}
+              onDonePress={() => this.editFolder()}
+              onDownArrow={() => this.editFolder()}
             />
           </View>
           {/* <View style={styles.inputView}>
@@ -254,6 +273,9 @@ const styles = StyleSheet.create({
   },
   labelText: {
     fontSize: 18,
+  },
+  focusLabelText: {
+    fontWeight: 'bold',
   },
   confirmationModal: {
     alignItems: 'center',

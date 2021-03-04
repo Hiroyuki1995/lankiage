@@ -9,7 +9,9 @@ import {
   Button as NativeButton,
   ImageBackground,
   Image,
+  KeyboardAvoidingView,
 } from 'react-native';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
@@ -40,7 +42,7 @@ class AddContent extends Component {
       message: '',
       // realm: null,
       currentFocus: {
-        key: 0,
+        key: null,
         isFront: true,
       },
     };
@@ -59,10 +61,25 @@ class AddContent extends Component {
     this.formFocus = this.formFocus.bind(this);
     this.backToList = this.backToList.bind(this);
     this.getLangName = this.getLangName.bind(this);
+    this.addCard = this.addCard.bind(this);
   }
 
   backToList() {
     this.props.navigation.goBack();
+  }
+
+  addCard() {
+    this.setState((prevState) => {
+      const words = prevState.words;
+      words.push(wordSchema);
+      return {
+        numberOfWords: prevState.numberOfWords + 1,
+        words,
+        currentFocus: {
+          key: null,
+        },
+      };
+    });
   }
 
   getLangName(langCode) {
@@ -89,7 +106,7 @@ class AddContent extends Component {
   }
 
   translate(isForword = true) {
-    this.setState({message: ''});
+    let message = '';
     const {words} = this.state;
     const frontLangTranslateCode = this.getLangTranslateCode(
       this.frontLangCode,
@@ -98,7 +115,9 @@ class AddContent extends Component {
     const fromLang = isForword ? frontLangTranslateCode : backLangTranslateCode;
     const toLang = !isForword ? frontLangTranslateCode : backLangTranslateCode;
     if (!fromLang || !toLang) {
-      this.setState({message: 'Please set the languages'});
+      message = 'Please set the languages';
+      this.setState({message: message});
+      return;
     } else {
       const translationTargets = [];
       const keys = [];
@@ -124,12 +143,15 @@ class AddContent extends Component {
                 return {
                   ...word,
                   [resultWordLabel]: result[index],
+                  currentFocus: {
+                    key: null,
+                  },
                 };
               } else {
                 return {word};
               }
             });
-            this.setState({words: updatedWords});
+            this.setState({words: updatedWords, message: ''});
           })
           .catch((error) => {
             this.setState({message: error.message});
@@ -186,21 +208,27 @@ class AddContent extends Component {
           prevState.currentFocus.key === prevState.numberOfWords - 1
         )
       ) {
-        const nextFocusKey = prevState.currentFocus.isFront
-          ? currentFocusKey
-          : currentFocusKey + 1;
-        return {
-          currentFocus: {
-            key: nextFocusKey,
-            isFront: !prevState.currentFocus.isFront,
-          },
-        };
+        if (prevState.currentFocus.isFront) {
+          return {
+            currentFocus: {
+              key: currentFocusKey,
+              isFront: false,
+            },
+          };
+        } else {
+          return {
+            currentFocus: {
+              key: currentFocusKey + 1,
+              isFront: true,
+            },
+          };
+        }
       }
     });
   }
 
   formFocus(key, isFront) {
-    console.log(key, isFront);
+    console.log('formFocus', key, isFront);
     this.setState({
       currentFocus: {
         key: key,
@@ -248,7 +276,13 @@ class AddContent extends Component {
           message = `Edited ${numberOfRegisterd} words`;
         }
       }
-      return {words: updatedWords, message: message};
+      return {
+        words: updatedWords,
+        message: message,
+        currentFocus: {
+          key: null,
+        },
+      };
     });
   }
 
@@ -258,7 +292,13 @@ class AddContent extends Component {
       for (let i = 0; i < this.state.numberOfWords; i++) {
         words.push(wordSchema);
       }
-      return {words, message: ''};
+      return {
+        words,
+        message: '',
+        currentFocus: {
+          key: null,
+        },
+      };
     });
   }
 
@@ -279,7 +319,22 @@ class AddContent extends Component {
         // resizeMode="contain"
         source={require('../png/milky-way.jpg')}>
         <View style={styles.container}>
-          <ScrollView style={styles.inputArea}>
+          <KeyboardAwareScrollView
+            extraScrollHeight={170}
+            style={styles.inputArea}>
+            {(() => {
+              if (!this.props.route.params.isEditing) {
+                return (
+                  <View style={styles.cardPlusIconView}>
+                    <Icon
+                      name="card-plus"
+                      style={styles.cardPlusIcon}
+                      onPress={this.addCard}
+                    />
+                  </View>
+                );
+              }
+            })()}
             {(() => {
               if (message) {
                 return (
@@ -333,12 +388,14 @@ class AddContent extends Component {
                     onChange={this.changeContent}
                     onFormFocus={this.formFocus}
                     inputAccessoryViewID={inputAccessoryViewID}
+                    onSubmitEditing={this.focusNextWord}
+                    scroll={this.scroll}
                   />,
                 );
               }
               return <View>{items}</View>;
             })()}
-            <InputAccessoryView
+            {/* <InputAccessoryView
               nativeID={inputAccessoryViewID}
               backgroundColor="#ffffff"
               style={styles.keyboradToolbar}>
@@ -349,21 +406,11 @@ class AddContent extends Component {
                     style={styles.directionButton}
                     onPress={this.focusBackWord}
                   />
-                  {/* <TouchableOpacity
-                    style={false ? {display: 'none'} : {display: 'flex'}}
-                    onPress={this.focusBackWord}>
-                    <Image source={backButton} style={styles.directionButton} />
-                  </TouchableOpacity> */}
                   <MaterialIcon
                     name="arrow-forward-ios"
                     style={styles.directionButton}
                     onPress={this.focusNextWord}
                   />
-                  {/* <TouchableOpacity
-                    style={styles.directionButton}
-                    onPress={this.focusNextWord}>
-                    <Image source={nextButton} style={styles.directionButton} />
-                  </TouchableOpacity> */}
                 </View>
                 <View style={styles.actionButtons}>
                   <NativeButton
@@ -378,57 +425,56 @@ class AddContent extends Component {
                   />
                 </View>
               </View>
-            </InputAccessoryView>
-            <View>
-              <View style={{flex: 1}}>
-                {(() => {
-                  if (!this.props.route.params.isEditing) {
-                    return (
-                      <View style={styles.submitButtonView}>
-                        <Button
-                          block
-                          primary
-                          variant="contained"
-                          style={[styles.button, styles.submitButton]}
-                          onPress={() => this.registerWords()}>
-                          <Text style={styles.submitButtonText}>Save</Text>
-                        </Button>
-                        <Button
-                          block
-                          light
-                          variant="contained"
-                          style={[styles.button, styles.resetButton]}
-                          onPress={this.resetWords}>
-                          <Text style={styles.resetButtonText}>Reset</Text>
-                        </Button>
-                      </View>
-                    );
-                  } else {
-                    return (
-                      <View style={styles.submitButtonView}>
-                        <Button
-                          block
-                          primary
-                          variant="contained"
-                          style={[styles.button, styles.submitButton]}
-                          onPress={() => this.registerWords(true)}>
-                          <Text style={styles.submitButtonText}>Save</Text>
-                        </Button>
-                        <Button
-                          block
-                          light
-                          variant="contained"
-                          style={[styles.button, styles.resetButton]}
-                          onPress={this.backToList}>
-                          <Text style={styles.resetButtonText}>Cancel</Text>
-                        </Button>
-                      </View>
-                    );
-                  }
-                })()}
-              </View>
+            </InputAccessoryView> */}
+            <View style={styles.buttonAreaView}>
+              {(() => {
+                if (!this.props.route.params.isEditing) {
+                  return (
+                    <View style={styles.submitButtonView}>
+                      <Button
+                        block
+                        primary
+                        variant="contained"
+                        style={[styles.button, styles.submitButton]}
+                        onPress={() => this.registerWords()}>
+                        <Text style={styles.submitButtonText}>Save</Text>
+                      </Button>
+                      <Button
+                        block
+                        light
+                        variant="contained"
+                        style={[styles.button, styles.resetButton]}
+                        onPress={this.resetWords}>
+                        <Text style={styles.resetButtonText}>Reset</Text>
+                      </Button>
+                    </View>
+                  );
+                } else {
+                  return (
+                    <View style={styles.submitButtonView}>
+                      <Button
+                        block
+                        primary
+                        variant="contained"
+                        style={[styles.button, styles.submitButton]}
+                        onPress={() => this.registerWords(true)}>
+                        <Text style={styles.submitButtonText}>Save</Text>
+                      </Button>
+                      <Button
+                        block
+                        light
+                        variant="contained"
+                        style={[styles.button, styles.resetButton]}
+                        onPress={this.backToList}>
+                        <Text style={styles.resetButtonText}>Cancel</Text>
+                      </Button>
+                    </View>
+                  );
+                }
+              })()}
             </View>
-          </ScrollView>
+            {/* </KeyboardAvoidingView> */}
+          </KeyboardAwareScrollView>
         </View>
       </ImageBackground>
     );
@@ -438,10 +484,10 @@ class AddContent extends Component {
 const styles = StyleSheet.create({
   inputArea: {
     flexDirection: 'column',
-    paddingTop: height * 0.06,
+    paddingTop: 10,
     paddingLeft: width * 0.02,
     paddingRight: width * 0.02,
-    flex: 1,
+    // flex: 1,
   },
   oneCardInputArea: {
     flexDirection: 'row',
@@ -603,17 +649,34 @@ const styles = StyleSheet.create({
     flex: 1,
     resizeMode: 'cover',
     justifyContent: 'center',
-    width: width,
-    height: height,
   },
   container: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0, 0.5)',
+    // justifyContent: 'center',
+    // alignItems: 'center',
   },
   languageText: {
     fontSize: 20,
     color: '#ffffff',
     textAlign: 'center',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  buttonAreaView: {
+    flex: 1,
+    marginBottom: 50,
+  },
+  cardPlusIconView: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  cardPlusIcon: {
+    fontSize: 50,
+    color: '#ffffff',
   },
 });
 

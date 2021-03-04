@@ -19,6 +19,7 @@ const {width, height} = Dimensions.get('window');
 import {FolderSchema} from './Schema.js';
 import {v4 as uuidv4} from 'uuid';
 import AddNewFolder from './AddNewFolder.js';
+import CopyFolder from './CopyFolder.js';
 
 class HomeContent extends Component {
   constructor(props) {
@@ -32,12 +33,14 @@ class HomeContent extends Component {
       isEditorVisible: false,
       isEditor2Visible: false,
       folder: null,
+      isCopyVisible: false,
     };
     // this.realm = null;
     this.openFolderEdit = this.openFolderEdit.bind(this);
     this.openFolderEdit2 = this.openFolderEdit2.bind(this);
     this.openFolder = this.openFolder.bind(this);
     this.editFolder = this.editFolder.bind(this);
+    this.copyFolder = this.copyFolder.bind(this);
     this.deleteFolder = this.deleteFolder.bind(this);
     this.registerWords = this.registerWords.bind(this);
     this.showAllCards = this.showAllCards.bind(this);
@@ -104,6 +107,9 @@ class HomeContent extends Component {
     //   this.realm = new Realm({schema: [FolderSchema, WordSchema]});
     // }
     let realm = this.state.realm;
+    const numOfWords = realm.objects('Word').filtered(`folderId="${folderId}"`)
+      .length;
+    let i = 1;
     for (let word of info.words) {
       if (word.frontWord && word.backWord) {
         if (!isEditing) {
@@ -115,11 +121,16 @@ class HomeContent extends Component {
               backWord: word.backWord,
               proficiencyLevel: 1,
               order:
-                realm.objects('Word').filtered(`folderId="${folderId}"`)
-                  .length + 1,
+                numOfWords === 0
+                  ? i
+                  : realm
+                      .objects('Word')
+                      .sorted('order', true)
+                      .filtered(`folderId="${folderId}"`)[0].order + 1,
               createdAt: new Date(),
             });
           });
+          i++;
         } else {
           realm.write(() => {
             realm.create(
@@ -190,6 +201,12 @@ class HomeContent extends Component {
     });
   }
 
+  copyFolder() {
+    this.setState({
+      isCopyVisible: true,
+    });
+  }
+
   openFolderEdit2() {
     this.setState({
       isEditor2Visible: true,
@@ -249,8 +266,9 @@ class HomeContent extends Component {
               <MaterialIcon
                 name="folder-multiple"
                 style={styles.folderCopyIcon}
-                onPress={() => this.openFolderEdit()}
+                onPress={() => this.copyFolder()}
               />
+              <Text style={styles.iconText}>Copy</Text>
             </View>
             <View style={styles.addIconView}>
               <FoundationIcon
@@ -258,6 +276,7 @@ class HomeContent extends Component {
                 onPress={() => this.openFolderEdit()}
                 name="folder-add"
               />
+              <Text style={styles.iconText}>Create</Text>
             </View>
           </View>
           <View style={styles.foldersArea}>{foldersObj}</View>
@@ -286,6 +305,17 @@ class HomeContent extends Component {
               realm={this.state.realm}
               createFolder={this.createFolder}
               goBack={() => this.setState({isEditor2Visible: false})}
+            />
+          </Modal>
+          <Modal
+            coverScreen={true}
+            style={styles.modal}
+            visible={this.state.isCopyVisible}
+            animationType={'fade'}
+            onBackdropPress={() => this.setState({isCopyVisible: false})}>
+            <CopyFolder
+              realm={this.state.realm}
+              goBack={() => this.setState({isCopyVisible: false})}
             />
           </Modal>
         </ScrollView>
@@ -383,6 +413,11 @@ const styles = StyleSheet.create({
     left: -20,
     bottom: -20,
     width: '100%',
+  },
+  iconText: {
+    fontSize: 16,
+    color: '#ffffff',
+    textAlign: 'center',
   },
 });
 

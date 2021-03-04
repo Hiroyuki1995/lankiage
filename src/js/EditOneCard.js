@@ -1,35 +1,19 @@
 import React, {Component} from 'react';
-import {TextInput, View, StyleSheet, Dimensions} from 'react-native';
+import {TextInput, View, StyleSheet, Dimensions, KeyboardAvoidingView} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 const {width, height} = Dimensions.get('window');
 import 'react-native-get-random-values';
-const defalutFrontLang = 'zh-cn';
-const defalutBackLang = 'ja';
-const wordSchema = {
-  frontWord: '',
-  backWord: '',
-  isRegisterd: false,
-};
+import { TouchableOpacity } from 'react-native';
 
 class EditOneCard extends Component {
   constructor(props) {
     super(props);
-    this.card = [];
     this.ref = null;
-    this.state = {
-      words: [],
-      loading: false,
-      frontLang: defalutFrontLang,
-      backLang: defalutBackLang,
-      numberOfWords: 10,
-      message: '',
-      realm: null,
-    };
   }
 
   componentDidUpdate() {
-    // console.log('componentDidUpdate', this.props.currentFocusKey, this.props.currentFocusSide);
     if (this.props.currentFocusKey === this.props.id) {
+      console.log('componentDidUpdate', this.props.currentFocusKey, this.props.currentFocusSide);
       if (this.props.currentFocusSide) {
         this.front.focus();
       } else {
@@ -50,21 +34,21 @@ class EditOneCard extends Component {
       <View style={styles.oneCardInputArea}>
         <View style={styles.oneSideInputArea}>
           <TextInput
-            multiline={true}
-            numberOfLines={10}
-            // maxLength={1000}
             name="frontWord"
+            numberOfLines={10}
             ref={(input) => (this.front = input)}
+            multiline={true}
+            blurOnSubmit={true}
             value={word.frontWord}
+            returnKeyType="next"
             style={formStyle}
             placeholder="front word"
-            inputAccessoryViewID={this.props.inputAccessoryViewID}
+            // inputAccessoryViewID={this.props.inputAccessoryViewID}
             onChangeText={(value) => {
               this.props.onChange('frontWord', value, this.props.id);
             }}
-            onFocus={() => {
-              this.props.onFormFocus(this.props.id, true);
-            }}
+            onSubmitEditing={this.props.onSubmitEditing}
+            onFocus={() => this.props.onFormFocus(this.props.id, true)}
           />
         </View>
         <Icon name ="ellipse-outline" style={styles.cardRing}></Icon>
@@ -77,15 +61,15 @@ class EditOneCard extends Component {
               multiline={true}
               blurOnSubmit={true}
               value={word.backWord}
+              returnKeyType="next"
               style={formStyle}
               placeholder="back word"
-              inputAccessoryViewID={this.props.inputAccessoryViewID}
+              // inputAccessoryViewID={this.props.inputAccessoryViewID}
               onChangeText={(value) => {
                 this.props.onChange('backWord', value, this.props.id);
               }}
-              onFocus={() => {
-                this.props.onFormFocus(this.props.id, false);
-              }}
+              onSubmitEditing={this.props.onSubmitEditing}
+              onFocus={() => this.props.onFormFocus(this.props.id, false)}
             />
           </View>
         </View>
@@ -133,6 +117,7 @@ const styles = StyleSheet.create({
     shadowOpacity: 1,
     textAlign: 'center',
     textAlignVertical: 'top',
+    paddingHorizontal: 10,
   },
   inputRegisterdForm: {
     backgroundColor: '#87cefa',
