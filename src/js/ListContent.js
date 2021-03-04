@@ -339,7 +339,7 @@ class ListContent extends Component {
   }
 
   render() {
-    console.log('render method is called');
+    console.log('currentPage', this.state.currentPage);
     let wordCards;
     if (!this.getWordsFromRealm(this.state.realm)) {
       wordCards = (
@@ -357,114 +357,140 @@ class ListContent extends Component {
       );
     } else {
       wordCards = this.getWordsFromRealm(this.state.realm).map((word, key) => {
-        return (
-          <View key={word.id} style={styles.wordCardView}>
-            <CardFlip
-              style={styles.cardContainer}
-              flipDirection="x"
-              key={word.id}
-              ref={(card) => (this.card[key] = card)}>
-              <TouchableOpacity
+        if (
+          key >= this.state.currentPage - 1 &&
+          key <= this.state.currentPage + 1
+        ) {
+          return (
+            <View key={word.id} style={styles.wordCardView}>
+              <CardFlip
+                style={styles.cardContainer}
+                flipDirection="x"
                 key={word.id}
-                style={styles.card}
-                onPress={() => {
-                  this.clickCard(key, this.card[key], false);
-                }}>
-                <Stars
-                  styles={styles}
-                  changeLevel={this.changeLevel}
-                  proficiencyLevel={word.proficiencyLevel}
-                  value={word.id}
-                />
-                <View style={styles.wordArea}>
-                  <Text
-                    numberOfLines={4}
-                    adjustsFontSizeToFit={true}
-                    style={styles.cardWord}>
-                    {word.frontWord}
-                  </Text>
-                </View>
-                <View style={styles.buttonArea}>
-                  <View style={styles.deleteOpacity}>
-                    <AntIcon
-                      name="delete"
-                      style={styles.deleteImage}
-                      onPress={() => {
-                        this.setState({
-                          isDeleteModalVisible: true,
-                          deleteTargetId: word.id,
-                        });
-                      }}
-                    />
+                ref={(card) => (this.card[key] = card)}>
+                <TouchableOpacity
+                  activeOpacity={1}
+                  key={word.id}
+                  style={styles.card}
+                  onPress={() => {
+                    this.clickCard(key, this.card[key], false);
+                  }}>
+                  <Stars
+                    styles={styles}
+                    changeLevel={this.changeLevel}
+                    proficiencyLevel={word.proficiencyLevel}
+                    value={word.id}
+                  />
+                  <View style={styles.wordArea}>
+                    <Text
+                      numberOfLines={4}
+                      adjustsFontSizeToFit={true}
+                      style={styles.cardWord}>
+                      {word.frontWord}
+                    </Text>
                   </View>
-                  <View style={styles.soundOpacity}>
-                    <AntIcon
-                      name="sound"
-                      style={styles.soundImage}
-                      onPress={() => this.speakWord(key, true)}
-                    />
+                  <View style={styles.buttonArea}>
+                    <View style={styles.deleteOpacity}>
+                      <AntIcon
+                        name="delete"
+                        style={styles.deleteImage}
+                        onPress={() => {
+                          this.setState({
+                            isDeleteModalVisible: true,
+                            deleteTargetId: word.id,
+                          });
+                        }}
+                      />
+                    </View>
+                    <View style={styles.soundOpacity}>
+                      <AntIcon
+                        name="sound"
+                        style={styles.soundImage}
+                        onPress={() => this.speakWord(key, true)}
+                      />
+                    </View>
+                    <View style={styles.penOpacity}>
+                      <Icon
+                        name="pencil-sharp"
+                        style={styles.penIcon}
+                        onPress={() => this.editWord(word)}
+                      />
+                    </View>
                   </View>
-                  <View style={styles.penOpacity}>
-                    <Icon
-                      name="pencil-sharp"
-                      style={styles.penIcon}
-                      onPress={() => this.editWord(word)}
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
+                </TouchableOpacity>
 
-              <TouchableOpacity
+                <TouchableOpacity
+                  activeOpacity={1}
+                  key={word.id}
+                  onPress={() => {
+                    this.clickCard(key, this.card[key], true);
+                  }}
+                  style={[styles.card, styles.backCard]}>
+                  <Stars
+                    styles={styles}
+                    changeLevel={this.changeLevel}
+                    proficiencyLevel={word.proficiencyLevel}
+                  />
+                  <View style={styles.wordArea}>
+                    <Text
+                      numberOfLines={4}
+                      adjustsFontSizeToFit={true}
+                      style={styles.cardWord}>
+                      {word.backWord}
+                    </Text>
+                  </View>
+                  <View style={styles.buttonArea}>
+                    <View style={styles.deleteOpacity}>
+                      <AntIcon
+                        name="delete"
+                        style={styles.deleteImage}
+                        onPress={() => {
+                          this.setState({
+                            isDeleteModalVisible: true,
+                            deleteTargetId: word.id,
+                          });
+                        }}
+                      />
+                    </View>
+                    <View style={styles.soundOpacity}>
+                      <AntIcon
+                        name="sound"
+                        style={styles.soundImage}
+                        onPress={() => this.speakWord(key, false)}
+                      />
+                    </View>
+                    <View style={styles.penOpacity}>
+                      <Icon
+                        name="pencil-sharp"
+                        style={styles.penIcon}
+                        onPress={() => this.editWord(word)}
+                      />
+                    </View>
+                  </View>
+                </TouchableOpacity>
+              </CardFlip>
+            </View>
+          );
+        } else {
+          return (
+            <View key={word.id} style={styles.wordCardView}>
+              <CardFlip
+                style={styles.cardContainer}
+                flipDirection="x"
                 key={word.id}
-                onPress={() => {
-                  this.clickCard(key, this.card[key], true);
-                }}
-                style={[styles.card, styles.backCard]}>
-                <Stars
-                  styles={styles}
-                  changeLevel={this.changeLevel}
-                  proficiencyLevel={word.proficiencyLevel}
+                ref={(card) => (this.card[key] = card)}>
+                <TouchableOpacity
+                  activeOpacity={1}
+                  key={word.id}
+                  style={styles.card}
+                  onPress={() => {
+                    this.clickCard(key, this.card[key], false);
+                  }}
                 />
-                <View style={styles.wordArea}>
-                  <Text
-                    numberOfLines={4}
-                    adjustsFontSizeToFit={true}
-                    style={styles.cardWord}>
-                    {word.backWord}
-                  </Text>
-                </View>
-                <View style={styles.buttonArea}>
-                  <View style={styles.deleteOpacity}>
-                    <AntIcon
-                      name="delete"
-                      style={styles.deleteImage}
-                      onPress={() => {
-                        this.setState({
-                          isDeleteModalVisible: true,
-                          deleteTargetId: word.id,
-                        });
-                      }}
-                    />
-                  </View>
-                  <View style={styles.soundOpacity}>
-                    <AntIcon
-                      name="sound"
-                      style={styles.soundImage}
-                      onPress={() => this.speakWord(key, false)}
-                    />
-                  </View>
-                  <View style={styles.penOpacity}>
-                    <Icon
-                      name="pencil-sharp"
-                      style={styles.penIcon}
-                      onPress={() => this.editWord(word)}
-                    />
-                  </View>
-                </View>
-              </TouchableOpacity>
-            </CardFlip>
-          </View>
-        );
+              </CardFlip>
+            </View>
+          );
+        }
       });
     }
     return (
