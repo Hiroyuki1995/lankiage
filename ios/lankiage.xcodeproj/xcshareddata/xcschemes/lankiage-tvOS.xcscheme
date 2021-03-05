@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-               BuildableName = "app0124-tvOS.app"
-               BlueprintName = "app0124-tvOS"
-               ReferencedContainer = "container:app0124.xcodeproj">
+               BuildableName = "lankiage-tvOS.app"
+               BlueprintName = "lankiage-tvOS"
+               ReferencedContainer = "container:lankiage.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "2D02E48F1E0B4A5D006451C7"
-               BuildableName = "app0124-tvOSTests.xctest"
-               BlueprintName = "app0124-tvOSTests"
-               ReferencedContainer = "container:app0124.xcodeproj">
+               BuildableName = "lankiage-tvOSTests.xctest"
+               BlueprintName = "lankiage-tvOSTests"
+               ReferencedContainer = "container:lankiage.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-            BuildableName = "app0124-tvOS.app"
-            BlueprintName = "app0124-tvOS"
-            ReferencedContainer = "container:app0124.xcodeproj">
+            BuildableName = "lankiage-tvOS.app"
+            BlueprintName = "lankiage-tvOS"
+            ReferencedContainer = "container:lankiage.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "2D02E47A1E0B4A5D006451C7"
-            BuildableName = "app0124-tvOS.app"
-            BlueprintName = "app0124-tvOS"
-            ReferencedContainer = "container:app0124.xcodeproj">
+            BuildableName = "lankiage-tvOS.app"
+            BlueprintName = "lankiage-tvOS"
+            ReferencedContainer = "container:lankiage.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "app0124.app"
-               BlueprintName = "app0124"
-               ReferencedContainer = "container:app0124.xcodeproj">
+               BuildableName = "lankiage.app"
+               BlueprintName = "lankiage"
+               ReferencedContainer = "container:lankiage.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -33,9 +33,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "00E356ED1AD99517003FC87E"
-               BuildableName = "app0124Tests.xctest"
-               BlueprintName = "app0124Tests"
-               ReferencedContainer = "container:app0124.xcodeproj">
+               BuildableName = "lankiageTests.xctest"
+               BlueprintName = "lankiageTests"
+               ReferencedContainer = "container:lankiage.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -55,9 +55,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "app0124.app"
-            BlueprintName = "app0124"
-            ReferencedContainer = "container:app0124.xcodeproj">
+            BuildableName = "lankiage.app"
+            BlueprintName = "lankiage"
+            ReferencedContainer = "container:lankiage.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -72,9 +72,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-            BuildableName = "app0124.app"
-            BlueprintName = "app0124"
-            ReferencedContainer = "container:app0124.xcodeproj">
+            BuildableName = "lankiage.app"
+            BlueprintName = "lankiage"
+            ReferencedContainer = "container:lankiage.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

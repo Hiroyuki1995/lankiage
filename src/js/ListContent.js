@@ -483,9 +483,6 @@ class ListContent extends Component {
                   activeOpacity={1}
                   key={word.id}
                   style={styles.card}
-                  onPress={() => {
-                    this.clickCard(key, this.card[key], false);
-                  }}
                 />
               </CardFlip>
             </View>
