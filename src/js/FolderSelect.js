@@ -6,15 +6,9 @@ const {width, height} = Dimensions.get('window');
 import {Languages} from './Languages.js';
 import 'react-native-get-random-values';
 
-class LanguageSelect extends Component {
+class FolderSelect extends Component {
   constructor(props) {
     super(props);
-    this.languages = Languages.map((language) => {
-      return {
-        label: language.name,
-        value: language.code,
-      };
-    });
   }
 
   componentDidUpdate() {
@@ -25,29 +19,36 @@ class LanguageSelect extends Component {
   }
 
   render() {
-    // let style =
-    // if (this.state.isFocused) {
-    // }
     const {label, value, onValueChange} = this.props;
     return (
       <RNPickerSelect
         ref={(input) => (this.select = input)}
         onDonePress={this.props.onDonePress}
-        onDownArrow={this.props.onDownArrow}
-        onUpArrow={this.props.onUpArrow}
+        onDownArrow={this.props.onDonePress}
         label={label}
         onValueChange={(_v) => onValueChange(_v)}
-        items={this.languages}
+        items={this.props.items}
         style={pickerSelectStyles}
-        placeholder={{label: 'Select a language', value: ''}}
-        Icon={() => <Text style={styles.triangleText}>▼</Text>}
+        placeholder={{label: 'Select a folder', value: ''}}
+        Icon={() => (
+          <Text
+            style={{
+              position: 'absolute',
+              right: 10,
+              top: 7,
+              fontSize: 24,
+              color: '#789'
+            }}>
+            ▼
+          </Text>
+        )}
         value={value}
       />
     );
   }
 }
 
-LanguageSelect.defaultProps = {
+FolderSelect.defaultProps = {
   label: '',
   value: '',
   onValueChange: (_v) => null,
@@ -55,6 +56,7 @@ LanguageSelect.defaultProps = {
 
 const pickerSelectStyles = StyleSheet.create({
   inputIOS: {
+    // flex: 1,
     borderWidth: 1,
     borderColor: '#ccc',
     borderRadius: 4,
@@ -75,15 +77,7 @@ const styles = StyleSheet.create({
   },
   focusedSelectBox: {
     color: 'red',
-    borderWidth: 3,
-  },
-  triangleText: {
-    position: 'absolute',
-    right: 10,
-    top: 7,
-    fontSize: 24,
-    color: '#789',
   },
 });
 
-export default LanguageSelect;
+export default FolderSelect;

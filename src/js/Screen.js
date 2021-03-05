@@ -5,14 +5,20 @@ import {
   Content,
   Footer,
   FooterTab,
-  Icon,
+  Header,
   Button,
   Text,
+  Left,
+  Right,
+  Body,
+  Title,
 } from 'native-base';
+import Icon from 'react-native-vector-icons/Ionicons';
 import ListContent from './ListContent';
 import AddContent from './AddContent';
 import HomeContent from './HomeContent';
 import TestContent from './TestContent';
+// import { Header } from 'react-native/Libraries/NewAppScreen';
 
 class Screen extends Component {
   constructor(props) {
@@ -20,6 +26,20 @@ class Screen extends Component {
     this.state = {
       selectedTab: 'list',
     };
+  }
+
+  renderHeaderTitle() {
+    switch (this.state.selectedTab) {
+      case 'home':
+        return 'HOME';
+      case 'list':
+        return 'NAME';
+      case 'test':
+        return 'TEST';
+      case 'add':
+        return 'REGISTER';
+      default:
+    }
   }
 
   renderSelectedTab() {
@@ -39,6 +59,20 @@ class Screen extends Component {
   render() {
     return (
       <Container>
+        <Header>
+          <Left>
+            <Button transparent />
+            {/* <Icon name="arrow-back" /> */}
+            {/* </Button> */}
+          </Left>
+          <Body>
+            <Title>{this.renderHeaderTitle()}</Title>
+          </Body>
+          <Right>
+            <Button transparent />
+            {/* </Button> */}
+          </Right>
+        </Header>
         <Content style={styles.content}>{this.renderSelectedTab()}</Content>
 
         <Footer>

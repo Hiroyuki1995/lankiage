@@ -5,99 +5,119 @@ import {
   StyleSheet,
   Dimensions,
   TouchableOpacity,
+  InputAccessoryView,
+  Button as NativeButton,
+  ImageBackground,
   Image,
+  KeyboardAvoidingView,
 } from 'react-native';
-import {Button, Footer} from 'native-base';
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
+import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
+import IonIcon from 'react-native-vector-icons/Ionicons';
+import {Button} from 'native-base';
 import {Text} from 'react-native-elements';
-import LanguageSelect from './LanguageSelect';
 const {width, height} = Dimensions.get('window');
 import 'react-native-get-random-values';
 import translate from 'translate-google-api';
-import {v4 as uuidv4} from 'uuid';
-const Realm = require('realm');
-import {WordSchema} from './Schema.js';
-const defalutFrontLang = 'zh-cn';
-const defalutBackLang = 'ja';
-// const defalutFrontLang = '';
-// const defalutBackLang = '';
+import {Languages} from './Languages.js';
+import EditOneCard from './EditOneCard';
+import {ScrollView} from 'react-native';
 const wordSchema = {
   frontWord: '',
   backWord: '',
   isRegisterd: false,
 };
-var rightArrowButton = require('../png/right_arrow.png');
-var leftArrowButton = require('../png/left_arrow.png');
+const inputAccessoryViewID = 'uniqueID';
+const nextButton = require('../png/right_arrow.png');
 
 class AddContent extends Component {
   constructor(props) {
     super(props);
-    this.card = [];
     this.state = {
-      words: [],
-      // words: [wordSchema],
-      loading: false,
-      frontLang: defalutFrontLang,
-      backLang: defalutBackLang,
-      numberOfWords: 10,
+      words: this.props.route.params.words ? this.props.route.params.words : [],
+      numberOfWords: this.props.route.params.numberOfWords
+        ? this.props.route.params.numberOfWords
+        : 5,
       message: '',
-      realm: null,
+      // realm: null,
+      currentFocus: {
+        key: null,
+        isFront: true,
+      },
     };
+    this.frontLangCode = this.props.route.params.folder.frontLangCode;
+    this.backLangCode = this.props.route.params.folder.backLangCode;
     for (let i = 0; i < this.state.numberOfWords; i++) {
       this.state.words.push(wordSchema);
     }
     this.registerWords = this.registerWords.bind(this);
-    // this.handleWordChange = this.handleWordChange.bind(this);
-    this.canSubmit = this.canSubmit.bind(this);
-    this.handleLangChange = this.handleLangChange.bind(this);
     this.resetWords = this.resetWords.bind(this);
     this.translate = this.translate.bind(this);
-    // this.canTranslate = this.canTranslate.bind(this);
     this.changeContent = this.changeContent.bind(this);
     this.changeLanguage = this.changeLanguage.bind(this);
+    this.focusNextWord = this.focusNextWord.bind(this);
+    this.focusBackWord = this.focusBackWord.bind(this);
+    this.formFocus = this.formFocus.bind(this);
+    this.backToList = this.backToList.bind(this);
+    this.getLangName = this.getLangName.bind(this);
+    this.addCard = this.addCard.bind(this);
   }
 
-  // async componentDidMount() {
-  //
-  // }
+  backToList() {
+    this.props.navigation.goBack();
+  }
 
-  // サブミットできるときtrueを返す
-  canSubmit = () => {
-    // const {info, message, loading} = this.state;
+  addCard() {
+    this.setState((prevState) => {
+      const words = prevState.words;
+      words.push(wordSchema);
+      return {
+        numberOfWords: prevState.numberOfWords + 1,
+        words,
+        currentFocus: {
+          key: null,
+        },
+      };
+    });
+  }
 
-    // const validInfo =
-    //   Object.values(info).filter((value) => {
-    //     return value === '';
-    //   }).length === 0;
-    // const validMessage =
-    //   Object.values(message).filter((value) => {
-    //     return value !== '';
-    //   }).length === 0;
-    // return validInfo && validMessage && !loading;
-    return true;
-  };
+  getLangName(langCode) {
+    if (langCode) {
+      for (let language of Languages) {
+        if (language.code === langCode) {
+          return language.name;
+        }
+      }
+    }
+    return null;
+  }
 
-  // 翻訳できるときtrueを返す
-  // canTranslate = () => {
-  //   const target = ['frontWord', 'frontLang', 'backLang'];
-  //   const {info} = this.state;
+  getLangTranslateCode(langCode) {
+    console.log(`langCode ${langCode}`);
+    if (langCode) {
+      for (let language of Languages) {
+        if (language.code === langCode) {
+          return language.translateCode;
+        }
+      }
+    }
+    return null;
+  }
 
-  //   for (let i = 0; i < target.length; i++) {
-  //     if (info[target[i]] === '') {
-  //       return false;
-  //     }
-  //     console.log('can translate');
-  //     return true;
-  //   }
-  // };
-
-  async translate(isForword = true) {
-    const {words, frontLang, backLang} = this.state;
-    const fromLang = isForword ? frontLang : backLang;
-    const toLang = !isForword ? frontLang : backLang;
-    console.log('translate function started');
-    console.log(this.state);
+  translate(isForword = true) {
+    let message = '';
+    const {words} = this.state;
+    const frontLangTranslateCode = this.getLangTranslateCode(
+      this.frontLangCode,
+    );
+    const backLangTranslateCode = this.getLangTranslateCode(this.backLangCode);
+    const fromLang = isForword ? frontLangTranslateCode : backLangTranslateCode;
+    const toLang = !isForword ? frontLangTranslateCode : backLangTranslateCode;
     if (!fromLang || !toLang) {
-      console.log('言語を設定してください');
+      message = 'Please set the languages';
+      this.setState({message: message});
+      return;
     } else {
       const translationTargets = [];
       const keys = [];
@@ -105,55 +125,48 @@ class AddContent extends Component {
       for (const word of words) {
         const targetWord = isForword ? word.frontWord : word.backWord;
         if (targetWord !== '') {
-          console.log(`${targetWord}を翻訳します`);
           translationTargets.push(targetWord);
           keys.push(key);
         }
         key++;
       }
-      console.log(translationTargets, keys);
       if (translationTargets.length > 0) {
-        const result = await translate(translationTargets, {
+        translate(translationTargets, {
           from: fromLang,
           tld: 'com',
           to: toLang,
-        });
-        console.log(result, keys);
-        const resultWordLabel = isForword ? 'backWord' : 'frontWord';
-        const updatedWords = words.map((word, index) => {
-          if (keys.includes(index)) {
-            return {
-              ...word,
-              [resultWordLabel]: result[index],
-            };
-          } else {
-            return {word};
-          }
-        });
-        this.setState({words: updatedWords});
+        })
+          .then((result) => {
+            const resultWordLabel = isForword ? 'backWord' : 'frontWord';
+            const updatedWords = words.map((word, index) => {
+              if (keys.includes(index)) {
+                return {
+                  ...word,
+                  [resultWordLabel]: result[index],
+                  currentFocus: {
+                    key: null,
+                  },
+                };
+              } else {
+                return {word};
+              }
+            });
+            this.setState({words: updatedWords, message: ''});
+          })
+          .catch((error) => {
+            this.setState({message: error.message});
+          });
       }
     }
-
-    // const query = isForword
-    //   ? `beforeWord=${frontWord}&beforeLang=${frontLang}&afterLang=${backLang}`
-    //   : `beforeWord=${backWord}&beforeLang=${backLang}&afterLang=${frontLang}`;
-    // const answer = isForword ? 'backWord' : 'frontWord';
-    // const response = await fetch(
-    //   `http://localhost:8080/api/translate?${query}`,
-    // );
-    // const json = await response.json();
-    // this.setState({
-    //   info: {...info, [answer]: json.text},
-    // });
   }
 
-  changeContent(v, i, label) {
+  changeContent(name, value, i) {
     this.setState((prevState) => {
       const updatedWords = prevState.words.map((word, index) => {
         if (index === i) {
           return {
             ...word,
-            [label]: v,
+            [name]: value,
           };
         }
         return word;
@@ -163,34 +176,86 @@ class AddContent extends Component {
   }
 
   changeLanguage(v, label) {
+    this.setState({[label]: v});
+  }
+
+  focusBackWord() {
     this.setState((prevState) => {
-      return {[label]: v};
+      const currentFocusKey = prevState.currentFocus.key;
+      if (
+        !(prevState.currentFocus.isFront && prevState.currentFocus.key === 0)
+      ) {
+        const nextFocusKey = prevState.currentFocus.isFront
+          ? currentFocusKey - 1
+          : currentFocusKey;
+        return {
+          currentFocus: {
+            key: nextFocusKey,
+            isFront: !prevState.currentFocus.isFront,
+          },
+        };
+      }
     });
   }
 
-  async registerWords() {
-    const {words, frontLang, backLang} = this.state;
+  focusNextWord() {
+    console.log('focusNextWord');
+    this.setState((prevState) => {
+      const currentFocusKey = prevState.currentFocus.key;
+      if (
+        !(
+          !prevState.currentFocus.isFront &&
+          prevState.currentFocus.key === prevState.numberOfWords - 1
+        )
+      ) {
+        if (prevState.currentFocus.isFront) {
+          return {
+            currentFocus: {
+              key: currentFocusKey,
+              isFront: false,
+            },
+          };
+        } else {
+          return {
+            currentFocus: {
+              key: currentFocusKey + 1,
+              isFront: true,
+            },
+          };
+        }
+      }
+    });
+  }
+
+  formFocus(key, isFront) {
+    console.log('formFocus', key, isFront);
+    this.setState({
+      currentFocus: {
+        key: key,
+        isFront: isFront,
+      },
+    });
+  }
+
+  registerWords(isEditing = false) {
+    this.setState({message: ''});
+    const {words} = this.state;
     const updatedWords = [];
     let numberOfRegisterd = 0;
+    console.log(`${this.props.route.params.folder.id}`);
+    // try {
+    this.props.route.params.registerWords(
+      this.state,
+      this.props.route.params.folder.id,
+      isEditing,
+    );
     for (const word of words) {
-      if (word.frontWord && frontLang && word.backWord && backLang) {
-        // this.setState({loading: true});
-        Realm.open({
-          schema: [WordSchema],
-          deleteRealmIfMigrationNeeded: true,
-        }).then((realm) => {
-          realm.write(() => {
-            realm.create('Word', {
-              id: uuidv4(),
-              frontWord: word.frontWord,
-              frontLang: frontLang,
-              backWord: word.backWord,
-              backLang: backLang,
-              createdAt: new Date(),
-            });
-          });
-          this.setState({realm});
-        });
+      if (
+        word.frontWord &&
+        this.frontLangCode &&
+        word.backWord &&
+        this.backLangCode
+      ) {
         updatedWords.push({
           ...word,
           isRegisterd: true,
@@ -200,199 +265,218 @@ class AddContent extends Component {
         updatedWords.push({...word});
       }
     }
-    console.log(`updatedWords ${JSON.stringify(updatedWords)}`);
     this.setState(() => {
       let message;
       if (numberOfRegisterd === 0) {
-        message = '登録できる単語はありません';
+        message = 'There are no words that can be registed';
       } else {
-        message = `${numberOfRegisterd}件の単語を登録しました`;
+        if (!isEditing) {
+          message = `Registerd ${numberOfRegisterd} words`;
+        } else {
+          message = `Edited ${numberOfRegisterd} words`;
+        }
       }
-      return {words: updatedWords, message: message};
+      return {
+        words: updatedWords,
+        message: message,
+        currentFocus: {
+          key: null,
+        },
+      };
     });
   }
 
-  async resetWords() {
+  resetWords() {
     this.setState(() => {
       const words = [];
       for (let i = 0; i < this.state.numberOfWords; i++) {
         words.push(wordSchema);
       }
-      return {words, message: ''};
-    });
-  }
-
-  componentWillUnmount() {
-    // Close the realm if there is one open.
-    const {realm} = this.state;
-    if (realm !== null && !realm.isClosed) {
-      realm.close();
-    }
-  }
-
-  handleLangChange = (event) => {
-    const key = event.target.name;
-    const value = event.target.value;
-    const {info} = this.state;
-    this.setState({
-      info: {...info, [key]: value},
-    });
-  };
-
-  handleChange(id) {
-    this.setState((prevState) => {
-      const updatedTodos = prevState.todos.map((todo) => {
-        if (todo.id === id) {
-          todo.done = !todo.done;
-        }
-        return todo;
-      });
       return {
-        todos: updatedTodos,
+        words,
+        message: '',
+        currentFocus: {
+          key: null,
+        },
       };
     });
   }
 
-  onChange = (event) => {
-    this.setState({
-      [event.target.name]: event.target.value,
-    });
-  };
+  componentWillUnmount() {
+    console.log('componentWillUnmount in AddContent');
+  }
 
-  // handleWordChange = (text) => {
-  //   this.setState({ inputValue });
-  //   // const key = event.target.name;
-  //   // const value = event.target.value;
-  //   // const {info, message} = this.state;
-  //   // this.setState({
-  //   //   info: {...info, [key]: value},
-  //   // });
-  //   // this.setState({
-  //   //   message: {
-  //   //     ...message,
-  //   //     [key]: Validation.formValidate(key, value),
-  //   //   },
-  //   // });
-  // };
+  componentDidDisappear() {
+    console.log('componentDidDisappear in AddContent');
+  }
 
   render() {
-    const {words, numberOfWords, message, frontLang, backLang} = this.state;
-    console.log(JSON.stringify(this.state));
+    console.log(`currentFocus ${JSON.stringify(this.state.currentFocus)}`);
+    const {words, numberOfWords, message} = this.state;
     return (
-      <View className="input-area" style={styles.inputArea}>
-        <View style={styles.languageSelectArea}>
-          <LanguageSelect
-            label="frontLang"
-            style={styles.languageSelect}
-            value={frontLang}
-            onValueChange={(v) => this.changeLanguage(v, 'frontLang')}
-          />
-          <View style={styles.buttonArea}>
-            <TouchableOpacity onPress={() => this.translate(true)}>
-              <Image
-                source={rightArrowButton}
-                style={styles.translationButton}
-              />
-            </TouchableOpacity>
-            <TouchableOpacity onPress={() => this.translate(false)}>
-              <Image
-                source={leftArrowButton}
-                style={styles.translationButton}
-              />
-            </TouchableOpacity>
-          </View>
-          <LanguageSelect
-            label="backLang"
-            style={styles.languageSelect}
-            value={backLang}
-            onValueChange={(v) => this.changeLanguage(v, 'backLang')}
-          />
-        </View>
-        {(() => {
-          const items = [];
-          for (let i = 0; i < numberOfWords; i++) {
-            let formStyle = {};
-            if (words[i].isRegisterd) {
-              formStyle = [styles.inputForm, styles.inputRegisterdForm];
-            } else {
-              formStyle = styles.inputForm;
-            }
-            items.push(
-              <View
-                key={i}
-                className="input-area"
-                style={styles.oneCardInputArea}>
-                <View
-                  className="front-input-area"
-                  style={styles.oneSideInputArea}>
-                  <View className="form-area">
-                    <TextInput
-                      multiline={true}
-                      numberOfLines={10}
-                      // maxLength={1000}
-                      label="frontWord"
-                      value={words[i].frontWord}
-                      style={formStyle}
-                      placeholder="front word"
-                      onChangeText={(v) =>
-                        this.changeContent(v, i, 'frontWord')
-                      }
+      <ImageBackground
+        style={styles.backgroundImage}
+        // resizeMode="contain"
+        source={require('../png/milky-way.jpg')}>
+        <View style={styles.container}>
+          <KeyboardAwareScrollView
+            extraScrollHeight={170}
+            style={styles.inputArea}>
+            {(() => {
+              if (!this.props.route.params.isEditing) {
+                return (
+                  <View style={styles.cardPlusIconView}>
+                    <Icon
+                      name="card-plus"
+                      style={styles.cardPlusIcon}
+                      onPress={this.addCard}
                     />
                   </View>
-                </View>
-                <View
-                  className="back-input-area"
-                  style={styles.oneSideInputArea}>
-                  <View className="form-area">
-                    <TextInput
-                      label="backWord"
-                      multiline={true}
-                      value={words[i].backWord}
-                      style={formStyle}
-                      placeholder="back word"
-                      onChangeText={(v) => this.changeContent(v, i, 'backWord')}
-                    />
+                );
+              }
+            })()}
+            {(() => {
+              if (message) {
+                return (
+                  <View style={styles.messageView}>
+                    <Text style={styles.messageText}>{message}</Text>
                   </View>
-                </View>
-              </View>,
-            );
-          }
-          return <View>{items}</View>;
-        })()}
-        {(() => {
-          if (message) {
-            return (
-              <View style={styles.messageView}>
-                <Text style={styles.messageText}>{message}</Text>
+                );
+              }
+            })()}
+            <View style={styles.languageSelectArea}>
+              <View style={styles.oneLanguageSelectArea}>
+                <Text style={styles.languageText}>
+                  {this.getLangName(this.frontLangCode)}
+                </Text>
               </View>
-            );
-          }
-        })()}
-        <View style={{flex: 1}}>
-          <View style={styles.submitButtonView}>
-            <Button
-              block
-              variant="contained"
-              style={[styles.button, styles.submitButton]}
-              disabled={!this.canSubmit()}
-              onPress={this.registerWords}>
-              <Text h3 style={styles.submitButtonText}>
-                Save
-              </Text>
-            </Button>
-            <Button
-              block
-              variant="contained"
-              style={[styles.button, styles.resetButton]}
-              disabled={!this.canSubmit()}
-              onPress={this.resetWords}>
-              <Text h3 style={styles.resetButtonText}>
-                Reset
-              </Text>
-            </Button>
-          </View>
+              <View style={styles.buttonArea}>
+                <TouchableOpacity onPress={() => this.translate(true)}>
+                  <IonIcon name="arrow-redo" style={styles.translationButton} />
+                </TouchableOpacity>
+                <Icon name="google-translate" style={styles.translateIcon} />
+                <TouchableOpacity onPress={() => this.translate(false)}>
+                  <IonIcon
+                    name="arrow-redo"
+                    style={[styles.translationButton, styles.reverseButton]}
+                  />
+                </TouchableOpacity>
+              </View>
+              <View style={styles.oneLanguageSelectArea}>
+                <Text style={styles.languageText}>
+                  {this.getLangName(this.backLangCode)}
+                </Text>
+              </View>
+            </View>
+            {(() => {
+              const items = [];
+              for (let i = 0; i < numberOfWords; i++) {
+                let formStyle = {};
+                if (words[i].isRegisterd) {
+                  formStyle = [styles.inputForm, styles.inputRegisterdForm];
+                } else {
+                  formStyle = styles.inputForm;
+                }
+                items.push(
+                  // <View>
+                  <EditOneCard
+                    id={i}
+                    key={i}
+                    word={words[i]}
+                    currentFocusKey={this.state.currentFocus.key}
+                    currentFocusSide={this.state.currentFocus.isFront}
+                    onChange={this.changeContent}
+                    onFormFocus={this.formFocus}
+                    inputAccessoryViewID={inputAccessoryViewID}
+                    onSubmitEditing={this.focusNextWord}
+                    scroll={this.scroll}
+                  />,
+                );
+              }
+              return <View>{items}</View>;
+            })()}
+            {/* <InputAccessoryView
+              nativeID={inputAccessoryViewID}
+              backgroundColor="#ffffff"
+              style={styles.keyboradToolbar}>
+              <View style={styles.keyboradToolbar}>
+                <View style={styles.directionButtons}>
+                  <MaterialIcon
+                    name="arrow-back-ios"
+                    style={styles.directionButton}
+                    onPress={this.focusBackWord}
+                  />
+                  <MaterialIcon
+                    name="arrow-forward-ios"
+                    style={styles.directionButton}
+                    onPress={this.focusNextWord}
+                  />
+                </View>
+                <View style={styles.actionButtons}>
+                  <NativeButton
+                    style={styles.keyboardButton}
+                    onPress={() => this.registerWords()}
+                    title="Save"
+                  />
+                  <NativeButton
+                    style={styles.keyboardButton}
+                    onPress={this.resetWords}
+                    title="Reset"
+                  />
+                </View>
+              </View>
+            </InputAccessoryView> */}
+            <View style={styles.buttonAreaView}>
+              {(() => {
+                if (!this.props.route.params.isEditing) {
+                  return (
+                    <View style={styles.submitButtonView}>
+                      <Button
+                        block
+                        primary
+                        variant="contained"
+                        style={[styles.button, styles.submitButton]}
+                        onPress={() => this.registerWords()}>
+                        <Text style={styles.submitButtonText}>Save</Text>
+                      </Button>
+                      <Button
+                        block
+                        light
+                        variant="contained"
+                        style={[styles.button, styles.resetButton]}
+                        onPress={this.resetWords}>
+                        <Text style={styles.resetButtonText}>Reset</Text>
+                      </Button>
+                    </View>
+                  );
+                } else {
+                  return (
+                    <View style={styles.submitButtonView}>
+                      <Button
+                        block
+                        primary
+                        variant="contained"
+                        style={[styles.button, styles.submitButton]}
+                        onPress={() => this.registerWords(true)}>
+                        <Text style={styles.submitButtonText}>Save</Text>
+                      </Button>
+                      <Button
+                        block
+                        light
+                        variant="contained"
+                        style={[styles.button, styles.resetButton]}
+                        onPress={this.backToList}>
+                        <Text style={styles.resetButtonText}>Cancel</Text>
+                      </Button>
+                    </View>
+                  );
+                }
+              })()}
+            </View>
+            {/* </KeyboardAvoidingView> */}
+          </KeyboardAwareScrollView>
         </View>
-      </View>
+      </ImageBackground>
     );
   }
 }
@@ -400,12 +484,10 @@ class AddContent extends Component {
 const styles = StyleSheet.create({
   inputArea: {
     flexDirection: 'column',
-    marginTop: height * 0.06,
-    marginLeft: width * 0.02,
-    marginRight: width * 0.02,
-    flex: 1,
-    // alignItems: 'center',
-    // justifyContent: 'center',
+    paddingTop: 10,
+    paddingLeft: width * 0.02,
+    paddingRight: width * 0.02,
+    // flex: 1,
   },
   oneCardInputArea: {
     flexDirection: 'row',
@@ -439,23 +521,18 @@ const styles = StyleSheet.create({
     backgroundColor: '#87cefa',
   },
   languageSelect: {
-    flex: 1,
-    alignItems: 'flex-end',
-    width: '40%',
+    // flex: 1,
+    // alignItems: 'flex-end',
   },
   button: {
     padding: 10,
     margin: 10,
   },
   submitButton: {
-    backgroundColor: '#2c8ef4',
-    color: 'white',
+    width: '30%',
   },
   resetButton: {
-    borderColor: '#2c8ef4',
-    borderWidth: 1,
-    backgroundColor: 'white',
-    color: '#2c8ef4',
+    width: '30%',
   },
   submitButtonView: {
     alignItems: 'center',
@@ -468,10 +545,12 @@ const styles = StyleSheet.create({
     // height: height * 0.2,
   },
   submitButtonText: {
-    color: 'white',
+    color: '#ffffff',
+    fontSize: 20,
   },
   resetButtonText: {
-    color: '#2c8ef4',
+    color: '#ffffff',
+    fontSize: 20,
   },
   messageView: {
     alignItems: 'center',
@@ -481,22 +560,123 @@ const styles = StyleSheet.create({
     // margin: 10,
   },
   messageText: {
-    color: 'red',
+    color: '#ffffff',
     fontSize: 20,
     // padding: 10,
+    fontStyle: 'italic',
+    textDecorationLine: 'underline',
   },
   translationButton: {
-    width: 30,
-    height: 30,
+    // width: 30,
+    // height: 30,
+    fontSize: 40,
+    color: '#ffffff',
   },
   buttonArea: {
     flexDirection: 'column',
+    width: '20%',
+    // flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   languageSelectArea: {
     flexDirection: 'row',
-    flex: 1,
+    // flex: 1,
+    // alignItems: 'center',
+    // justifyContent: 'center',
+  },
+  oneLanguageSelectArea: {
+    width: '40%',
+    // flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  keyboardButton: {
+    textAlign: 'center',
+    flex: 1,
+    // paddingHorizontal: 10,
+  },
+  inputAccessoryView: {
+    // backgroundColor: '#ffffff',
+    // flexDirection: 'row',
+    // flex: 1,
+    // // alignItems: 'flex-end',
+    // justifyContent: 'center',
+  },
+  keyboardButtonText: {
+    flex: 1,
+    color: '#007aff',
+    textAlign: 'center',
+  },
+  keyboradToolbar: {
+    // flex: 1,
+    justifyContent: 'center',
+    // flexDirection: 'row',
+    alignItems: 'center',
+    // backgroundColor: '#F8F8F8',
+    // paddingHorizontal: 8,
+    height: 48,
+  },
+  directionButtons: {
+    // alignItems: 'flex-start',
+    flexDirection: 'row',
+    // justifyContent: 'flex-start',
+    position: 'absolute',
+    left: 10,
+  },
+  actionButtons: {
+    alignItems: 'flex-end',
+    // flexDirection: 'row',
+    justifyContent: 'flex-end',
+    // position: 'absolute',
+    // right: 10,
+  },
+  directionButton: {
+    fontSize: 20,
+    width: 18,
+    height: 18,
+    marginHorizontal: 10,
+    color: 'rgb(10,132,255)',
+  },
+  translateIcon: {
+    fontSize: 25,
+    color: '#ffffff',
+  },
+  reverseButton: {
+    transform: [{rotate: '180deg'}],
+  },
+  backgroundImage: {
+    flex: 1,
+    resizeMode: 'cover',
+    justifyContent: 'center',
+  },
+  container: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0, 0.5)',
+    // justifyContent: 'center',
+    // alignItems: 'center',
+  },
+  languageText: {
+    fontSize: 20,
+    color: '#ffffff',
+    textAlign: 'center',
+  },
+  keyboardAvoidingView: {
+    flex: 1,
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
+  buttonAreaView: {
+    flex: 1,
+    marginBottom: 50,
+  },
+  cardPlusIconView: {
+    flex: 1,
+    alignItems: 'flex-end',
+  },
+  cardPlusIcon: {
+    fontSize: 50,
+    color: '#ffffff',
   },
 });
 

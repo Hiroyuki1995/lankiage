@@ -1,11 +1,5 @@
-/**
- * @format
- */
-
 import {AppRegistry} from 'react-native';
-// import App from './App';
-import Screen from './src/js/Screen';
+import App from './src/js/App';
 import {name as appName} from './app.json';
 
-// AppRegistry.registerComponent(appName, () => App);
-AppRegistry.registerComponent(appName, () => Screen);
+AppRegistry.registerComponent(appName, () => App);
