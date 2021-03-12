@@ -1,9 +1,8 @@
 import React, {Component} from 'react';
-import {TextInput, View, StyleSheet, Dimensions, KeyboardAvoidingView} from 'react-native';
+import {TextInput, View, StyleSheet, Dimensions} from 'react-native';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 const {width, height} = Dimensions.get('window');
 import 'react-native-get-random-values';
-import { TouchableOpacity } from 'react-native';
 
 class EditOneCard extends Component {
   constructor(props) {
@@ -13,7 +12,6 @@ class EditOneCard extends Component {
 
   componentDidUpdate() {
     if (this.props.currentFocusKey === this.props.id) {
-      console.log('componentDidUpdate', this.props.currentFocusKey, this.props.currentFocusSide);
       if (this.props.currentFocusSide) {
         this.front.focus();
       } else {
@@ -32,6 +30,9 @@ class EditOneCard extends Component {
     }
     return (
       <View style={styles.oneCardInputArea}>
+        <View style={styles.cardRingView}>
+          <Icon name="ellipse-outline" style={styles.cardRing} />
+        </View>
         <View style={styles.oneSideInputArea}>
           <TextInput
             name="frontWord"
@@ -51,7 +52,9 @@ class EditOneCard extends Component {
             onFocus={() => this.props.onFormFocus(this.props.id, true)}
           />
         </View>
-        <Icon name ="ellipse-outline" style={styles.cardRing}></Icon>
+        {/* <View style={styles.cardRingView}>
+          <Icon name="ellipse-outline" style={styles.cardRing} />
+        </View> */}
         <View style={styles.oneSideInputArea}>
           <View>
             <TextInput
@@ -73,6 +76,9 @@ class EditOneCard extends Component {
             />
           </View>
         </View>
+        {/* <View style={styles.cardRingView}>
+          <Icon name="ellipse-outline" style={styles.cardRing} />
+        </View> */}
       </View>
     );
   }
@@ -90,15 +96,16 @@ const styles = StyleSheet.create({
   },
   oneCardInputArea: {
     flexDirection: 'row',
-    // flex: 1,
+    flex: 1,
     marginBottom: 10,
     marginTop: 10,
   },
   oneSideInputArea: {
-    // width: '50%',
-    paddingLeft: '2%',
-    paddingRight: '2%',
+    width: '50%',
+    paddingLeft: 10,
+    paddingRight: 10,
     flex: 1,
+    // zIndex: 0,
   },
   inputForm: {
     // flex: 1,
@@ -118,6 +125,9 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     textAlignVertical: 'top',
     paddingHorizontal: 10,
+    // position: 'absolute',
+    width: '100%',
+    // height: 100,
   },
   inputRegisterdForm: {
     backgroundColor: '#87cefa',
@@ -184,11 +194,16 @@ const styles = StyleSheet.create({
   },
   cardRing: {
     fontSize: 40,
-    position: 'absolute',
-    left: width * 0.5 - 30,
+    right: 20,
     color: '#6e6efa',
-    zIndex: 1,
+    // zIndex: 100,
     transform: [{rotateX: '45deg'}],
+  },
+  cardRingView: {
+    position: 'absolute',
+    left: '50%',
+    zIndex: 1,
+    // transform: [{rotateX: '45deg'}],
   },
 });
 

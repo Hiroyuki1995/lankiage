@@ -256,70 +256,70 @@ class HomeContent extends Component {
       }
     }
     return (
-      <ImageBackground
-        style={styles.backgroundImage}
-        // resizeMode="contain"
-        source={require('../png/milky-way.jpg')}>
-        <ScrollView style={styles.container}>
-          <View style={styles.buttonArea}>
-            <View style={styles.addIconView}>
-              <MaterialIcon
-                name="folder-multiple"
-                style={styles.folderCopyIcon}
-                onPress={() => this.copyFolder()}
-              />
-              <Text style={styles.iconText}>Copy</Text>
-            </View>
-            <View style={styles.addIconView}>
-              <FoundationIcon
-                style={styles.folderAddIcon}
-                onPress={() => this.openFolderEdit()}
-                name="folder-add"
-              />
-              <Text style={styles.iconText}>Create</Text>
-            </View>
+      <ScrollView style={styles.container} keyboardShouldPersistTaps="always">
+        <View style={styles.buttonArea}>
+          <View style={styles.addIconView}>
+            <MaterialIcon
+              name="folder-multiple"
+              style={styles.folderCopyIcon}
+              onPress={() => this.copyFolder()}
+            />
+            <Text style={styles.iconText}>Copy</Text>
           </View>
-          <View style={styles.foldersArea}>{foldersObj}</View>
-          <Modal
-            coverScreen={true}
-            style={styles.modal}
-            visible={this.state.isEditorVisible}
-            animationType={'fade'}
-            onBackdropPress={() => this.setState({isEditorVisible: false})}>
-            <AddNewFolder
-              realm={this.state.realm}
-              editFolder={this.editFolder}
-              folder={this.state.folder}
-              isEditing={this.state.folder ? true : false}
-              deleteFolder={this.deleteFolder}
-              goBack={() => this.setState({isEditorVisible: false})}
+          <View style={styles.addIconView}>
+            <FoundationIcon
+              style={styles.folderAddIcon}
+              onPress={() => this.openFolderEdit()}
+              name="folder-add"
             />
-          </Modal>
-          <Modal
-            coverScreen={false}
-            style={styles.modal}
-            visible={this.state.isEditor2Visible}
-            animationType={'fade'}
-            onBackdropPress={() => this.setState({isEditor2Visible: false})}>
-            <AddNewFolder
-              realm={this.state.realm}
-              createFolder={this.createFolder}
-              goBack={() => this.setState({isEditor2Visible: false})}
-            />
-          </Modal>
-          <Modal
-            coverScreen={true}
-            style={styles.modal}
-            visible={this.state.isCopyVisible}
-            animationType={'fade'}
-            onBackdropPress={() => this.setState({isCopyVisible: false})}>
-            <CopyFolder
-              realm={this.state.realm}
-              goBack={() => this.setState({isCopyVisible: false})}
-            />
-          </Modal>
-        </ScrollView>
-      </ImageBackground>
+            <Text style={styles.iconText}>Create</Text>
+          </View>
+        </View>
+        <View style={styles.foldersArea}>{foldersObj}</View>
+        <Modal
+          transparent={true}
+          coverScreen={true}
+          // presentationStyle="fullScreen"
+          style={styles.modal}
+          visible={this.state.isEditorVisible}
+          animationType={'fade'}
+          onBackdropPress={() => this.setState({isEditorVisible: false})}>
+          <AddNewFolder
+            realm={this.state.realm}
+            editFolder={this.editFolder}
+            folder={this.state.folder}
+            isEditing={this.state.folder ? true : false}
+            deleteFolder={this.deleteFolder}
+            goBack={() => this.setState({isEditorVisible: false})}
+          />
+        </Modal>
+        <Modal
+          transparent={true}
+          statusBarTranslucent={true}
+          // presentationStyle="fullScreen"
+          coverScreen={false}
+          style={styles.modal}
+          visible={this.state.isEditor2Visible}
+          animationType={'fade'}
+          onBackdropPress={() => this.setState({isEditor2Visible: false})}>
+          <AddNewFolder
+            realm={this.state.realm}
+            createFolder={this.createFolder}
+            goBack={() => this.setState({isEditor2Visible: false})}
+          />
+        </Modal>
+        <Modal
+          coverScreen={true}
+          style={styles.modal}
+          visible={this.state.isCopyVisible}
+          animationType={'fade'}
+          onBackdropPress={() => this.setState({isCopyVisible: false})}>
+          <CopyFolder
+            realm={this.state.realm}
+            goBack={() => this.setState({isCopyVisible: false})}
+          />
+        </Modal>
+      </ScrollView>
     );
   }
 }
@@ -327,7 +327,8 @@ class HomeContent extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0, 0.5)',
+    // position: 'absolute',
+    // backgroundColor: 'rgba(0,0,0, 0.5)',
     // opacity: 0.5,
     // backgroundColor: '#000000',
   },
@@ -378,7 +379,8 @@ const styles = StyleSheet.create({
   },
   folderIcon: {
     flex: 1,
-    fontSize: 40,
+    // fontSize: 40,
+    fontSize: height * 0.05,
     marginLeft: 20,
     color: '#4682b4',
   },
@@ -386,7 +388,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   penIcon: {
-    fontSize: 40,
+    // fontSize: 40,
+    fontSize: height * 0.05,
     color: '#ffffff',
   },
   editIconOpacity: {
@@ -396,7 +399,7 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   folderArrowicon: {
-    fontSize: 30,
+    fontSize: height * 0.03,
     flex: 1,
   },
   backgroundImage: {
@@ -410,9 +413,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    left: -20,
-    bottom: -20,
-    width: '100%',
+    width: width,
+    height: height,
+    margin: 0,
   },
   iconText: {
     fontSize: 16,

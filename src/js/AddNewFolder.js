@@ -1,11 +1,8 @@
 import React, {Component} from 'react';
 import {TextInput, Text, View, StyleSheet, Dimensions} from 'react-native';
 import {Button} from 'native-base';
-import {Navigation} from 'react-native-navigation';
 import LanguageSelect from './LanguageSelect';
 const {width, height} = Dimensions.get('window');
-import {FolderSchema} from './Schema.js';
-import {v4 as uuidv4} from 'uuid';
 import Modal from 'react-native-modal';
 
 class AddNewFolder extends Component {
@@ -281,14 +278,15 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    left: -20,
-    bottom: -20,
-    width: '100%',
+    margin: 0,
+    height: height,
+    width: width,
   },
   confirmationView: {
     backgroundColor: '#ffffff',
     width: 300,
-    height: 200,
+    // height: 200,
+    margin: 0,
     flexDirection: 'column',
     padding: 30,
     borderRadius: 10,
