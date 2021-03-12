@@ -1,21 +1,16 @@
 import React, {Component} from 'react';
 import {
   View,
-  Image,
   ScrollView,
   TouchableOpacity,
   StyleSheet,
   Dimensions,
-  Item,
-  ImageBackground,
 } from 'react-native';
 import {Button} from 'native-base';
 import {Text} from 'native-base';
 import Modal from 'react-native-modal';
 import Icon from 'react-native-vector-icons/Ionicons';
-import FoundationIcon from 'react-native-vector-icons/Foundation';
 import CommunityIcon from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import AntIcon from 'react-native-vector-icons/AntDesign';
 import {Colors} from 'react-native/Libraries/NewAppScreen';
 import CardFlip from 'react-native-card-flip';
@@ -23,8 +18,6 @@ import Tts from 'react-native-tts';
 import Slider from '@react-native-community/slider';
 import 'react-native-get-random-values';
 const {width, height} = Dimensions.get('window');
-const Realm = require('realm');
-import AddContent from './AddContent.js';
 import Stars from './Stars';
 
 class ListContent extends Component {
@@ -187,6 +180,7 @@ class ListContent extends Component {
       realm: this.state.realm,
       currentPage: 0,
     });
+    this.onPageChange(0);
   }
 
   // componentDidUpdate() {
@@ -280,35 +274,37 @@ class ListContent extends Component {
   }
 
   playback() {
-    this.setState({isAutoPlaying: true});
-    Tts.removeAllListeners('tts-finish');
-    Tts.addEventListener('tts-finish', () => {
-      this.sleep(4, () => {
-        let nextWordPage;
-        console.log('tts-finish');
-        // 自動再生中でない場合、または最後のカードの裏の場合、自動再生を止める。
-        if (
-          !this.state.isAutoPlaying ||
-          (this.state.currentPage ===
-            this.getWordsFromRealm(this.state.realm).length - 1 &&
-            !this.isFront)
-        ) {
-          this.setState({isAutoPlaying: false});
-          return;
-        } else if (this.isFront) {
-          // カードが表の場合は、カードをめくる
-          nextWordPage = this.state.currentPage;
-          this.card[this.state.currentPage].flip();
-        } else {
-          // 上記以外の場合、スクロールする
-          nextWordPage = this.state.currentPage + 1;
-          this.autoScroll();
-        }
-        this.isFront = !this.isFront;
-        this.speakWord(nextWordPage);
+    if (this.getWordsFromRealm(this.state.realm).length > 0) {
+      this.setState({isAutoPlaying: true});
+      Tts.removeAllListeners('tts-finish');
+      Tts.addEventListener('tts-finish', () => {
+        this.sleep(4, () => {
+          let nextWordPage;
+          console.log('tts-finish');
+          // 自動再生中でない場合、または最後のカードの裏の場合、自動再生を止める。
+          if (
+            !this.state.isAutoPlaying ||
+            (this.state.currentPage ===
+              this.getWordsFromRealm(this.state.realm).length - 1 &&
+              !this.isFront)
+          ) {
+            this.setState({isAutoPlaying: false});
+            return;
+          } else if (this.isFront) {
+            // カードが表の場合は、カードをめくる
+            nextWordPage = this.state.currentPage;
+            this.card[this.state.currentPage].flip();
+          } else {
+            // 上記以外の場合、スクロールする
+            nextWordPage = this.state.currentPage + 1;
+            this.autoScroll();
+          }
+          this.isFront = !this.isFront;
+          this.speakWord(nextWordPage);
+        });
       });
-    });
-    this.speakWord();
+      this.speakWord();
+    }
   }
 
   stopPlaying() {
@@ -492,32 +488,31 @@ class ListContent extends Component {
     }
     return (
       <View style={styles.listContentView}>
-        <ImageBackground
+        {/* <ImageBackground
           style={styles.backgroundImage}
           // resizeMode="contain"
-          source={require('../png/milky-way.jpg')}>
-          <View style={styles.background}>
-            <ScrollView
-              horizontal={true}
-              id="words-area"
-              name="words-area"
-              className="words-area"
-              showsHorizontalScrollIndicator={false}
-              pagingEnabled
-              scrollEnabled={!this.state.isSliding}
-              style={styles.cardsArea}
-              ref={(ref) => (this.ScrollView = ref)}
-              onScroll={(event) => this.scrollCardView(event)}>
-              {wordCards}
-            </ScrollView>
-            <Icon name="list" style={{fontSize: 30}} />
-            <View>
+          source={require('../png/milky-way.jpg')}> */}
+        <View style={styles.background}>
+          <ScrollView
+            keyboardShouldPersistTaps="always"
+            horizontal={true}
+            id="words-area"
+            name="words-area"
+            className="words-area"
+            showsHorizontalScrollIndicator={false}
+            pagingEnabled
+            scrollEnabled={!this.state.isSliding}
+            style={styles.cardsArea}
+            ref={(ref) => (this.ScrollView = ref)}
+            onScroll={(event) => this.scrollCardView(event)}>
+            {wordCards}
+          </ScrollView>
+          <View style={styles.sliderView}>
+            <View style={styles.sliderOnlyView}>
               <Slider
                 onSlidingStart={() => this.setState({isSliding: true})}
-                onSlidingComplete={(pageNumber) =>
-                  this.onPageChange(pageNumber)
-                }
-                style={styles.sliderView}
+                onSlidingComplete={(pageNumber) => this.onPageChange(pageNumber)}
+                style={styles.slider}
                 minimumTrackTintColor="#ffffff"
                 maximumTrackTintColor="#444444"
                 maximumValue={
@@ -530,6 +525,8 @@ class ListContent extends Component {
                 disableInitialCallback={true}
                 step={1}
               />
+            </View>
+            <View style={styles.sliderTextView}>
               <Text style={styles.pageText}>
                 {this.state.currentPage + 1}/
                 {this.getWordsFromRealm(this.state.realm)
@@ -537,62 +534,59 @@ class ListContent extends Component {
                   : 0}
               </Text>
             </View>
-            <View style={styles.settingArea}>
-              <TouchableOpacity
-                onPress={() => this.shuffle()}
-                style={styles.shuffleOpacity}>
-                <Icon name="shuffle" style={styles.shuffleButton} />
-              </TouchableOpacity>
+          </View>
+          <View style={styles.settingArea}>
+            <TouchableOpacity
+              onPress={() => this.shuffle()}
+              style={styles.shuffleOpacity}>
+              <Icon name="shuffle" style={styles.shuffleButton} />
+            </TouchableOpacity>
+            {(() => {
+              if (!this.state.isAutoPlaying) {
+                return (
+                  <TouchableOpacity
+                    onPress={() => this.playback()}
+                    style={styles.playStopOpacity}>
+                    <Icon name="play-circle" style={styles.playStopButton} />
+                  </TouchableOpacity>
+                );
+              } else {
+                return (
+                  <TouchableOpacity
+                    onPress={() => this.stopPlaying()}
+                    style={styles.playStopOpacity}>
+                    <Icon
+                      name="stop-circle-sharp"
+                      style={styles.playStopButton}
+                    />
+                  </TouchableOpacity>
+                );
+              }
+            })()}
+            <TouchableOpacity
+              onPress={() => this.setState({editModalIsVisible: true})}
+              style={styles.shuffleOpacity}>
               {(() => {
-                if (!this.state.isAutoPlaying) {
+                if (this.isFiltered() === true) {
                   return (
-                    <TouchableOpacity
-                      onPress={() => this.playback()}
-                      style={styles.playStopOpacity}>
-                      <Icon name="play-circle" style={styles.playStopButton} />
-                    </TouchableOpacity>
-                  );
-                } else {
-                  return (
-                    <TouchableOpacity
-                      onPress={() => this.stopPlaying()}
-                      style={styles.playStopOpacity}>
-                      <Icon
-                        name="stop-circle-sharp"
-                        style={styles.playStopButton}
-                      />
-                    </TouchableOpacity>
+                    <CommunityIcon name="filter" style={styles.shuffleButton} />
                   );
                 }
+                return (
+                  <CommunityIcon
+                    name="filter-outline"
+                    style={styles.shuffleButton}
+                  />
+                );
               })()}
-              <TouchableOpacity
-                onPress={() => this.setState({editModalIsVisible: true})}
-                style={styles.shuffleOpacity}>
-                {(() => {
-                  if (this.isFiltered() === true) {
-                    return (
-                      <CommunityIcon
-                        name="filter"
-                        style={styles.shuffleButton}
-                      />
-                    );
-                  }
-                  return (
-                    <CommunityIcon
-                      name="filter-outline"
-                      style={styles.shuffleButton}
-                    />
-                  );
-                })()}
-              </TouchableOpacity>
-            </View>
-            <View style={styles.bottomArea}>
-              <TouchableOpacity onPress={() => this.openAddContent()}>
-                <CommunityIcon name="card-plus" style={styles.plusButton} />
-              </TouchableOpacity>
-            </View>
+            </TouchableOpacity>
           </View>
-        </ImageBackground>
+          <View style={styles.bottomArea}>
+            <TouchableOpacity onPress={() => this.openAddContent()}>
+              <CommunityIcon name="card-plus" style={styles.plusButton} />
+            </TouchableOpacity>
+          </View>
+        </View>
         <Modal
           style={styles.modal}
           visible={this.state.editModalIsVisible}
@@ -791,7 +785,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     width: width * 0.9,
     height: height * 0.1,
-    left: 20,
+    // left: 20,
   },
   playStopButton: {
     fontSize: 80,
@@ -803,14 +797,16 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     marginHorizontal: 20,
   },
-  sliderView: {
-    // width: '100%',
-    marginHorizontal: width * 0.1,
+  slider: {
+    width: width * 0.8,
     marginTop: 20,
   },
+  sliderTextView: {
+    flex: 1,
+    alignItems: 'flex-end',
+    marginTop: 25,
+  },
   pageText: {
-    textAlign: 'right',
-    marginRight: width * 0.1,
     color: '#ffffff',
   },
   addContentView: {
@@ -832,11 +828,12 @@ const styles = StyleSheet.create({
     height: height,
   },
   background: {
-    backgroundColor: 'rgba(0,0,0, 0.5)',
+    // backgroundColor: 'rgba(0,0,0, 0.5)',
     flex: 1,
+    alignItems: 'center',
   },
   bottomArea: {
-    bottom: 10,
+    bottom: 25,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -847,6 +844,13 @@ const styles = StyleSheet.create({
   messageTextView: {
     alignItems: 'center',
     justifyContent: 'center',
+    textAlign: 'center',
+    width: width * 0.9,
+    height: height * 0.3,
+    flex: 1,
+    display: 'flex',
+    marginLeft: width * 0.05,
+    marginRight: width * 0.05,
   },
   wordArea: {
     flex: 4,
@@ -855,7 +859,7 @@ const styles = StyleSheet.create({
   },
   buttonArea: {
     flexDirection: 'row',
-    flex: 1,
+    // flex: 1,
   },
   starArea: {
     flexDirection: 'row',
@@ -869,14 +873,15 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0, 0, 0, 0.6)',
-    left: -20,
-    bottom: -20,
-    width: '100%',
+    margin: 0,
+    width: width,
+    height: height,
     flex: 1,
   },
   modalView: {
     // flex: 1,
-    height: 200,
+    margin: 0,
+    // height: 400,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: '#ffffff',
@@ -908,7 +913,7 @@ const styles = StyleSheet.create({
   },
   okButton: {
     width: '30%',
-    margin: 20,
+    marginTop: 20,
   },
   buttonText: {
     fontSize: 22,
@@ -916,7 +921,8 @@ const styles = StyleSheet.create({
   confirmationView: {
     backgroundColor: '#ffffff',
     width: 300,
-    height: 200,
+    // height: 200,
+    margin: 0,
     flexDirection: 'column',
     padding: 30,
     borderRadius: 10,
@@ -934,6 +940,12 @@ const styles = StyleSheet.create({
   confirmationButtonArea: {
     flexDirection: 'row',
     marginTop: 20,
+  },
+  sliderView: {
+    flex: 0.3,
+  },
+  sliderOnlyView: {
+    flex: 1,
   },
 });
 

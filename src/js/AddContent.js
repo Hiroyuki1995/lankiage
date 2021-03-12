@@ -1,28 +1,22 @@
 import React, {Component} from 'react';
 import {
-  TextInput,
   View,
   StyleSheet,
   Dimensions,
   TouchableOpacity,
-  InputAccessoryView,
   Button as NativeButton,
   ImageBackground,
-  Image,
-  KeyboardAvoidingView,
 } from 'react-native';
-import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view'
+import {KeyboardAwareScrollView} from 'react-native-keyboard-aware-scroll-view';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
-import MaterialIcon from 'react-native-vector-icons/MaterialIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
 import {Button} from 'native-base';
 import {Text} from 'react-native-elements';
-const {width, height} = Dimensions.get('window');
+const {width} = Dimensions.get('window');
 import 'react-native-get-random-values';
 import translate from 'translate-google-api';
 import {Languages} from './Languages.js';
 import EditOneCard from './EditOneCard';
-import {ScrollView} from 'react-native';
 const wordSchema = {
   frontWord: '',
   backWord: '',
@@ -314,169 +308,170 @@ class AddContent extends Component {
     console.log(`currentFocus ${JSON.stringify(this.state.currentFocus)}`);
     const {words, numberOfWords, message} = this.state;
     return (
-      <ImageBackground
-        style={styles.backgroundImage}
-        // resizeMode="contain"
-        source={require('../png/milky-way.jpg')}>
-        <View style={styles.container}>
-          <KeyboardAwareScrollView
-            extraScrollHeight={170}
-            style={styles.inputArea}>
-            {(() => {
-              if (!this.props.route.params.isEditing) {
-                return (
-                  <View style={styles.cardPlusIconView}>
+      // <ImageBackground
+      //   style={styles.backgroundImage}
+      //   // resizeMode="contain"
+      //   source={require('../png/milky-way.jpg')}>
+      <View style={styles.container}>
+        <KeyboardAwareScrollView
+          keyboardShouldPersistTaps="always"
+          extraScrollHeight={170}
+          style={styles.inputArea}>
+          {(() => {
+            if (!this.props.route.params.isEditing) {
+              return (
+                <View style={styles.cardPlusIconView}>
+                  <TouchableOpacity onPress={this.addCard}>
                     <Icon
                       name="card-plus"
                       style={styles.cardPlusIcon}
-                      onPress={this.addCard}
                     />
-                  </View>
-                );
+                  </TouchableOpacity>
+                </View>
+              );
+            }
+          })()}
+          {(() => {
+            if (message) {
+              return (
+                <View style={styles.messageView}>
+                  <Text style={styles.messageText}>{message}</Text>
+                </View>
+              );
+            }
+          })()}
+          <View style={styles.languageSelectArea}>
+            <View style={styles.oneLanguageSelectArea}>
+              <Text style={styles.languageText}>
+                {this.getLangName(this.frontLangCode)}
+              </Text>
+            </View>
+            <View style={styles.buttonArea}>
+              <TouchableOpacity onPress={() => this.translate(true)}>
+                <IonIcon name="arrow-redo" style={styles.translationButton} />
+              </TouchableOpacity>
+              <Icon name="google-translate" style={styles.translateIcon} />
+              <TouchableOpacity onPress={() => this.translate(false)}>
+                <IonIcon
+                  name="arrow-redo"
+                  style={[styles.translationButton, styles.reverseButton]}
+                />
+              </TouchableOpacity>
+            </View>
+            <View style={styles.oneLanguageSelectArea}>
+              <Text style={styles.languageText}>
+                {this.getLangName(this.backLangCode)}
+              </Text>
+            </View>
+          </View>
+          {(() => {
+            const items = [];
+            for (let i = 0; i < numberOfWords; i++) {
+              let formStyle = {};
+              if (words[i].isRegisterd) {
+                formStyle = [styles.inputForm, styles.inputRegisterdForm];
+              } else {
+                formStyle = styles.inputForm;
               }
-            })()}
+              items.push(
+                <EditOneCard
+                  id={i}
+                  key={i}
+                  word={words[i]}
+                  currentFocusKey={this.state.currentFocus.key}
+                  currentFocusSide={this.state.currentFocus.isFront}
+                  onChange={this.changeContent}
+                  onFormFocus={this.formFocus}
+                  // inputAccessoryViewID={inputAccessoryViewID}
+                  onSubmitEditing={this.focusNextWord}
+                  scroll={this.scroll}
+                />,
+              );
+            }
+            return <View>{items}</View>;
+          })()}
+          {/* <InputAccessoryView
+            nativeID={inputAccessoryViewID}
+            backgroundColor="#ffffff"
+            style={styles.keyboradToolbar}>
+            <View style={styles.keyboradToolbar}>
+              <View style={styles.directionButtons}>
+                <MaterialIcon
+                  name="arrow-back-ios"
+                  style={styles.directionButton}
+                  onPress={this.focusBackWord}
+                />
+                <MaterialIcon
+                  name="arrow-forward-ios"
+                  style={styles.directionButton}
+                  onPress={this.focusNextWord}
+                />
+              </View>
+              <View style={styles.actionButtons}>
+                <NativeButton
+                  style={styles.keyboardButton}
+                  onPress={() => this.registerWords()}
+                  title="Save"
+                />
+                <NativeButton
+                  style={styles.keyboardButton}
+                  onPress={this.resetWords}
+                  title="Reset"
+                />
+              </View>
+            </View>
+          </InputAccessoryView> */}
+          <View style={styles.buttonAreaView}>
             {(() => {
-              if (message) {
+              if (!this.props.route.params.isEditing) {
                 return (
-                  <View style={styles.messageView}>
-                    <Text style={styles.messageText}>{message}</Text>
+                  <View style={styles.submitButtonView}>
+                    <Button
+                      block
+                      primary
+                      variant="contained"
+                      style={[styles.button, styles.submitButton]}
+                      onPress={() => this.registerWords()}>
+                      <Text style={styles.submitButtonText}>Save</Text>
+                    </Button>
+                    <Button
+                      block
+                      light
+                      variant="contained"
+                      style={[styles.button, styles.resetButton]}
+                      onPress={this.resetWords}>
+                      <Text style={styles.resetButtonText}>Reset</Text>
+                    </Button>
+                  </View>
+                );
+              } else {
+                return (
+                  <View style={styles.submitButtonView}>
+                    <Button
+                      block
+                      primary
+                      variant="contained"
+                      style={[styles.button, styles.submitButton]}
+                      onPress={() => this.registerWords(true)}>
+                      <Text style={styles.submitButtonText}>Save</Text>
+                    </Button>
+                    <Button
+                      block
+                      light
+                      variant="contained"
+                      style={[styles.button, styles.resetButton]}
+                      onPress={this.backToList}>
+                      <Text style={styles.resetButtonText}>Cancel</Text>
+                    </Button>
                   </View>
                 );
               }
             })()}
-            <View style={styles.languageSelectArea}>
-              <View style={styles.oneLanguageSelectArea}>
-                <Text style={styles.languageText}>
-                  {this.getLangName(this.frontLangCode)}
-                </Text>
-              </View>
-              <View style={styles.buttonArea}>
-                <TouchableOpacity onPress={() => this.translate(true)}>
-                  <IonIcon name="arrow-redo" style={styles.translationButton} />
-                </TouchableOpacity>
-                <Icon name="google-translate" style={styles.translateIcon} />
-                <TouchableOpacity onPress={() => this.translate(false)}>
-                  <IonIcon
-                    name="arrow-redo"
-                    style={[styles.translationButton, styles.reverseButton]}
-                  />
-                </TouchableOpacity>
-              </View>
-              <View style={styles.oneLanguageSelectArea}>
-                <Text style={styles.languageText}>
-                  {this.getLangName(this.backLangCode)}
-                </Text>
-              </View>
-            </View>
-            {(() => {
-              const items = [];
-              for (let i = 0; i < numberOfWords; i++) {
-                let formStyle = {};
-                if (words[i].isRegisterd) {
-                  formStyle = [styles.inputForm, styles.inputRegisterdForm];
-                } else {
-                  formStyle = styles.inputForm;
-                }
-                items.push(
-                  // <View>
-                  <EditOneCard
-                    id={i}
-                    key={i}
-                    word={words[i]}
-                    currentFocusKey={this.state.currentFocus.key}
-                    currentFocusSide={this.state.currentFocus.isFront}
-                    onChange={this.changeContent}
-                    onFormFocus={this.formFocus}
-                    inputAccessoryViewID={inputAccessoryViewID}
-                    onSubmitEditing={this.focusNextWord}
-                    scroll={this.scroll}
-                  />,
-                );
-              }
-              return <View>{items}</View>;
-            })()}
-            {/* <InputAccessoryView
-              nativeID={inputAccessoryViewID}
-              backgroundColor="#ffffff"
-              style={styles.keyboradToolbar}>
-              <View style={styles.keyboradToolbar}>
-                <View style={styles.directionButtons}>
-                  <MaterialIcon
-                    name="arrow-back-ios"
-                    style={styles.directionButton}
-                    onPress={this.focusBackWord}
-                  />
-                  <MaterialIcon
-                    name="arrow-forward-ios"
-                    style={styles.directionButton}
-                    onPress={this.focusNextWord}
-                  />
-                </View>
-                <View style={styles.actionButtons}>
-                  <NativeButton
-                    style={styles.keyboardButton}
-                    onPress={() => this.registerWords()}
-                    title="Save"
-                  />
-                  <NativeButton
-                    style={styles.keyboardButton}
-                    onPress={this.resetWords}
-                    title="Reset"
-                  />
-                </View>
-              </View>
-            </InputAccessoryView> */}
-            <View style={styles.buttonAreaView}>
-              {(() => {
-                if (!this.props.route.params.isEditing) {
-                  return (
-                    <View style={styles.submitButtonView}>
-                      <Button
-                        block
-                        primary
-                        variant="contained"
-                        style={[styles.button, styles.submitButton]}
-                        onPress={() => this.registerWords()}>
-                        <Text style={styles.submitButtonText}>Save</Text>
-                      </Button>
-                      <Button
-                        block
-                        light
-                        variant="contained"
-                        style={[styles.button, styles.resetButton]}
-                        onPress={this.resetWords}>
-                        <Text style={styles.resetButtonText}>Reset</Text>
-                      </Button>
-                    </View>
-                  );
-                } else {
-                  return (
-                    <View style={styles.submitButtonView}>
-                      <Button
-                        block
-                        primary
-                        variant="contained"
-                        style={[styles.button, styles.submitButton]}
-                        onPress={() => this.registerWords(true)}>
-                        <Text style={styles.submitButtonText}>Save</Text>
-                      </Button>
-                      <Button
-                        block
-                        light
-                        variant="contained"
-                        style={[styles.button, styles.resetButton]}
-                        onPress={this.backToList}>
-                        <Text style={styles.resetButtonText}>Cancel</Text>
-                      </Button>
-                    </View>
-                  );
-                }
-              })()}
-            </View>
-            {/* </KeyboardAvoidingView> */}
-          </KeyboardAwareScrollView>
-        </View>
-      </ImageBackground>
+          </View>
+          {/* </KeyboardAvoidingView> */}
+        </KeyboardAwareScrollView>
+      </View>
+      // </ImageBackground>
     );
   }
 }
@@ -570,7 +565,7 @@ const styles = StyleSheet.create({
     // width: 30,
     // height: 30,
     fontSize: 40,
-    color: '#ffffff',
+    color: 'rgb(0,122,255)',
   },
   buttonArea: {
     flexDirection: 'column',
@@ -652,7 +647,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0, 0.5)',
+    // backgroundColor: 'rgba(0,0,0, 0.5)',
     // justifyContent: 'center',
     // alignItems: 'center',
   },

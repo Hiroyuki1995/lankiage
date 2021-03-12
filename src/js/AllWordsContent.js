@@ -172,139 +172,139 @@ class AllWordsContent extends Component {
           ` OR backWord LIKE "*${searchString}*")`,
       );
     return (
-      <ImageBackground
-        style={styles.backgroundImage}
-        source={require('../png/milky-way.jpg')}>
-        <View style={styles.container}>
-          <ScrollView style={styles.inputArea}>
-            <View style={styles.searchArea}>
-              <IonIcon name="search" style={styles.searchIcon} />
-              <TextInput
-                placeholder="front word or back word"
-                style={styles.searhText}
-                onFocus={() => this.setState({message: ''})}
-                onChangeText={this.searchWords}
-                value={searchString}
-              />
+      // <ImageBackground
+      //   style={styles.backgroundImage}
+      //   source={require('../png/milky-way.jpg')}>
+      <View style={styles.container}>
+        <ScrollView style={styles.inputArea} keyboardShouldPersistTaps="always">
+          <View style={styles.searchArea}>
+            <IonIcon name="search" style={styles.searchIcon} />
+            <TextInput
+              placeholder="front word or back word"
+              style={styles.searhText}
+              onFocus={() => this.setState({message: ''})}
+              onChangeText={this.searchWords}
+              value={searchString}
+            />
+          </View>
+          {(() => {
+            if (message) {
+              return (
+                <View style={styles.messageView}>
+                  <Text style={styles.messageText}>{message}</Text>
+                </View>
+              );
+            }
+          })()}
+          <View style={{flex: 1}}>
+            <View style={styles.submitButtonView}>
+              <Button
+                block
+                danger
+                disabled={this.canChange()}
+                variant="contained"
+                style={[styles.button, styles.submitButton]}
+                onPress={() => this.setState({modalIsVisible: true})}>
+                <Text style={styles.submitButtonText}>Delete</Text>
+              </Button>
+              <Button
+                block
+                warning
+                disabled={this.canChange()}
+                variant="contained"
+                style={[styles.button, styles.resetButton]}
+                onPress={() => this.changeLevel(1)}>
+                <Text style={styles.starButtonText}>★</Text>
+              </Button>
+              <Button
+                block
+                warning
+                disabled={this.canChange()}
+                variant="contained"
+                style={[styles.button, styles.resetButton]}
+                onPress={() => this.changeLevel(2)}>
+                <Text style={styles.starButtonText}>★★</Text>
+              </Button>
+              <Button
+                block
+                warning
+                disabled={this.canChange()}
+                variant="contained"
+                style={[styles.button, styles.resetButton]}
+                onPress={() => this.changeLevel(3)}>
+                <Text style={styles.starButtonText}>★★★</Text>
+              </Button>
             </View>
-            {(() => {
-              if (message) {
-                return (
-                  <View style={styles.messageView}>
-                    <Text style={styles.messageText}>{message}</Text>
-                  </View>
-                );
-              }
-            })()}
-            <View style={{flex: 1}}>
-              <View style={styles.submitButtonView}>
-                <Button
-                  block
-                  danger
-                  disabled={this.canChange()}
-                  variant="contained"
-                  style={[styles.button, styles.submitButton]}
-                  onPress={() => this.setState({modalIsVisible: true})}>
-                  <Text style={styles.submitButtonText}>Delete</Text>
-                </Button>
-                <Button
-                  block
-                  warning
-                  disabled={this.canChange()}
-                  variant="contained"
-                  style={[styles.button, styles.resetButton]}
-                  onPress={() => this.changeLevel(1)}>
-                  <Text style={styles.starButtonText}>★</Text>
-                </Button>
-                <Button
-                  block
-                  warning
-                  disabled={this.canChange()}
-                  variant="contained"
-                  style={[styles.button, styles.resetButton]}
-                  onPress={() => this.changeLevel(2)}>
-                  <Text style={styles.starButtonText}>★★</Text>
-                </Button>
-                <Button
-                  block
-                  warning
-                  disabled={this.canChange()}
-                  variant="contained"
-                  style={[styles.button, styles.resetButton]}
-                  onPress={() => this.changeLevel(3)}>
-                  <Text style={styles.starButtonText}>★★★</Text>
-                </Button>
-              </View>
-            </View>
-            {(() => {
-              let items = [];
-              for (let i = 0; i < words.length; i++) {
-                items.push(
-                  <View key={i} style={styles.oneCardView}>
-                    <CheckBox
-                      onAnimationType="fill"
-                      offAnimationType="fill"
-                      boxType="square"
-                      style={styles.checkBox}
-                      disabled={false}
-                      value={targetIds.includes(words[i].id) ? true : false}
-                      onValueChange={() => this.toggleCheckBox(words[i].id)}
-                    />
-                    <TouchableOpacity
-                      style={styles.wordCard}
-                      onPress={() => this.openAddContent(words[i])}>
-                      <View style={{flexDirection: 'column', flex: 5}}>
-                        <Stars
-                          styles={styles}
-                          proficiencyLevel={words[i].proficiencyLevel}
-                          value={words[i].id}
-                        />
-                        <Text style={styles.cardText} numberOfLines={1}>
-                          {words[i].frontWord}
-                        </Text>
-                      </View>
-                      <IonIcon
-                        name="arrow-forward"
-                        style={styles.folderArrowicon}
+          </View>
+          {(() => {
+            let items = [];
+            for (let i = 0; i < words.length; i++) {
+              items.push(
+                <View key={i} style={styles.oneCardView}>
+                  <CheckBox
+                    onAnimationType="fill"
+                    offAnimationType="fill"
+                    boxType="square"
+                    style={styles.checkBox}
+                    disabled={false}
+                    value={targetIds.includes(words[i].id) ? true : false}
+                    onValueChange={() => this.toggleCheckBox(words[i].id)}
+                  />
+                  <TouchableOpacity
+                    style={styles.wordCard}
+                    onPress={() => this.openAddContent(words[i])}>
+                    <View style={{flexDirection: 'column', flex: 5}}>
+                      <Stars
+                        styles={styles}
+                        proficiencyLevel={words[i].proficiencyLevel}
+                        value={words[i].id}
                       />
-                    </TouchableOpacity>
-                  </View>,
-                );
-              }
-              return <View style={styles.cardArea}>{items}</View>;
-            })()}
-          </ScrollView>
-          <Modal
-            style={styles.modal}
-            visible={this.state.modalIsVisible}
-            animationType={'fade'}
-            onBackdropPress={() => this.setState({modalIsVisible: false})}>
-            <View style={styles.confirmationView}>
-              <Text style={styles.modalText}>
-                Are you sure you want to delete these words?
-              </Text>
-              <View style={styles.modalButtonArea}>
-                <Button
-                  block
-                  danger
-                  variant="contained"
-                  style={[styles.button, styles.modalSubmitButton]}
-                  onPress={() => this.deleteWords()}>
-                  <Text style={styles.submitButtonText}>Delete</Text>
-                </Button>
-                <Button
-                  block
-                  light
-                  variant="contained"
-                  style={[styles.button, styles.modalCancelButton]}
-                  onPress={() => this.setState({modalIsVisible: false})}>
-                  <Text style={styles.resetButtonText}>Cancel</Text>
-                </Button>
-              </View>
+                      <Text style={styles.cardText} numberOfLines={1}>
+                        {words[i].frontWord}
+                      </Text>
+                    </View>
+                    <IonIcon
+                      name="arrow-forward"
+                      style={styles.folderArrowicon}
+                    />
+                  </TouchableOpacity>
+                </View>,
+              );
+            }
+            return <View style={styles.cardArea}>{items}</View>;
+          })()}
+        </ScrollView>
+        <Modal
+          style={styles.modal}
+          visible={this.state.modalIsVisible}
+          animationType={'fade'}
+          onBackdropPress={() => this.setState({modalIsVisible: false})}>
+          <View style={styles.confirmationView}>
+            <Text style={styles.modalText}>
+              Are you sure you want to delete these words?
+            </Text>
+            <View style={styles.modalButtonArea}>
+              <Button
+                block
+                danger
+                variant="contained"
+                style={[styles.button, styles.modalSubmitButton]}
+                onPress={() => this.deleteWords()}>
+                <Text style={styles.submitButtonText}>Delete</Text>
+              </Button>
+              <Button
+                block
+                light
+                variant="contained"
+                style={[styles.button, styles.modalCancelButton]}
+                onPress={() => this.setState({modalIsVisible: false})}>
+                <Text style={styles.resetButtonText}>Cancel</Text>
+              </Button>
             </View>
-          </Modal>
-        </View>
-      </ImageBackground>
+          </View>
+        </Modal>
+      </View>
+      // </ImageBackground>
     );
   }
 }
@@ -489,7 +489,7 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0, 0.5)',
+    // backgroundColor: 'rgba(0,0,0, 0.5)',
   },
   languageText: {
     fontSize: 30,
